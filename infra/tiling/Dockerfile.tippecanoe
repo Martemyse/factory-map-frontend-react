@@ -1,0 +1,16 @@
+FROM debian:bookworm-slim
+
+# Build dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential git make zlib1g-dev libsqlite3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Build Tippecanoe
+RUN git clone --depth=1 https://github.com/mapbox/tippecanoe.git /tippecanoe \
+    && cd /tippecanoe \
+    && make -j$(nproc) \
+    && make install \
+    && rm -rf /tippecanoe
+
+WORKDIR /data
+ENTRYPOINT ["tippecanoe"]

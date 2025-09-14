@@ -1,0 +1,65 @@
+{
+  "type": "FeatureCollection",
+  "coordinateSystem": "local-meters",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "polje1",
+      "properties": {
+        "level": "polje",
+        "parent_id": null,
+        "path": "polje1",
+        "name": "Polje 1",
+        "opomba": "Glavni vhod",
+        "color": "#d6f0ff",
+        "visible": true
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[0,0],[40,0],[40,25],[0,25],[0,0]]] }
+    },
+    {
+      "type": "Feature",
+      "id": "polje1-subA",
+      "properties": {
+        "level": "subzone",
+        "parent_id": "polje1",
+        "path": "polje1/subA",
+        "name": "Subcone A",
+        "opomba": "Za palete z livi",
+        "color": "#ffd8b1",
+        "visible": true
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[2,2],[22,2],[22,23],[2,23],[2,2]]] }
+    },
+    {
+      "type": "Feature",
+      "id": "polje1-subA-vrsta1",
+      "properties": {
+        "level": "vrsta",
+        "order": 1,
+        "parent_id": "polje1-subA",
+        "path": "polje1/subA/vrsta1",
+        "name": "Vrsta 1",
+        "color": "#c9f7b3",
+        "visible": true
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[3,3],[11,3],[11,10],[3,10],[3,3]]] }
+    },
+    {
+      "type": "Feature",
+      "id": "polje1-subA-vrsta1-g1",
+      "properties": {
+        "level": "globina",
+        "depth": 1,
+        "parent_id": "polje1-subA-vrsta1",
+        "path": "polje1/subA/vrsta1/g1",
+        "name": "Globina 1",
+        "color": "#f3c7ff",
+        "visible": true,
+        "pallet_count": 12
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[3,3],[11,3],[11,6.5],[3,6.5],[3,3]]] }
+    }
+  ]
+}
+
+
