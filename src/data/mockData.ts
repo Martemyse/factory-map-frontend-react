@@ -1,4 +1,4 @@
-import { Factory, ProductionLine } from '../types';
+import type { Factory, ProductionLine } from '../types';
 
 export const mockFactories: Factory[] = [
   {

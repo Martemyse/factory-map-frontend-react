@@ -1,5 +1,5 @@
 import React from 'react';
-import { Factory, ProductionLine } from '../../types';
+import type { Factory, ProductionLine } from '../../types';
 
 interface FactoryDetailsProps {
   factory: Factory | null;

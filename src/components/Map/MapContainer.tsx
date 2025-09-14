@@ -1,6 +1,6 @@
 import React from 'react';
 import DeckGLMap from './DeckGLMap';
-import { MapViewState, Factory } from '../../types';
+import type { MapViewState, Factory } from '../../types';
 
 interface MapContainerProps {
   viewState: MapViewState;

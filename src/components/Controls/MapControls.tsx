@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapViewState } from '../../types';
+import type { MapViewState } from '../../types';
 
 interface MapControlsProps {
   viewState: MapViewState;

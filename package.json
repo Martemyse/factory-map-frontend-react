@@ -6,10 +6,10 @@
   "keywords": ["react", "typescript", "mapping", "deck.gl", "maplibre", "factory", "visualization"],
   "author": "Martin Miller",
   "license": "MIT",
-  "homepage": "https://github.com/martinmi/factory-map#readme",
+  "homepage": "https://github.com/martinmi/factory-map-frontend-react#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/martinmi/factory-map.git"
+    "url": "https://github.com/martinmi/factory-map-frontend-react.git"
   },
   "type": "module",
   "scripts": {
@@ -29,6 +29,7 @@
     "maplibre-gl": "^5.7.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-router-dom": "^6.26.2",
     "react-hook-form": "^7.62.0",
     "react-konva": "^19.0.10",
     "zod": "^4.1.8",

@@ -1,6 +1,6 @@
 import React from 'react';
 import FactoryDetails from './FactoryDetails';
-import { Factory, ProductionLine } from '../../types';
+import type { Factory, ProductionLine } from '../../types';
 
 interface FactoryPanelProps {
   selectedFactory: Factory | null;

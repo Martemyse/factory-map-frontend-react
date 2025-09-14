@@ -29,8 +29,8 @@ A modern, interactive factory mapping and monitoring application built with Reac
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/martinmi/factory-map.git
-   cd factory-map
+   git clone https://github.com/Martemyse/factory-map-frontend-react.git
+   cd factory-map-frontend-react
    ```
 
 2. **Install dependencies**

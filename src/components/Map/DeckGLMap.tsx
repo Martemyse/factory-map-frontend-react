@@ -1,7 +1,8 @@
 import React from 'react';
 import DeckGL from '@deck.gl/react';
-import { ScatterplotLayer, HeatmapLayer } from '@deck.gl/layers';
-import { MapViewState, Factory } from '../../types';
+import { ScatterplotLayer } from '@deck.gl/layers';
+import { HeatmapLayer } from '@deck.gl/aggregation-layers';
+import type { MapViewState, Factory } from '../../types';
 
 interface DeckGLMapProps {
   viewState: MapViewState;

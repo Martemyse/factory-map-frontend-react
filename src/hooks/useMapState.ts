@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { MapViewState } from '../types';
+import type { MapViewState } from '../types';
 
 const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -74.006,

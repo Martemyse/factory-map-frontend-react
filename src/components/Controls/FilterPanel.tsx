@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Factory } from '../../types';
+import type { Factory } from '../../types';
 
 interface FilterPanelProps {
   factories: Factory[];
