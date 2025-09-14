@@ -1,3 +1,74 @@
+# Factory Map Monorepo
+
+A reorganized monorepo for the factory layout viewer/editor, backend API, and tiling infrastructure.
+
+## Structure
+
+```
+apps/
+  frontend/        # React + TypeScript + Vite app (Viewer + Editor)
+  backend/         # FastAPI backend (alembic, models, routers)
+infra/
+  tiling/          # Tippecanoe build + tileserver-gl compose setup
+data/              # Shared data artifacts (factory_clean.json, factory.mbtiles)
+docs/              # Documentation
+scripts/           # Utilities (optional)
+```
+
+## Frontend (apps/frontend)
+
+- Dev: `npm run dev`
+- Build: `npm run build`
+- Preview: `npm run preview`
+- Lint: `npm run lint`
+- Type-check: `npm run type-check`
+
+Run from repo root via workspaces:
+
+```
+npm install
+npm run dev
+```
+
+## Backend (apps/backend)
+
+- Create venv, install deps:
+```
+cd apps/backend
+python -m venv .venv
+. .venv/Scripts/activate  # Windows PowerShell: . .venv/Scripts/Activate.ps1
+pip install -r requirements.txt
+```
+
+- Run API:
+```
+uvicorn app.main:app --reload --port 8000
+```
+
+## Tiling (infra/tiling)
+
+Generates/serves vector tiles with Tippecanoe and tileserver-gl.
+
+- Data mounts from `../../data`:
+  - `factory_clean.json` (input GeoJSON)
+  - `factory.mbtiles` (output or served tiles)
+
+- Run:
+```
+cd infra/tiling
+docker compose up --build
+```
+
+## Data
+
+- `data/factory_clean.json` — cleaned GeoJSON from CAD/DXF
+- `data/factory.mbtiles` — vector tiles (optional)
+
+## Notes
+
+- The previous standalone tiling repo has been moved to `infra/tiling/` and flattened.
+- Frontend was moved into `apps/frontend/`. Backend into `apps/backend/`.
+
 # Factory Map Dashboard
 
 A modern, interactive factory mapping and monitoring application built with React, TypeScript, and Deck.gl. This application provides real-time visualization of factory locations, production metrics, and operational status across multiple facilities.
@@ -182,3 +253,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 ⭐ **Star this repository if you found it helpful!**
+

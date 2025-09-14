@@ -91,3 +91,19 @@ jspm_packages/
 # Temporary folders
 tmp/
 temp/
+
+# Monorepo app outputs
+apps/frontend/node_modules/
+apps/frontend/dist/
+apps/backend/.venv/
+**/__pycache__/
+**/*.pyc
+
+# Local data artifacts
+data/*.mbtiles
+
+# Tiling vendor/build files
+infra/tiling/jpeg-8d/
+infra/tiling/**/.deps/
+infra/tiling/**/.libs/
+infra/tiling/*.gz

@@ -1,0 +1,13 @@
+{
+  "byLevel": {
+    "polje":   { "fill": "#CDEAFE", "stroke": "#2F6B9A" },
+    "subzone": { "fill": "#FFE2B5", "stroke": "#AA6B2F" },
+    "vrsta":   { "fill": "#D5F2C3", "stroke": "#3C6A2F" },
+    "globina": { "fill": "#F5D0FE", "stroke": "#7B2F9A" }
+  },
+  "overrides": [
+    { "when": { "level": "globina", "pallet_count_gt": 0 }, "fill": "#FFB3C1" }
+  ]
+}
+
+
