@@ -1,4 +1,4 @@
-import Viewer from '../viewer/Viewer';
+// import Viewer from '../viewer/Viewer';
 import React, { useState } from 'react';
 
 export default function ViewerPage() {
@@ -28,7 +28,7 @@ export default function ViewerPage() {
           <input name="cona" placeholder="Cona" value={filters.cona} onChange={handleChange} />
         </div>
       </div>
-      <Viewer />
+      {/* Viewer temporarily suppressed */}
     </div>
   );
 }

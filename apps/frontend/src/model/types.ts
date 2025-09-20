@@ -8,6 +8,8 @@ export interface HierarchyNode {
   name: string;
   opomba?: string;
   color?: string;
+  remoteId?: number;
+  parentLocalId?: string;
   visible?: boolean;
   order?: number;
   depth?: number;

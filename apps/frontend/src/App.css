@@ -3,7 +3,8 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f8fafc;
+  background-color: #0b0f17;
+  color: white;
 }
 
 .app-header {
@@ -53,18 +54,18 @@
 /* Sidebar */
 .sidebar {
   width: 300px;
-  background: white;
-  border-right: 1px solid #e2e8f0;
+  background: #0b0f17;
+  border-right: 1px solid #1f2937;
   padding: 1rem;
   overflow-y: auto;
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
 }
 
 /* Map Section */
 .map-section {
   flex: 1;
   position: relative;
-  background: #f1f5f9;
+  background: #0b0f17;
 }
 
 .map-container {

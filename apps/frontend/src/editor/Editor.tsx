@@ -1,11 +1,10 @@
-import { Stage, Layer, Rect, Text, Group, Transformer, Line } from 'react-konva';
+import { Stage, Layer, Rect, Text, Group, Transformer, Shape } from 'react-konva';
 import { useMemo, useRef, useState, useEffect } from 'react';
 import type { HierarchyDocument, HierarchyNode, Level } from '../model/types';
-import docJson from '../data/factory_hierarchy.json';
-import { hierarchyToGeoJson } from '../model/convert';
-import HierarchyTree from './HierarchyTree';
+// removed seed hierarchy import; editor now loads only backend features
+import Sunburst from './Sunburst';
 
-const initialDoc = docJson as unknown as HierarchyDocument;
+const initialDoc: HierarchyDocument = { origin: [0, 0], units: 'm', nodes: [] as HierarchyNode[] };
 
 function flatten(nodes: HierarchyNode[], acc: HierarchyNode[] = []): HierarchyNode[] {
   for (const n of nodes) {
@@ -15,16 +14,83 @@ function flatten(nodes: HierarchyNode[], acc: HierarchyNode[] = []): HierarchyNo
   return acc;
 }
 
+// Color inheritance system - each polje gets a base color, children get darker shades
+function getPoljeBaseColor(poljeId: string): string {
+  // Generate consistent colors for each polje based on ID
+  const colors = [
+    '#3B82F6', // Blue
+    '#10B981', // Green  
+    '#F59E0B', // Orange
+    '#EF4444', // Red
+    '#8B5CF6', // Purple
+    '#06B6D4', // Cyan
+    '#84CC16', // Lime
+    '#F97316', // Orange-red
+    '#EC4899', // Pink
+    '#6366F1', // Indigo
+  ];
+  
+  // Simple hash function to get consistent color for polje ID
+  let hash = 0;
+  for (let i = 0; i < poljeId.length; i++) {
+    const char = poljeId.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
+
+function getInheritedColor(node: HierarchyNode, allNodes: HierarchyNode[]): string {
+  // Find the root polje for this node
+  let current = node;
+  while (current.parentLocalId) {
+    const parent = allNodes.find(n => n.id === current.parentLocalId);
+    if (!parent) break;
+    current = parent;
+  }
+  
+  // If this is already a polje, return its base color
+  if (current.level === 'polje') {
+    return current.color || getPoljeBaseColor(current.id);
+  }
+  
+  // Get the polje's base color
+  const poljeColor = current.color || getPoljeBaseColor(current.id);
+  
+  // Create darker shades based on level depth
+  const levelDepths = { 'polje': 0, 'subzone': 1, 'vrsta': 2, 'globina': 3 };
+  const depth = levelDepths[node.level] || 0;
+  
+  return darkenColor(poljeColor, depth * 0.3); // Each level gets 30% darker
+}
+
+function darkenColor(color: string, amount: number): string {
+  // Convert hex to RGB
+  const hex = color.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  
+  // Darken by reducing each component
+  const newR = Math.max(0, Math.floor(r * (1 - amount)));
+  const newG = Math.max(0, Math.floor(g * (1 - amount)));
+  const newB = Math.max(0, Math.floor(b * (1 - amount)));
+  
+  // Convert back to hex
+  return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+}
+
+// Legacy function for backward compatibility
 function colorByLevel(level: Level) {
   switch (level) {
     case 'polje':
-      return '#CDEAFE';
+      return '#3B82F6';
     case 'subzone':
-      return '#FFE2B5';
+      return '#2563EB';
     case 'vrsta':
-      return '#D5F2C3';
+      return '#1D4ED8';
     default:
-      return '#F5D0FE';
+      return '#1E40AF';
   }
 }
 
@@ -32,17 +98,56 @@ export default function Editor() {
   const [doc, setDoc] = useState<HierarchyDocument>(initialDoc);
   const all = useMemo(() => flatten(doc.nodes), [doc]);
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
-  const stageWidth = 900;
-  const stageHeight = 500;
-  const [showBackground, setShowBackground] = useState(true);
+  const [visibleLevel, setVisibleLevel] = useState<Level | 'all'>('all');
+  const [stageWidth, setStageWidth] = useState(900);
+  const [stageHeight, setStageHeight] = useState(500);
+  const [showBackground] = useState(true);
   const [bgPaths, setBgPaths] = useState<number[][]>([]);
   const [bgBbox, setBgBbox] = useState<[number, number, number, number] | null>(null);
-  const [bgScale, setBgScale] = useState<number>(0.001);
+  const [bgScale] = useState<number>(0.001);
   const [bgRaw, setBgRaw] = useState<any | null>(null);
   const stageRef = useRef<any>(null);
   const [viewScale, setViewScale] = useState<number>(1);
   const [viewOffset, setViewOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const userInteractedRef = useRef<boolean>(false);
+  const [selectedColor, setSelectedColor] = useState<string>('#d6f0ff');
+  const [selectedOrder, setSelectedOrder] = useState<number>(0);
+  const [showSunburst, setShowSunburst] = useState<boolean>(true);
+
+  // Calculate dynamic canvas dimensions
+  useEffect(() => {
+    const calculateDimensions = () => {
+      // Calculate height: 100vh minus navbar (60px) and button bar (60px) and padding (20px)
+      const availableHeight = window.innerHeight - 60 - 60 - 20;
+      setStageHeight(Math.max(400, availableHeight));
+      
+      // Calculate width based on sunburst visibility
+      const sunburstWidth = showSunburst ? 320 : 0;
+      const gap = 12;
+      const padding = 24; // Reduced padding
+      const availableWidth = window.innerWidth - sunburstWidth - gap - padding;
+      setStageWidth(Math.max(400, availableWidth)); // Minimum width of 400px
+    };
+
+    calculateDimensions();
+    window.addEventListener('resize', calculateDimensions);
+    return () => window.removeEventListener('resize', calculateDimensions);
+  }, [showSunburst]);
+
+  // Load existing annotations from backend on mount
+  useEffect(() => {
+    let cancelled = false;
+    loadAnnotations().then(backendNodes => {
+      if (cancelled) return;
+      console.log('Loaded backend annotations:', backendNodes.length, backendNodes);
+      // Always replace the document with backend annotations (even if empty)
+      setDoc(prev => ({
+        ...prev,
+        nodes: backendNodes
+      }));
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   // Load factory_clean.json as background (from public/)
   useEffect(() => {
@@ -99,25 +204,29 @@ export default function Editor() {
     return [minX, minY, maxX, maxY] as [number, number, number, number];
   }, [all, bgBbox]);
 
-  // Fit content to stage with padding
+  // Center view on factory layout with scale 1
   const fit = useMemo(() => {
-    if (!bbox) return { scale: 1, offsetX: 0, offsetY: 0 };
-    const [minX, minY, maxX, maxY] = bbox;
-    const padding = 30;
-    const width = Math.max(1, maxX - minX);
-    const height = Math.max(1, maxY - minY);
-    const scale = Math.min((stageWidth - padding * 2) / width, (stageHeight - padding * 2) / height);
-    const offsetX = padding + (-minX) * scale;
-    const offsetY = padding + (-minY) * scale;
+    // Use factory background bbox for centering, fallback to annotations if no background
+    const targetBbox = bgBbox || bbox;
+    if (!targetBbox) return { scale: 3, offsetX: 1200, offsetY: 1400 };
+    
+    const [minX, minY, maxX, maxY] = targetBbox;
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+    
+    // Center the factory layout in the viewport with scale 1
+    const offsetX = 1200;
+    const offsetY = 1400;
+    
     // eslint-disable-next-line no-console
-    console.log('Editor bbox:', bbox, 'scale:', scale.toFixed(3));
-    return { scale, offsetX, offsetY };
-  }, [bbox]);
+    console.log('Factory centered view - bbox:', targetBbox, 'center:', centerX, centerY, 'offset:', offsetX, offsetY);
+    return { scale: 3, offsetX, offsetY };
+  }, [bgBbox, bbox]);
 
   // Initialize interactive view from fit, until user pans/zooms
   useEffect(() => {
     if (!userInteractedRef.current) {
-      setViewScale(fit.scale);
+      setViewScale(3); // Always use scale 1 as requested
       setViewOffset({ x: fit.offsetX, y: fit.offsetY });
     }
   }, [fit]);
@@ -146,21 +255,45 @@ export default function Editor() {
     setViewOffset(newPos);
   }
 
-  // Middle/right mouse panning
+  // Mouse panning (left click on empty space, middle/right click anywhere)
   const isPanningRef = useRef<boolean>(false);
   const lastPosRef = useRef<{ x: number; y: number } | null>(null);
+  const clickedOnAnnotationRef = useRef<boolean>(false);
+  
   function onMouseDown(e: any) {
     const btn = e.evt.button;
-    if (btn === 1 || btn === 2) {
+    const target = e.target;
+    
+    // Check if clicked on an annotation (Rect or Group containing annotation)
+    const parent = target.getParent ? target.getParent() : null;
+    const isAnnotation = (
+      target.className === 'Rect' ||
+      (parent && parent.className === 'Group')
+    );
+    
+    clickedOnAnnotationRef.current = isAnnotation;
+    
+    // Enable panning for:
+    // - Middle mouse (button 1) or right mouse (button 2) - anywhere
+    // - Left mouse (button 0) - only if not on annotation
+    if (btn === 1 || btn === 2 || (btn === 0 && !isAnnotation)) {
       isPanningRef.current = true;
       lastPosRef.current = { x: e.evt.clientX, y: e.evt.clientY };
       userInteractedRef.current = true;
+      
+      // Prevent default behavior for left click panning
+      if (btn === 0 && !isAnnotation) {
+        e.evt.preventDefault();
+      }
     }
   }
+  
   function onMouseUp() {
     isPanningRef.current = false;
     lastPosRef.current = null;
+    clickedOnAnnotationRef.current = false;
   }
+  
   function onMouseMove(e: any) {
     if (!isPanningRef.current || !lastPosRef.current) return;
     const p = { x: e.evt.clientX, y: e.evt.clientY };
@@ -170,12 +303,6 @@ export default function Editor() {
     setViewOffset((o) => ({ x: o.x + dx, y: o.y + dy }));
   }
 
-  useEffect(() => {
-    if (!userInteractedRef.current) {
-      setViewScale(fit.scale);
-      setViewOffset({ x: fit.offsetX, y: fit.offsetY });
-    }
-  }, [fit]);
 
   // Selection/transformer
   const transformerRef = useRef<any>(null);
@@ -192,28 +319,47 @@ export default function Editor() {
     }
   }, [selectedId, doc]);
 
-  function exportGeoJson() {
-    const fc = hierarchyToGeoJson(doc);
-    // For now, just log it. Later: send to backend or download.
-    // eslint-disable-next-line no-console
-    console.log('Exported GeoJSON', fc);
-    alert('GeoJSON exported to console');
-  }
 
   function updateNodeRect(id: string, x: number, y: number, width: number, height: number) {
+    console.log('updateNodeRect called:', id, 'pos:', x, y, 'size:', width, height);
+    // x, y, width, height are already in factory coordinates (same as background)
     setDoc((prev) => {
       const copy: HierarchyDocument = JSON.parse(JSON.stringify(prev));
       const node = findNodeById(copy.nodes, id);
       if (!node) return prev;
-      // Assume rectangle polygon ordered: [p0,p1,p2,p3]
+      // Store in factory coordinates: [p0,p1,p2,p3,p0] - closed ring
       node.polygon = [
         [x, y],
         [x + width, y],
         [x + width, y + height],
         [x, y + height],
+        [x, y], // Close the ring
       ];
       return copy;
     });
+    
+    // Persist immediately - only if the annotation already exists in backend
+    const existing = findNodeById(doc.nodes, id);
+    const ring = [
+      [x, y],
+      [x + width, y],
+      [x + width, y + height],
+      [x, y + height],
+      [x, y], // Close the ring
+    ];
+    if (existing && (existing as any).remoteId) {
+      console.log('Persisting to backend:', (existing as any).remoteId, ring, 'x:', x, 'y:', y);
+      // Update existing annotation in backend with coordinates and x,y position
+      persistPatch((existing as any).remoteId!, { 
+        coordinates: ring,
+        x_coord: x,
+        y_coord: y
+      }).catch((e) => console.warn('patch failed', e));
+    } else {
+      console.log('No remoteId found for node:', id, existing);
+      console.log('This annotation is not persisted to backend yet');
+    }
+    // Note: Don't create new annotations when moving existing ones
   }
 
   function findNodeById(nodes: HierarchyNode[], id: string): HierarchyNode | undefined {
@@ -227,36 +373,399 @@ export default function Editor() {
     return undefined;
   }
 
+  function nextLevel(l: Level): Level | null {
+    if (l === 'polje') return 'subzone';
+    if (l === 'subzone') return 'vrsta';
+    if (l === 'vrsta') return 'globina';
+    return null;
+  }
+
+  function addAnnotationAtCenter() {
+    // Calculate center in factory coordinates
+    const center = {
+      x: (stageWidth / 2 - viewOffset.x) / Math.max(viewScale, 1e-6),
+      y: (stageHeight / 2 - viewOffset.y) / Math.max(viewScale, 1e-6),
+    };
+    const size = 5; // Size in factory coordinates
+    // Determine parent based on current sunburst selection
+    let parent: HierarchyNode | undefined;
+    let targetLevel: Level;
+    if (selectedId) {
+      const sel = findNodeById(doc.nodes, selectedId);
+      if (sel) {
+        const child = nextLevel(sel.level);
+        if (!child) {
+          // eslint-disable-next-line no-alert
+          alert('Reached deepest level for this branch. Select a higher level to add children.');
+          return;
+        }
+        parent = sel;
+        targetLevel = child;
+      } else {
+        targetLevel = 'polje';
+      }
+    } else {
+      targetLevel = 'polje';
+    }
+    const baseName = `New ${targetLevel}`;
+    const uniqueName = generateUniqueName(baseName, targetLevel);
+    
+    const newNode: HierarchyNode = {
+      id: `ann-${Date.now()}`,
+      level: targetLevel,
+      parentLocalId: parent?.id,
+      name: uniqueName,
+      polygon: [
+        [center.x - size, center.y - size],
+        [center.x + size, center.y - size],
+        [center.x + size, center.y + size],
+        [center.x - size, center.y + size],
+        [center.x - size, center.y - size], // Close the ring
+      ],
+      children: [],
+    } as any;
+    
+    // Set color based on inheritance system
+    const tempAll = [...all, newNode];
+    newNode.color = getInheritedColor(newNode, tempAll);
+    setDoc((prev) => insertNode(prev, newNode, parent?.id));
+    setSelectedId(newNode.id);
+    // Persist to backend (best-effort)
+    persistCreate(newNode, parent).catch((e) => console.warn('create feature failed', e));
+  }
+
+  function deleteSelected() {
+    if (!selectedId) return;
+    const node = findNodeById(doc.nodes, selectedId);
+    if (!node) return;
+    setDoc((prev) => removeNode(prev, selectedId));
+    setSelectedId(undefined);
+    if ((node as any).remoteId) persistDelete((node as any).remoteId!).catch((e) => console.warn('delete failed', e));
+  }
+
+  function handleRename(id: string) {
+    const node = findNodeById(doc.nodes, id);
+    if (!node) return;
+    // eslint-disable-next-line no-alert
+    const name = window.prompt('Rename annotation', node.name);
+    if (!name) return;
+    
+    // Generate unique name if needed
+    const uniqueName = generateUniqueName(name, node.level);
+    
+    setDoc((prev) => {
+      const copy: HierarchyDocument = JSON.parse(JSON.stringify(prev));
+      const n = findNodeById(copy.nodes, id);
+      if (!n) return prev;
+      n.name = uniqueName;
+      return copy;
+    });
+    if ((node as any).remoteId) persistPatch((node as any).remoteId!, { name: uniqueName }).catch((e) => console.warn('rename failed', e));
+  }
+
+
+  function insertNode(state: HierarchyDocument, node: HierarchyNode, parentId?: string): HierarchyDocument {
+    const copy: HierarchyDocument = JSON.parse(JSON.stringify(state));
+    if (!parentId) {
+      copy.nodes.push(node);
+      return copy;
+    }
+    const parent = findNodeById(copy.nodes, parentId);
+    if (parent) {
+      parent.children = parent.children || [];
+      parent.children.push(node);
+    } else {
+      copy.nodes.push(node);
+    }
+    return copy;
+  }
+
+  function removeNode(state: HierarchyDocument, id: string): HierarchyDocument {
+    const copy: HierarchyDocument = JSON.parse(JSON.stringify(state));
+    function rec(nodes: HierarchyNode[]): HierarchyNode[] {
+      return nodes.filter((n) => {
+        if (n.id === id) return false;
+        if (n.children) n.children = rec(n.children);
+        return true;
+      });
+    }
+    copy.nodes = rec(copy.nodes);
+    return copy;
+  }
+
+  const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000';
+
+  // Load existing annotations from backend
+  async function loadAnnotations(): Promise<HierarchyNode[]> {
+    try {
+      console.log('Loading annotations from:', `${API_BASE}/features/`);
+      const res = await fetch(`${API_BASE}/features/`);
+      if (!res.ok) {
+        console.error('Failed to load annotations:', res.status, res.statusText);
+        return [];
+      }
+      const features = await res.json();
+      console.log('Raw features from backend:', features);
+      console.log('Number of features loaded:', features.length);
+      
+      // If no features exist, log it
+      if (features.length === 0) {
+        console.log('No features found in backend.');
+      }
+      
+      // Convert backend features to HierarchyNode format
+      const nodes: HierarchyNode[] = [];
+      const nodeMap = new Map<number, HierarchyNode>();
+      
+      // First pass: create all nodes
+      for (const feature of features) {
+        // Use the stored coordinates directly as the polygon
+        let polygon: [number, number][] = [];
+        
+        if (feature.coordinates && feature.coordinates.length >= 3) {
+          // Use the stored coordinates directly - they already have the correct shape and position
+          polygon = feature.coordinates as [number, number][];
+          console.log(`Feature ${feature.id}: using stored coordinates, polygon:`, polygon);
+        } else {
+          // Fallback: create a default rectangle at x_coord, y_coord
+          const x = feature.x_coord || 0;
+          const y = feature.y_coord || 0;
+          const width = 10;
+          const height = 10;
+          polygon = [
+            [x, y],
+            [x + width, y],
+            [x + width, y + height],
+            [x, y + height],
+            [x, y] // Close the ring
+          ];
+          console.log(`Feature ${feature.id}: using fallback coordinates, x=${x}, y=${y}, polygon:`, polygon);
+        }
+        
+        const node: HierarchyNode = {
+          id: `backend_${feature.id}`,
+          remoteId: feature.id,
+          name: feature.name,
+          level: feature.level as Level,
+          color: feature.color || colorByLevel(feature.level as Level),
+          polygon: polygon,
+          children: []
+        };
+        nodeMap.set(feature.id, node);
+      }
+      
+      // Second pass: build hierarchy
+      for (const feature of features) {
+        const node = nodeMap.get(feature.id);
+        if (!node) continue;
+        
+        if (feature.parent_id) {
+          const parent = nodeMap.get(feature.parent_id);
+          if (parent) {
+            parent.children = parent.children || [];
+            parent.children.push(node);
+          }
+        } else {
+          nodes.push(node);
+        }
+      }
+      
+      // Apply inherited color system to all nodes
+      const allNodes = flatten(nodes);
+      for (const node of allNodes) {
+        node.color = getInheritedColor(node, allNodes);
+      }
+      
+      console.log('Converted to HierarchyNodes with inherited colors:', nodes.length, nodes);
+      return nodes;
+    } catch (error) {
+      console.error('Failed to load annotations:', error);
+      return [];
+    }
+  }
+
+  async function persistCreate(n: HierarchyNode, parent?: HierarchyNode) {
+    try {
+      console.log('Creating feature in backend:', n.name, n.polygon);
+      const res = await fetch(`${API_BASE}/features/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          layer_id: 1, // Use default annotations layer
+          parent_id: parent && (parent as any).remoteId ? (parent as any).remoteId : null,
+          name: n.name,
+          color: n.color || null,
+          level: n.level,
+          properties: {},
+          coordinates: n.polygon,
+          x_coord: n.polygon[0][0],
+          y_coord: n.polygon[0][1]
+        })
+      });
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Failed to create feature:', res.status, res.statusText, errorText);
+        return;
+      }
+      const json = await res.json();
+      console.log('Feature created successfully:', json);
+      setDoc((prev) => {
+        const copy: HierarchyDocument = JSON.parse(JSON.stringify(prev));
+        const node = findNodeById(copy.nodes, n.id);
+        if (node) (node as any).remoteId = json.id;
+        return copy;
+      });
+    } catch (error) {
+      console.error('Error creating feature:', error);
+    }
+  }
+  async function persistDelete(remoteId: number) {
+    try { await fetch(`${API_BASE}/features/${remoteId}`, { method: 'DELETE' }); } catch {}
+  }
+  async function persistPatch(remoteId: number, patch: any) {
+    try {
+      console.log('Patching feature:', remoteId, patch);
+      const res = await fetch(`${API_BASE}/features/${remoteId}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch)
+      });
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Failed to patch feature:', res.status, res.statusText, errorText);
+        return;
+      }
+      console.log('Feature patched successfully');
+    } catch (error) {
+      console.error('Error patching feature:', error);
+    }
+  }
+
+  // Update selected annotation color
+  function updateSelectedColor(color: string) {
+    if (!selectedId) return;
+    const node = all.find(n => n.id === selectedId);
+    if (!node) return;
+    
+    node.color = color;
+    setDoc(prev => ({ ...prev }));
+    
+    // Persist to backend
+    if ((node as any).remoteId) {
+      persistPatch((node as any).remoteId, { color });
+    }
+  }
+
+  // Update selected annotation order
+  function updateSelectedOrder(order: number) {
+    if (!selectedId) return;
+    const node = all.find(n => n.id === selectedId);
+    if (!node) return;
+    
+    node.order = order;
+    setDoc(prev => ({ ...prev }));
+    
+    // Persist to backend
+    if ((node as any).remoteId) {
+      persistPatch((node as any).remoteId, { order_index: order });
+    }
+  }
+
+  // Update selected annotation when selection changes
+  useEffect(() => {
+    if (selectedId) {
+      const node = all.find(n => n.id === selectedId);
+      if (node) {
+        setSelectedColor(node.color || '#d6f0ff');
+        setSelectedOrder(node.order || 0);
+      }
+    }
+  }, [selectedId, all]);
+
+  // Generate unique name for new annotations
+  function generateUniqueName(baseName: string, level: Level): string {
+    const existingNames = all
+      .filter(n => n.level === level)
+      .map(n => n.name)
+      .filter(name => name.startsWith(baseName));
+    
+    if (!existingNames.includes(baseName)) {
+      return baseName;
+    }
+    
+    let counter = 1;
+    let newName = `${baseName} ${counter}`;
+    while (existingNames.includes(newName)) {
+      counter++;
+      newName = `${baseName} ${counter}`;
+    }
+    return newName;
+  }
+
+
+  const darkPanel = { border: '1px solid #1f2937', borderRadius: 8, background: '#0b0f17', padding: 8, display: 'grid', gap: 8 } as const;
+  const btn = { padding: '6px 10px', borderRadius: 8, border: '1px solid #374151', background: '#111827', color: 'white', cursor: 'pointer', minWidth: 120 } as const;
+  const labelStyle = { color: '#9ca3af', fontSize: 12 } as const;
+
   return (
-    <div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-        <button onClick={exportGeoJson}>Export GeoJSON</button>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <input type="checkbox" checked={showBackground} onChange={e => setShowBackground(e.target.checked)} />
-          Show background
+    <div style={{ background: '#0b0f17', height: '100vh', color: 'white', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 8, alignItems: 'center', padding: '8px 0', height: '60px', flexShrink: 0 }}>
+        <label style={{ ...labelStyle }}>Level
+          <select style={{ marginLeft: 6, background: '#111827', color: 'white', border: '1px solid #374151', borderRadius: 6, padding: '6px 8px' }} value={visibleLevel} onChange={e => setVisibleLevel(e.target.value as any)}>
+            <option value="all">All</option>
+            <option value="polje">polje</option>
+            <option value="subzone">subzone</option>
+            <option value="vrsta">vrsta</option>
+            <option value="globina">globina</option>
+          </select>
         </label>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          BG scale
-          <input
-            type="number"
-            step="0.001"
-            min="0.0001"
-            value={bgScale}
-            onChange={e => setBgScale(Math.max(0.0001, Number(e.target.value) || 0.001))}
-            style={{ width: 90 }}
-          />
-        </label>
+        <button style={btn} onClick={() => addAnnotationAtCenter()}>Add annotation</button>
+        <button style={btn} onClick={() => deleteSelected()} disabled={!selectedId}>Delete</button>
+        <button style={btn} onClick={() => setShowSunburst(!showSunburst)}>
+          {showSunburst ? 'Hide Sunburst' : 'Show Sunburst'}
+        </button>
+        {selectedId && (
+          <>
+            <label style={{ ...labelStyle }}>Color
+              <input 
+                type="color" 
+                style={{ marginLeft: 6, background: '#111827', border: '1px solid #374151', borderRadius: 6, padding: '2px 4px' }} 
+                value={selectedColor} 
+                onChange={e => updateSelectedColor(e.target.value)} 
+              />
+              <span style={{ marginLeft: 8, fontSize: 10, color: '#6b7280' }}>
+                (Inherited: {getInheritedColor(all.find(n => n.id === selectedId)!, all)})
+              </span>
+            </label>
+            <label style={{ ...labelStyle }}>Order
+              <input 
+                type="number" 
+                style={{ marginLeft: 6, background: '#111827', color: 'white', border: '1px solid #374151', borderRadius: 6, padding: '6px 8px', width: 80 }} 
+                value={selectedOrder} 
+                onChange={e => updateSelectedOrder(parseInt(e.target.value) || 0)} 
+              />
+            </label>
+          </>
+        )}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 12 }}>
-        <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, background: '#fff', padding: 8 }}>
-          <div style={{ fontWeight: 600, marginBottom: 6 }}>Hierarchy</div>
-          <HierarchyTree nodes={doc.nodes} selectedId={selectedId} onSelect={setSelectedId} />
+      <div style={{ display: 'flex', gap: 12, flex: 1, overflow: 'hidden' }}>
+        {showSunburst && (
+          <div style={{ ...darkPanel, width: '320px', flexShrink: 0 }}>
+            <div style={{ fontWeight: 600, color: 'white' }}>Sunburst</div>
+            <Sunburst
+              doc={doc}
+              activeId={selectedId}
+              onSelect={(id, lvl) => {
+                setSelectedId(id);
+                setVisibleLevel(lvl);
+              }}
+            />
         </div>
-        <Stage
-          ref={stageRef}
-          width={stageWidth}
-          height={stageHeight}
-          style={{ border: '1px solid #e5e7eb', background: 'white', borderRadius: 8 }}
+        )}
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
+          <Stage
+            ref={stageRef}
+            width={stageWidth}
+            height={stageHeight}
+            style={{ border: '1px solid #1f2937', background: 'black', borderRadius: 8, flex: 1 }}
           onWheel={onWheel}
           onMouseDown={onMouseDown}
           onMouseUp={onMouseUp}
@@ -265,15 +774,36 @@ export default function Editor() {
           <Layer listening={false}>
             {showBackground && (
               <Group x={viewOffset.x} y={viewOffset.y} scaleX={viewScale} scaleY={viewScale}>
-                {bgPaths.slice(0, 20000).map((pts, i) => (
-                  <Line key={`bg-${i}`} points={pts} stroke="#9ca3af" strokeWidth={Math.max(0.6 / Math.max(viewScale, 1e-6), 0.2)} opacity={0.7} />
-                ))}
+                <Shape
+                  sceneFunc={(ctx) => {
+                    ctx.save();
+                    ctx.globalAlpha = 0.9;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = Math.max(0.6 / Math.max(viewScale, 1e-6), 0.2);
+                    const arr = bgPaths; // already in data coords
+                    for (let k = 0; k < arr.length; k++) {
+                      const pts = arr[k];
+                      if (!pts || pts.length < 4) continue;
+                      ctx.beginPath();
+                      ctx.moveTo(pts[0], pts[1]);
+                      for (let i = 2; i < pts.length; i += 2) {
+                        ctx.lineTo(pts[i], pts[i + 1]);
+                      }
+                      ctx.stroke();
+                    }
+                    ctx.restore();
+                  }}
+                />
               </Group>
             )}
           </Layer>
           <Layer>
             <Group x={viewOffset.x} y={viewOffset.y} scaleX={viewScale} scaleY={viewScale}>
-            {all.map((n) => {
+            {all
+              .filter((n) => visibleLevel === 'all' || n.level === (visibleLevel as Level))
+              .filter((n) => n.polygon && n.polygon.length >= 3) // Only render annotations with valid polygons
+              .map((n) => {
+              // Use factory coordinates directly (same as background)
               const x = n.polygon[0][0];
               const y = n.polygon[0][1];
               const w = n.polygon[1][0] - n.polygon[0][0];
@@ -287,16 +817,28 @@ export default function Editor() {
                     y={y}
                     width={Math.abs(w)}
                     height={Math.abs(h)}
-                    fill={n.color || colorByLevel(n.level)}
+                    fill={getInheritedColor(n, all)}
+                    opacity={0.5}
                     stroke={isSel ? '#2563eb' : '#111827'}
                     strokeWidth={(isSel ? 1.5 : 0.5) / Math.max(viewScale, 1e-6)}
                     draggable
-                    onClick={() => setSelectedId(n.id)}
+                    onClick={(e) => {
+                      e.cancelBubble = true; // Prevent event from bubbling to stage
+                      setSelectedId(n.id);
+                    }}
+                    onDblClick={(e) => {
+                      e.cancelBubble = true; // Prevent event from bubbling to stage
+                      console.log('dblclick rename', n.id);
+                      handleRename(n.id);
+                    }}
                     onDragEnd={(e) => {
                       const node = e.target as any;
                       const nx = node.x();
                       const ny = node.y();
-                      updateNodeRect(n.id, nx, ny, Math.abs(w), Math.abs(h));
+                      const nw = node.width();
+                      const nh = node.height();
+                      console.log('Drag ended:', n.id, 'new pos:', nx, ny, 'size:', nw, nh);
+                      updateNodeRect(n.id, nx, ny, nw, nh);
                     }}
                     onTransformEnd={(e) => {
                       const node = e.target as any;
@@ -309,15 +851,17 @@ export default function Editor() {
                       updateNodeRect(n.id, nx, ny, newW, newH);
                     }}
                   />
-                  <Text x={x + 3} y={y + 3} text={n.name} fontSize={12} fill="#111827" />
+                   <Text x={x + 3} y={y + 3} text={n.name} fontSize={12} fill="#111827" listening={false} />
+                   <Text x={x + 3} y={y + 3} text={n.name} fontSize={12} fill="#ffffff" listening={false} />
                 </Group>
               );
             })}
             </Group>
             <Transformer ref={transformerRef} rotateEnabled={false} keepRatio={false} />
-            <Text x={6} y={stageHeight - 18} text={`items: ${all.length} viewScale: ${viewScale.toFixed(3)}`} fontSize={12} fill="#6b7280" />
+            <Text x={6} y={stageHeight - 18} text={`items: ${all.length} viewScale: ${viewScale.toFixed(3)}`} fontSize={12} fill="#9ca3af" />
           </Layer>
         </Stage>
+        </div>
       </div>
     </div>
   );

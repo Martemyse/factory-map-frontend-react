@@ -1,6 +1,6 @@
 from typing import List, Optional
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Integer, Boolean, ForeignKey, JSON
+from sqlalchemy import String, Integer, Boolean, ForeignKey, JSON, Float
 from geoalchemy2 import Geometry
 from .db import Base
 
@@ -33,8 +33,9 @@ class Feature(Base):
   depth: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
   properties: Mapped[dict] = mapped_column(JSON, default=dict)
 
-  geom = mapped_column(Geometry(geometry_type='POLYGON', srid=3857))
+  geom = mapped_column(Geometry(geometry_type='POLYGON', srid=0))
+  x_coord: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+  y_coord: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 
   layer: Mapped['Layer'] = relationship(back_populates='features')
   parent: Mapped[Optional['Feature']] = relationship(remote_side=[id])
-
