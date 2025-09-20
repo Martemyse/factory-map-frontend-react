@@ -22,7 +22,7 @@ class LayerRead(LayerBase):
 
 
 class FeatureBase(BaseModel):
-  layer_id: int
+  layer_id: Optional[int] = None
   parent_id: Optional[int] = None
   name: str
   opomba: Optional[str] = None
@@ -33,6 +33,9 @@ class FeatureBase(BaseModel):
   properties: dict = {}
   # geometry provided as GeoJSON-like
   coordinates: list
+  # Position relative to factory floor
+  x_coord: Optional[float] = None
+  y_coord: Optional[float] = None
 
 
 class FeatureCreate(FeatureBase):
@@ -50,7 +53,28 @@ class FeatureRead(BaseModel):
   order_index: Optional[int]
   depth: Optional[int]
   properties: dict
+  coordinates: list
+  x_coord: Optional[float]
+  y_coord: Optional[float]
 
   class Config:
     from_attributes = True
 
+
+class FeatureDeleteResponse(BaseModel):
+  ok: bool
+
+
+class FeatureUpdate(BaseModel):
+  layer_id: Optional[int] = None
+  parent_id: Optional[int] = None
+  name: Optional[str] = None
+  opomba: Optional[str] = None
+  color: Optional[str] = None
+  level: Optional[str] = None
+  order_index: Optional[int] = None
+  depth: Optional[int] = None
+  properties: Optional[dict] = None
+  coordinates: Optional[list] = None
+  x_coord: Optional[float] = None
+  y_coord: Optional[float] = None

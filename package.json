@@ -10,5 +10,12 @@
     "lint": "npm run --workspace apps/frontend lint",
     "type-check": "npm run --workspace apps/frontend type-check",
     "preview": "npm run --workspace apps/frontend preview"
+  },
+  "dependencies": {
+    "plotly.js": "^3.1.0",
+    "react-plotly.js": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/plotly.js": "^3.0.5"
   }
 }
