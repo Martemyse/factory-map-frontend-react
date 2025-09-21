@@ -15,6 +15,9 @@ export interface HierarchyNode {
   depth?: number;
   polygon: LocalPoint[]; // closed ring preferred (first == last)
   children?: HierarchyNode[];
+  cona?: string;
+  max_capacity?: number;
+  taken_capacity?: number;
 }
 
 export interface HierarchyDocument {
