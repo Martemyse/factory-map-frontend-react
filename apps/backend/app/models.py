@@ -36,6 +36,9 @@ class Feature(Base):
   geom = mapped_column(Geometry(geometry_type='POLYGON', srid=0))
   x_coord: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
   y_coord: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+  cona: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+  max_capacity: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+  taken_capacity: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
   layer: Mapped['Layer'] = relationship(back_populates='features')
   parent: Mapped[Optional['Feature']] = relationship(remote_side=[id])

@@ -1,8 +1,8 @@
 import { Stage, Layer, Rect, Text, Group, Transformer, Shape } from 'react-konva';
-import { useMemo, useRef, useState, useEffect } from 'react';
+import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import type { HierarchyDocument, HierarchyNode, Level } from '../model/types';
 // removed seed hierarchy import; editor now loads only backend features
-import Sunburst from './Sunburst';
+import HierarchyNavigator from './HierarchyNavigator';
 
 const initialDoc: HierarchyDocument = { origin: [0, 0], units: 'm', nodes: [] as HierarchyNode[] };
 
@@ -99,6 +99,8 @@ export default function Editor() {
   const all = useMemo(() => flatten(doc.nodes), [doc]);
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const [visibleLevel, setVisibleLevel] = useState<Level | 'all'>('all');
+  const [displayLevel, setDisplayLevel] = useState<'root' | 'polje' | 'subzone' | 'vrsta'>('root');
+  const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
   const [stageWidth, setStageWidth] = useState(900);
   const [stageHeight, setStageHeight] = useState(500);
   const [showBackground] = useState(true);
@@ -112,7 +114,130 @@ export default function Editor() {
   const userInteractedRef = useRef<boolean>(false);
   const [selectedColor, setSelectedColor] = useState<string>('#d6f0ff');
   const [selectedOrder, setSelectedOrder] = useState<number>(0);
-  const [showSunburst, setShowSunburst] = useState<boolean>(true);
+  const [showHierarchy, setShowHierarchy] = useState<boolean>(true);
+
+  // Function to move selected annotation and its children to current camera position
+  const bringToView = useCallback(() => {
+    console.log('🔍 Bring to view called, selectedId:', selectedId);
+    
+    if (!selectedId) {
+      console.log('❌ No selectedId, returning');
+      return;
+    }
+    
+    const selectedNode = all.find(n => n.id === selectedId);
+    console.log('🎯 Selected node:', selectedNode);
+    
+    if (!selectedNode) {
+      console.log('❌ Selected node not found, returning');
+      return;
+    }
+    
+    // Get all children of the selected node
+    const getChildren = (node: HierarchyNode): HierarchyNode[] => {
+      const children = all.filter(n => n.parentLocalId === node.id);
+      const allChildren = [...children];
+      children.forEach(child => {
+        allChildren.push(...getChildren(child));
+      });
+      return allChildren;
+    };
+    
+    const children = getChildren(selectedNode);
+    const allNodes = [selectedNode, ...children];
+    console.log('👥 All nodes (selected + children):', allNodes.length, allNodes.map(n => ({ id: n.id, name: n.name, level: n.level })));
+    
+    if (allNodes.length === 0) {
+      console.log('❌ No nodes to move, returning');
+      return;
+    }
+    
+    // Calculate current viewport center in world coordinates
+    const viewportCenterX = (stageWidth / 2 - viewOffset.x) / viewScale;
+    const viewportCenterY = (stageHeight / 2 - viewOffset.y) / viewScale;
+    
+    console.log('📷 Current viewport center:', { viewportCenterX, viewportCenterY });
+    console.log('📷 Current view settings:', { viewScale, viewOffset });
+    
+    // Calculate the current bounding box of all selected nodes
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    
+    allNodes.forEach(node => {
+      console.log('📍 Processing node:', node.id, 'polygon:', node.polygon);
+      if (node.polygon && node.polygon.length > 0) {
+        node.polygon.forEach((point: [number, number]) => {
+          const [x, y] = point;
+          minX = Math.min(minX, x);
+          minY = Math.min(minY, y);
+          maxX = Math.max(maxX, x);
+          maxY = Math.max(maxY, y);
+        });
+      }
+    });
+    
+    console.log('📦 Current bounding box:', { minX, minY, maxX, maxY });
+    
+    if (minX === Infinity) {
+      console.log('❌ No valid points found, returning');
+      return;
+    }
+    
+    // Calculate the center of the selected nodes
+    const currentCenterX = (minX + maxX) / 2;
+    const currentCenterY = (minY + maxY) / 2;
+    
+    console.log('🎯 Current center of selected nodes:', { currentCenterX, currentCenterY });
+    
+    // Calculate the offset needed to move the center to viewport center
+    const offsetX = viewportCenterX - currentCenterX;
+    const offsetY = viewportCenterY - currentCenterY;
+    
+    console.log('📐 Offset to move to viewport center:', { offsetX, offsetY });
+    
+    // Move all selected nodes by the calculated offset
+    setDoc((prev) => {
+      const copy: HierarchyDocument = JSON.parse(JSON.stringify(prev));
+      
+      allNodes.forEach(nodeToMove => {
+        const node = findNodeById(copy.nodes, nodeToMove.id);
+        if (node && node.polygon) {
+          // Update the polygon coordinates
+          node.polygon = node.polygon.map((point: [number, number]) => [
+            point[0] + offsetX,
+            point[1] + offsetY
+          ]);
+          
+          // Update x_coord and y_coord if they exist
+          if (node.polygon.length > 0) {
+            const [x, y] = node.polygon[0];
+            // Update the node's position properties if they exist
+            if ('x' in node) (node as any).x = x;
+            if ('y' in node) (node as any).y = y;
+          }
+          
+          console.log('✅ Moved node:', node.id, 'new polygon:', node.polygon);
+          
+          // Persist the changes to backend if the node has a remoteId
+          if (node.remoteId) {
+            const ring = node.polygon.slice(0, -1); // Remove last point if it's a duplicate of first
+            const [x, y] = node.polygon[0];
+            
+            persistPatch(node.remoteId, { 
+              coordinates: ring,
+              x_coord: x,
+              y_coord: y
+            }).catch((e) => console.warn('Failed to persist moved node:', node.id, e));
+          }
+        }
+      });
+      
+      return copy;
+    });
+    
+    console.log('✅ All selected nodes moved to viewport center');
+    // NOTE: We intentionally do NOT change displayLevel or selectedParentId here
+    // to preserve the sunburst state
+  }, [selectedId, all, stageWidth, stageHeight, viewScale, viewOffset]);
 
   // Calculate dynamic canvas dimensions
   useEffect(() => {
@@ -122,24 +247,24 @@ export default function Editor() {
       setStageHeight(Math.max(400, availableHeight));
       
       // Calculate width based on sunburst visibility
-      const sunburstWidth = showSunburst ? 320 : 0;
+      const hierarchyWidth = showHierarchy ? 320 : 0;
       const gap = 12;
       const padding = 24; // Reduced padding
-      const availableWidth = window.innerWidth - sunburstWidth - gap - padding;
+      const availableWidth = window.innerWidth - hierarchyWidth - gap - padding;
       setStageWidth(Math.max(400, availableWidth)); // Minimum width of 400px
     };
 
     calculateDimensions();
     window.addEventListener('resize', calculateDimensions);
     return () => window.removeEventListener('resize', calculateDimensions);
-  }, [showSunburst]);
+  }, [showHierarchy]);
 
   // Load existing annotations from backend on mount
   useEffect(() => {
     let cancelled = false;
     loadAnnotations().then(backendNodes => {
       if (cancelled) return;
-      console.log('Loaded backend annotations:', backendNodes.length, backendNodes);
+      // console.log('Loaded backend annotations:', backendNodes.length, backendNodes);
       // Always replace the document with backend annotations (even if empty)
       setDoc(prev => ({
         ...prev,
@@ -163,7 +288,7 @@ export default function Editor() {
           setBgPaths(paths);
           setBgBbox(bbox);
           // eslint-disable-next-line no-console
-          console.log('Editor background paths:', paths.length, 'bbox:', bbox);
+          // console.log('Editor background paths:', paths.length, 'bbox:', bbox);
         }
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -210,16 +335,16 @@ export default function Editor() {
     const targetBbox = bgBbox || bbox;
     if (!targetBbox) return { scale: 3, offsetX: 1200, offsetY: 1400 };
     
-    const [minX, minY, maxX, maxY] = targetBbox;
-    const centerX = (minX + maxX) / 2;
-    const centerY = (minY + maxY) / 2;
+    // const [minX, minY, maxX, maxY] = targetBbox;
+    // const centerX = (minX + maxX) / 2;
+    // const centerY = (minY + maxY) / 2;
     
     // Center the factory layout in the viewport with scale 1
     const offsetX = 1200;
     const offsetY = 1400;
     
     // eslint-disable-next-line no-console
-    console.log('Factory centered view - bbox:', targetBbox, 'center:', centerX, centerY, 'offset:', offsetX, offsetY);
+    // console.log('Factory centered view - bbox:', targetBbox, 'center:', centerX, centerY, 'offset:', offsetX, offsetY);
     return { scale: 3, offsetX, offsetY };
   }, [bgBbox, bbox]);
 
@@ -321,7 +446,7 @@ export default function Editor() {
 
 
   function updateNodeRect(id: string, x: number, y: number, width: number, height: number) {
-    console.log('updateNodeRect called:', id, 'pos:', x, y, 'size:', width, height);
+    // console.log('updateNodeRect called:', id, 'pos:', x, y, 'size:', width, height);
     // x, y, width, height are already in factory coordinates (same as background)
     setDoc((prev) => {
       const copy: HierarchyDocument = JSON.parse(JSON.stringify(prev));
@@ -348,7 +473,7 @@ export default function Editor() {
       [x, y], // Close the ring
     ];
     if (existing && (existing as any).remoteId) {
-      console.log('Persisting to backend:', (existing as any).remoteId, ring, 'x:', x, 'y:', y);
+      // console.log('Persisting to backend:', (existing as any).remoteId, ring, 'x:', x, 'y:', y);
       // Update existing annotation in backend with coordinates and x,y position
       persistPatch((existing as any).remoteId!, { 
         coordinates: ring,
@@ -356,8 +481,8 @@ export default function Editor() {
         y_coord: y
       }).catch((e) => console.warn('patch failed', e));
     } else {
-      console.log('No remoteId found for node:', id, existing);
-      console.log('This annotation is not persisted to backend yet');
+      // console.log('No remoteId found for node:', id, existing);
+      // console.log('This annotation is not persisted to backend yet');
     }
     // Note: Don't create new annotations when moving existing ones
   }
@@ -498,19 +623,19 @@ export default function Editor() {
   // Load existing annotations from backend
   async function loadAnnotations(): Promise<HierarchyNode[]> {
     try {
-      console.log('Loading annotations from:', `${API_BASE}/features/`);
+      // console.log('Loading annotations from:', `${API_BASE}/features/`);
       const res = await fetch(`${API_BASE}/features/`);
       if (!res.ok) {
         console.error('Failed to load annotations:', res.status, res.statusText);
         return [];
       }
       const features = await res.json();
-      console.log('Raw features from backend:', features);
-      console.log('Number of features loaded:', features.length);
+      // console.log('Raw features from backend:', features);
+      // console.log('Number of features loaded:', features.length);
       
       // If no features exist, log it
       if (features.length === 0) {
-        console.log('No features found in backend.');
+        // console.log('No features found in backend.');
       }
       
       // Convert backend features to HierarchyNode format
@@ -525,7 +650,7 @@ export default function Editor() {
         if (feature.coordinates && feature.coordinates.length >= 3) {
           // Use the stored coordinates directly - they already have the correct shape and position
           polygon = feature.coordinates as [number, number][];
-          console.log(`Feature ${feature.id}: using stored coordinates, polygon:`, polygon);
+          // console.log(`Feature ${feature.id}: using stored coordinates, polygon:`, polygon);
         } else {
           // Fallback: create a default rectangle at x_coord, y_coord
           const x = feature.x_coord || 0;
@@ -539,7 +664,7 @@ export default function Editor() {
             [x, y + height],
             [x, y] // Close the ring
           ];
-          console.log(`Feature ${feature.id}: using fallback coordinates, x=${x}, y=${y}, polygon:`, polygon);
+          // console.log(`Feature ${feature.id}: using fallback coordinates, x=${x}, y=${y}, polygon:`, polygon);
         }
         
         const node: HierarchyNode = {
@@ -549,7 +674,11 @@ export default function Editor() {
           level: feature.level as Level,
           color: feature.color || colorByLevel(feature.level as Level),
           polygon: polygon,
-          children: []
+          children: [],
+          parentLocalId: feature.parent_id ? `backend_${feature.parent_id}` : undefined,
+          cona: feature.cona,
+          max_capacity: feature.max_capacity,
+          taken_capacity: feature.taken_capacity
         };
         nodeMap.set(feature.id, node);
       }
@@ -576,7 +705,7 @@ export default function Editor() {
         node.color = getInheritedColor(node, allNodes);
       }
       
-      console.log('Converted to HierarchyNodes with inherited colors:', nodes.length, nodes);
+      // console.log('Converted to HierarchyNodes with inherited colors:', nodes.length, nodes);
       return nodes;
     } catch (error) {
       console.error('Failed to load annotations:', error);
@@ -586,7 +715,7 @@ export default function Editor() {
 
   async function persistCreate(n: HierarchyNode, parent?: HierarchyNode) {
     try {
-      console.log('Creating feature in backend:', n.name, n.polygon);
+      // console.log('Creating feature in backend:', n.name, n.polygon);
       const res = await fetch(`${API_BASE}/features/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -608,7 +737,7 @@ export default function Editor() {
         return;
       }
       const json = await res.json();
-      console.log('Feature created successfully:', json);
+      // console.log('Feature created successfully:', json);
       setDoc((prev) => {
         const copy: HierarchyDocument = JSON.parse(JSON.stringify(prev));
         const node = findNodeById(copy.nodes, n.id);
@@ -624,7 +753,7 @@ export default function Editor() {
   }
   async function persistPatch(remoteId: number, patch: any) {
     try {
-      console.log('Patching feature:', remoteId, patch);
+      // console.log('Patching feature:', remoteId, patch);
       const res = await fetch(`${API_BASE}/features/${remoteId}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch)
       });
@@ -633,7 +762,7 @@ export default function Editor() {
         console.error('Failed to patch feature:', res.status, res.statusText, errorText);
         return;
       }
-      console.log('Feature patched successfully');
+      // console.log('Feature patched successfully');
     } catch (error) {
       console.error('Error patching feature:', error);
     }
@@ -719,8 +848,11 @@ export default function Editor() {
         </label>
         <button style={btn} onClick={() => addAnnotationAtCenter()}>Add annotation</button>
         <button style={btn} onClick={() => deleteSelected()} disabled={!selectedId}>Delete</button>
-        <button style={btn} onClick={() => setShowSunburst(!showSunburst)}>
-          {showSunburst ? 'Hide Sunburst' : 'Show Sunburst'}
+        <button style={btn} onClick={() => setShowHierarchy(!showHierarchy)}>
+          {showHierarchy ? 'Hide Hierarchy' : 'Show Hierarchy'}
+        </button>
+        <button style={btn} onClick={bringToView} disabled={!selectedId}>
+          Bring to view
         </button>
         {selectedId && (
           <>
@@ -747,15 +879,43 @@ export default function Editor() {
         )}
       </div>
       <div style={{ display: 'flex', gap: 12, flex: 1, overflow: 'hidden' }}>
-        {showSunburst && (
+        {showHierarchy && (
           <div style={{ ...darkPanel, width: '320px', flexShrink: 0 }}>
-            <div style={{ fontWeight: 600, color: 'white' }}>Sunburst</div>
-            <Sunburst
+            <HierarchyNavigator
               doc={doc}
               activeId={selectedId}
               onSelect={(id, lvl) => {
+                console.log('HierarchyNavigator onSelect:', { id, lvl });
                 setSelectedId(id);
                 setVisibleLevel(lvl);
+                
+                // Set display level and parent based on what was clicked
+                if (id === 'root' || lvl === 'polje') {
+                  // Show only polje level
+                  console.log('Setting displayLevel to root');
+                  setDisplayLevel('root');
+                  setSelectedParentId(null);
+                } else if (lvl === 'subzone') {
+                  // Show all subzones of the parent polje
+                  console.log('Setting displayLevel to polje');
+                  setDisplayLevel('polje');
+                  // Find the parent polje of this subzone
+                  const subzoneNode = all.find(n => n.id === id);
+                  console.log('Subzone node:', subzoneNode);
+                  const parentPoljeId = subzoneNode?.parentLocalId;
+                  console.log('Parent polje ID:', parentPoljeId);
+                  setSelectedParentId(parentPoljeId || null);
+                } else if (lvl === 'vrsta') {
+                  // Show all vrste of the parent subzone
+                  console.log('Setting displayLevel to subzone');
+                  setDisplayLevel('subzone');
+                  // Find the parent subzone of this vrsta
+                  const vrstaNode = all.find(n => n.id === id);
+                  console.log('Vrsta node:', vrstaNode);
+                  const parentSubzoneId = vrstaNode?.parentLocalId;
+                  console.log('Parent subzone ID:', parentSubzoneId);
+                  setSelectedParentId(parentSubzoneId || null);
+                }
               }}
             />
         </div>
@@ -800,7 +960,30 @@ export default function Editor() {
           <Layer>
             <Group x={viewOffset.x} y={viewOffset.y} scaleX={viewScale} scaleY={viewScale}>
             {all
-              .filter((n) => visibleLevel === 'all' || n.level === (visibleLevel as Level))
+              .filter((n) => {
+                // First apply the manual level filter if set
+                if (visibleLevel !== 'all' && n.level !== (visibleLevel as Level)) {
+                  return false;
+                }
+                
+                // Then apply the display level logic
+                if (displayLevel === 'root') {
+                  // Show only polje level
+                  return n.level === 'polje';
+                } else if (displayLevel === 'polje') {
+                  // Show only direct children of selected polje (subzones)
+                  const show = n.level === 'subzone' && n.parentLocalId === selectedParentId;
+                  if (show) console.log('Showing subzone:', n.name, 'parent:', n.parentLocalId, 'selectedParent:', selectedParentId);
+                  return show;
+                } else if (displayLevel === 'subzone') {
+                  // Show only direct children of selected subzone (vrste)
+                  const show = n.level === 'vrsta' && n.parentLocalId === selectedParentId;
+                  if (show) console.log('Showing vrsta:', n.name, 'parent:', n.parentLocalId, 'selectedParent:', selectedParentId);
+                  return show;
+                }
+                
+                return true;
+              })
               .filter((n) => n.polygon && n.polygon.length >= 3) // Only render annotations with valid polygons
               .map((n) => {
               // Use factory coordinates directly (same as background)
@@ -828,7 +1011,7 @@ export default function Editor() {
                     }}
                     onDblClick={(e) => {
                       e.cancelBubble = true; // Prevent event from bubbling to stage
-                      console.log('dblclick rename', n.id);
+                      // console.log('dblclick rename', n.id);
                       handleRename(n.id);
                     }}
                     onDragEnd={(e) => {
@@ -837,7 +1020,7 @@ export default function Editor() {
                       const ny = node.y();
                       const nw = node.width();
                       const nh = node.height();
-                      console.log('Drag ended:', n.id, 'new pos:', nx, ny, 'size:', nw, nh);
+                      // console.log('Drag ended:', n.id, 'new pos:', nx, ny, 'size:', nw, nh);
                       updateNodeRect(n.id, nx, ny, nw, nh);
                     }}
                     onTransformEnd={(e) => {
@@ -851,8 +1034,8 @@ export default function Editor() {
                       updateNodeRect(n.id, nx, ny, newW, newH);
                     }}
                   />
-                   <Text x={x + 3} y={y + 3} text={n.name} fontSize={12} fill="#111827" listening={false} />
-                   <Text x={x + 3} y={y + 3} text={n.name} fontSize={12} fill="#ffffff" listening={false} />
+                   <Text x={x + 3} y={y + 3} text={n.name} fontSize={4} fill="#111827" listening={false} />
+                   <Text x={x + 3} y={y + 3} text={n.name} fontSize={4} fill="#ffffff" listening={false} />
                 </Group>
               );
             })}
