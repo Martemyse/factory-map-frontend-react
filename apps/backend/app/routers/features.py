@@ -36,7 +36,8 @@ async def get_features(db: AsyncSession = Depends(get_db)):
     out.append(schemas.FeatureRead(
       id=f.id, layer_id=f.layer_id, parent_id=f.parent_id, name=f.name, opomba=f.opomba,
       color=f.color, level=f.level, order_index=f.order_index, depth=f.depth, properties=f.properties,
-      coordinates=coords, x_coord=f.x_coord, y_coord=f.y_coord
+      coordinates=coords, x_coord=f.x_coord, y_coord=f.y_coord,
+      shape_gl=getattr(f, 'shape_gl', None), x_coord_gl=getattr(f, 'x_coord_gl', None), y_coord_gl=getattr(f, 'y_coord_gl', None)
     ))
   return out
 
@@ -49,7 +50,8 @@ async def post_feature(payload: schemas.FeatureCreate, db: AsyncSession = Depend
   return schemas.FeatureRead(
     id=f.id, layer_id=f.layer_id, parent_id=f.parent_id, name=f.name, opomba=f.opomba,
     color=f.color, level=f.level, order_index=f.order_index, depth=f.depth, properties=f.properties,
-    coordinates=payload.coordinates, x_coord=f.x_coord, y_coord=f.y_coord
+    coordinates=payload.coordinates, x_coord=f.x_coord, y_coord=f.y_coord,
+    shape_gl=getattr(f, 'shape_gl', None), x_coord_gl=getattr(f, 'x_coord_gl', None), y_coord_gl=getattr(f, 'y_coord_gl', None)
   )
 
 
@@ -70,7 +72,8 @@ async def patch_feature(feature_id: int, payload: schemas.FeatureUpdate, db: Asy
   return schemas.FeatureRead(
     id=f.id, layer_id=f.layer_id, parent_id=f.parent_id, name=f.name, opomba=f.opomba,
     color=f.color, level=f.level, order_index=f.order_index, depth=f.depth, properties=f.properties,
-    coordinates=coords, x_coord=f.x_coord, y_coord=f.y_coord
+    coordinates=coords, x_coord=f.x_coord, y_coord=f.y_coord,
+    shape_gl=getattr(f, 'shape_gl', None), x_coord_gl=getattr(f, 'x_coord_gl', None), y_coord_gl=getattr(f, 'y_coord_gl', None)
   )
 
 
