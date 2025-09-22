@@ -39,6 +39,9 @@ class Feature(Base):
   cona: Mapped[Optional[str]] = mapped_column(String, nullable=True)
   max_capacity: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
   taken_capacity: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+  shape_gl: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+  x_coord_gl: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+  y_coord_gl: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 
   layer: Mapped['Layer'] = relationship(back_populates='features')
   parent: Mapped[Optional['Feature']] = relationship(remote_side=[id])

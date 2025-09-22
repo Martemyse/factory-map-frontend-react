@@ -36,6 +36,10 @@ class FeatureBase(BaseModel):
   # Position relative to factory floor
   x_coord: Optional[float] = None
   y_coord: Optional[float] = None
+  # MapLibre GL fields (optional on create)
+  shape_gl: Optional[dict] = None
+  x_coord_gl: Optional[float] = None
+  y_coord_gl: Optional[float] = None
 
 
 class FeatureCreate(FeatureBase):
@@ -56,6 +60,10 @@ class FeatureRead(BaseModel):
   coordinates: list
   x_coord: Optional[float]
   y_coord: Optional[float]
+  # MapLibre GL fields
+  shape_gl: Optional[dict]
+  x_coord_gl: Optional[float]
+  y_coord_gl: Optional[float]
 
   class Config:
     from_attributes = True
@@ -78,3 +86,7 @@ class FeatureUpdate(BaseModel):
   coordinates: Optional[list] = None
   x_coord: Optional[float] = None
   y_coord: Optional[float] = None
+  # MapLibre GL fields (optional on update)
+  shape_gl: Optional[dict] = None
+  x_coord_gl: Optional[float] = None
+  y_coord_gl: Optional[float] = None

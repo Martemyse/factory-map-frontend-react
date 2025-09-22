@@ -77,12 +77,12 @@ class OptimizedDataMigrator:
         return f"POLYGON(({x} {y}, {x + width} {y}, {x + width} {y + height}, {x} {y + height}, {x} {y}))"
     
     def get_coordinates_within_bounds(self, index: int, total: int, level: int) -> tuple[float, float]:
-        """Calculate coordinates within the specified bounds for proper distribution."""
-        # Bounds: X: -432.52 to -123.97, Y: -660.19 to -334.76
-        x_min, x_max = -432.519365940685, -123.97249177401847
-        y_min, y_max = -660.1910901866504, -334.7553344866505
+        """Calculate coordinates within the factory layout bounds for proper distribution."""
+        # Factory layout bounds (from analyze_factory_bounds.py)
+        x_min, x_max = -666803.02, -151784.69
+        y_min, y_max = -886396.71, -301810.62
         
-        # Fixed grid: 28 rows
+        # Use a grid that covers the factory layout area
         rows = 28
         cols = (total + rows - 1) // rows  # Calculate columns needed
         
@@ -91,10 +91,11 @@ class OptimizedDataMigrator:
         row = index // cols
         
         # Add level offset for hierarchy (polje=0, subzone=1, vrsta=2)
-        level_offset_x = level * 1  # Small horizontal offset per level
-        level_offset_y = level * 1  # Small vertical offset per level
+        # Use larger offsets to spread annotations across the factory
+        level_offset_x = level * 50000  # 50k units offset per level
+        level_offset_y = level * 50000  # 50k units offset per level
         
-        # Calculate spacing
+        # Calculate spacing across the factory area
         x_spacing = (x_max - x_min) / max(1, cols - 1) if cols > 1 else 0
         y_spacing = (y_max - y_min) / max(1, rows - 1) if rows > 1 else 0
         
@@ -102,11 +103,61 @@ class OptimizedDataMigrator:
         x = x_min + col * x_spacing + level_offset_x
         y = y_min + row * y_spacing + level_offset_y
         
-        # Ensure coordinates stay within bounds
-        x = max(x_min, min(x_max - 5, x))  # Leave 5 units margin
-        y = max(y_min, min(y_max - 5, y))  # Leave 5 units margin
+        # Ensure coordinates stay within factory bounds
+        x = max(x_min, min(x_max - 1000, x))  # Leave 1000 units margin
+        y = max(y_min, min(y_max - 1000, y))  # Leave 1000 units margin
         
         return x, y
+
+    def convert_to_maplibre_coords(self, x: float, y: float) -> Tuple[float, float]:
+        """Convert local coordinates to MapLibre GL coordinate system (longitude, latitude)."""
+        # MapLibre GL uses Web Mercator projection (EPSG:3857) for display
+        # For simplicity, we'll use a local coordinate system that maps to a reasonable lat/lng range
+        # This is a basic conversion - you may need to adjust based on your actual geographic location
+        
+        # Convert to a reasonable lat/lng range (adjust these values based on your location)
+        # This maps the local coordinate system to a small area around a specific location
+        base_lng = 14.5  # Adjust to your location
+        base_lat = 46.0  # Adjust to your location
+        
+        # Scale factor to convert local units to degrees
+        # 1 degree ≈ 111,320 meters, so 1 meter ≈ 0.000009 degrees
+        scale_factor = 0.000009
+        
+        lng = base_lng + (x * scale_factor)
+        lat = base_lat + (y * scale_factor)
+        
+        return lng, lat
+
+    def create_maplibre_polygon(self, x: float, y: float, level: str) -> dict:
+        """Create a GeoJSON polygon for MapLibre GL rendering."""
+        # Convert to MapLibre coordinates
+        lng, lat = self.convert_to_maplibre_coords(x, y)
+        
+        # Set size based on level (much larger for visibility)
+        if level == "polje":
+            width = 0.01  # degrees (about 1km)
+            height = 0.01
+        else:
+            width = 0.005  # degrees (about 500m)
+            height = 0.005
+        
+        # Create polygon coordinates
+        half_width = width / 2
+        half_height = height / 2
+        
+        coordinates = [[
+            [lng - half_width, lat - half_height],
+            [lng + half_width, lat - half_height],
+            [lng + half_width, lat + half_height],
+            [lng - half_width, lat + half_height],
+            [lng - half_width, lat - half_height]  # Close the ring
+        ]]
+        
+        return {
+            "type": "Polygon",
+            "coordinates": coordinates
+        }
 
     def generate_color_palette(self, num_colors: int) -> List[str]:
         """Generate a distinct color palette for the given number of colors."""
@@ -277,6 +328,10 @@ class OptimizedDataMigrator:
                         # Calculate coordinates within bounds
                         x, y = self.get_coordinates_within_bounds(polje_count, len(unique_polje_names), 0)
                         
+                        # Calculate GL coordinates
+                        x_gl, y_gl = self.convert_to_maplibre_coords(x, y)
+                        shape_gl = self.create_maplibre_polygon(x, y, "polje")
+                        
                         polje_feature = {
                             "layer_id": layer_id,
                             "parent_id": None,
@@ -292,7 +347,10 @@ class OptimizedDataMigrator:
                             "y_coord": y,
                             "cona": polje_cona,  # First 4 chars
                             "max_capacity": polje_max_capacity,
-                            "taken_capacity": polje_taken_capacity
+                            "taken_capacity": polje_taken_capacity,
+                            "shape_gl": shape_gl,
+                            "x_coord_gl": x_gl,
+                            "y_coord_gl": y_gl
                         }
                         polje_count += 1
                         polje_map[polje_cona] = polje_feature
@@ -320,6 +378,10 @@ class OptimizedDataMigrator:
                         # Calculate coordinates within bounds
                         x, y = self.get_coordinates_within_bounds(subzone_count, len(unique_features), 1)
                         
+                        # Calculate GL coordinates
+                        x_gl, y_gl = self.convert_to_maplibre_coords(x, y)
+                        shape_gl = self.create_maplibre_polygon(x, y, "subzone")
+                        
                         subzone_feature = {
                             "layer_id": layer_id,
                             "parent_id": None,  # Will be set later
@@ -335,7 +397,10 @@ class OptimizedDataMigrator:
                             "y_coord": y,
                             "cona": subzone_cona,  # First 5 chars
                             "max_capacity": subzone_max_capacity,
-                            "taken_capacity": subzone_taken_capacity
+                            "taken_capacity": subzone_taken_capacity,
+                            "shape_gl": shape_gl,
+                            "x_coord_gl": x_gl,
+                            "y_coord_gl": y_gl
                         }
                         subzone_count += 1
                         subzone_map[subzone_cona] = subzone_feature
@@ -364,6 +429,10 @@ class OptimizedDataMigrator:
                         # Calculate coordinates within bounds
                         x, y = self.get_coordinates_within_bounds(vrsta_count, len(unique_features), 2)
                         
+                        # Calculate GL coordinates
+                        x_gl, y_gl = self.convert_to_maplibre_coords(x, y)
+                        shape_gl = self.create_maplibre_polygon(x, y, "vrsta")
+                        
                         vrsta_feature = {
                             "layer_id": layer_id,
                             "parent_id": None,  # Will be set later
@@ -379,7 +448,10 @@ class OptimizedDataMigrator:
                             "y_coord": y,
                             "cona": vrsta_cona,  # Full length
                             "max_capacity": vrsta_max_capacity,
-                            "taken_capacity": vrsta_taken_capacity
+                            "taken_capacity": vrsta_taken_capacity,
+                            "shape_gl": shape_gl,
+                            "x_coord_gl": x_gl,
+                            "y_coord_gl": y_gl
                         }
                         vrsta_count += 1
                         unique_features[vrsta_key] = vrsta_feature
@@ -399,12 +471,12 @@ class OptimizedDataMigrator:
                     INSERT INTO features (
                         layer_id, parent_id, name, opomba, color, level, 
                         order_index, depth, properties, geom, x_coord, y_coord,
-                        cona, max_capacity, taken_capacity
+                        cona, max_capacity, taken_capacity, shape_gl, x_coord_gl, y_coord_gl
                     ) VALUES (
                         :layer_id, :parent_id, :name, :opomba, :color, :level,
                         :order_index, :depth, :properties, 
                         ST_GeomFromText(:geom_wkt, 3857), :x_coord, :y_coord,
-                        :cona, :max_capacity, :taken_capacity
+                        :cona, :max_capacity, :taken_capacity, :shape_gl, :x_coord_gl, :y_coord_gl
                     )
                 """)
                 
@@ -430,7 +502,10 @@ class OptimizedDataMigrator:
                             'y_coord': feature['y_coord'],
                             'cona': feature['cona'],
                             'max_capacity': feature['max_capacity'],
-                            'taken_capacity': feature['taken_capacity']
+                            'taken_capacity': feature['taken_capacity'],
+                            'shape_gl': json.dumps(feature['shape_gl']),
+                            'x_coord_gl': feature['x_coord_gl'],
+                            'y_coord_gl': feature['y_coord_gl']
                         }
                         
                         conn.execute(insert_query, feature_data)
