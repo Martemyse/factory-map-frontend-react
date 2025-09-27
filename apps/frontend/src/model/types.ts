@@ -18,6 +18,12 @@ export interface HierarchyNode {
   cona?: string;
   max_capacity?: number;
   taken_capacity?: number;
+  shape_gl?: {
+    type: 'Polygon';
+    coordinates: number[][][];
+  };
+  x_coord_gl?: number;
+  y_coord_gl?: number;
 }
 
 export interface HierarchyDocument {

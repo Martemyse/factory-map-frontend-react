@@ -73,14 +73,32 @@ def main():
     with open(input_file, "r", encoding="utf-8") as f:
         factory_data = json.load(f)
     
-    print(f"Loaded {len(factory_data.get('features', []))} features")
-    
-    # Transform all features
-    transformed_features = []
-    for feature in factory_data.get("features", []):
-        if "geometry" in feature:
-            feature["geometry"] = transform_geometry(feature["geometry"])
-        transformed_features.append(feature)
+    # Handle both GeometryCollection and FeatureCollection formats
+    if factory_data.get("type") == "GeometryCollection":
+        geometries = factory_data.get("geometries", [])
+        print(f"Loaded {len(geometries)} geometries from GeometryCollection")
+        
+        # Transform geometries and convert to features
+        transformed_features = []
+        for i, geometry in enumerate(geometries):
+            transformed_geometry = transform_geometry(geometry)
+            feature = {
+                "type": "Feature",
+                "properties": {"id": f"geometry_{i}"},
+                "geometry": transformed_geometry
+            }
+            transformed_features.append(feature)
+    else:
+        # Handle FeatureCollection format
+        features = factory_data.get("features", [])
+        print(f"Loaded {len(features)} features from FeatureCollection")
+        
+        # Transform all features
+        transformed_features = []
+        for feature in features:
+            if "geometry" in feature:
+                feature["geometry"] = transform_geometry(feature["geometry"])
+            transformed_features.append(feature)
     
     # Create output GeoJSON
     output_data = {

@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  # Service for converting JSON to MBTiles
+  tippecanoe:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.tippecanoe
+    container_name: tippecanoe-converter
+    volumes:
+      - ./data:/data:ro       # Read-only access to input data
+      - ./output:/output      # Bind host ./output directory
+    working_dir: /data
+    command: >
+      -o /output/LTH_factory.mbtiles 
+      -Z14 -z17 
+      --drop-smallest-as-needed 
+      --force
+      test_factory.ndjson
+
+  # Tile server for serving the converted MBTiles
+  factory-maps:
+    image: maptiler/tileserver-gl
+    container_name: factory-maps
+    working_dir: /data
+    volumes:
+      - ./output:/data        # Access to the converted mbtiles file
+    ports:
+      - "8080:80"
+    command: >
+      tileserver-gl --port 80 --mbtiles /data/LTH_factory.mbtiles

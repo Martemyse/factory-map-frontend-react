@@ -1,0 +1,3 @@
+{"type":"Feature","properties":{"Layer":"TEST","name":"Factory Building 1"},"geometry":{"type":"MultiLineString","coordinates":[[[14.476,46.085],[14.477,46.085],[14.477,46.086],[14.476,46.086],[14.476,46.085]]]}}
+{"type":"Feature","properties":{"Layer":"TEST","name":"Factory Building 2"},"geometry":{"type":"MultiLineString","coordinates":[[[14.4765,46.0855],[14.4775,46.0855],[14.4775,46.0865],[14.4765,46.0865],[14.4765,46.0855]]]}}
+{"type":"Feature","properties":{"Layer":"TEST","name":"Factory Road"},"geometry":{"type":"MultiLineString","coordinates":[[[14.475,46.084],[14.478,46.087]]]}}

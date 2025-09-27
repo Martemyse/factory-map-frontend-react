@@ -57,11 +57,16 @@ export interface HierarchyNavigatorProps {
   doc: HierarchyDocument;
   activeId?: string;
   onSelect: (id: string, level: Level) => void;
+  checkedNodes?: Set<string>;
+  onNodeCheck?: (nodeId: string, checked: boolean) => void;
+  displayLevel?: Level;
+  onDisplayLevelChange?: (level: Level) => void;
 }
 
-function Node({ node, style, dragHandle, tree, onNavigate }: any) {
+function Node({ node, style, dragHandle, tree, onNavigate, checkedNodes, onNodeCheck }: any) {
   const isSelected = tree.isSelected(node.id);
   const hasChildren = !node.isLeaf;
+  const isChecked = checkedNodes?.has(node.data.id) || false;
   
   return (
     <div
@@ -71,23 +76,29 @@ function Node({ node, style, dragHandle, tree, onNavigate }: any) {
         display: 'flex',
         alignItems: 'center',
         padding: '8px 12px',
-        cursor: 'pointer',
         backgroundColor: isSelected ? '#374151' : 'transparent',
         borderLeft: isSelected ? '3px solid #3B82F6' : '3px solid transparent',
         fontSize: '13px',
         color: 'white',
         gap: '8px'
       }}
-      onClick={() => {
-        tree.select(node.id);
-        onNavigate(node.data.id, node.data.level);
-        
-        // Toggle expansion if it has children
-        if (hasChildren) {
-          node.toggle();
-        }
-      }}
     >
+      {/* Checkbox */}
+      <input
+        type="checkbox"
+        checked={isChecked}
+        onChange={(e) => {
+          e.stopPropagation();
+          onNodeCheck?.(node.data.id, e.target.checked);
+        }}
+        style={{
+          width: '14px',
+          height: '14px',
+          flexShrink: 0,
+          cursor: 'pointer'
+        }}
+      />
+      
       {/* Color indicator */}
       <div
         style={{
@@ -99,8 +110,19 @@ function Node({ node, style, dragHandle, tree, onNavigate }: any) {
         }}
       />
       
-      {/* Node info */}
-      <div style={{ flex: 1, minWidth: 0 }}>
+      {/* Node info - clickable for navigation */}
+      <div 
+        style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
+        onClick={() => {
+          tree.select(node.id);
+          onNavigate(node.data.id, node.data.level);
+          
+          // Toggle expansion if it has children
+          if (hasChildren) {
+            node.toggle();
+          }
+        }}
+      >
         <div style={{ 
           fontWeight: isSelected ? 600 : 400,
           whiteSpace: 'nowrap',
@@ -128,7 +150,12 @@ function Node({ node, style, dragHandle, tree, onNavigate }: any) {
           cursor: 'pointer',
           transform: node.isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
           transition: 'transform 0.2s ease'
-        }}>
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          node.toggle();
+        }}
+        >
           ▶
         </div>
       )}
@@ -136,7 +163,15 @@ function Node({ node, style, dragHandle, tree, onNavigate }: any) {
   );
 }
 
-export default function HierarchyNavigator({ doc, activeId, onSelect }: HierarchyNavigatorProps) {
+export default function HierarchyNavigator({ 
+  doc, 
+  activeId, 
+  onSelect, 
+  checkedNodes, 
+  onNodeCheck, 
+  displayLevel, 
+  onDisplayLevelChange 
+}: HierarchyNavigatorProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [treeHeight, setTreeHeight] = useState(400);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -150,6 +185,21 @@ export default function HierarchyNavigator({ doc, activeId, onSelect }: Hierarch
     // For normal navigation, use the nested structure and let react-arborist handle expansion
     return doc.nodes.map(mapNode);
   }, [doc, searchTerm]);
+
+  // Get currently visible/filtered nodes for button actions
+  const getVisibleNodes = () => {
+    if (searchTerm) {
+      // When searching, return filtered nodes
+      const flatNodes = flattenToArboristData(doc.nodes);
+      return flatNodes.filter(node => {
+        const searchableText = `${node.name} ${node.cona || ''} ${node.level}`.toLowerCase();
+        return searchableText.includes(searchTerm.toLowerCase());
+      });
+    }
+    
+    // When not searching, return all nodes (flattened for easier processing)
+    return flattenToArboristData(doc.nodes);
+  };
 
   // Calculate available height for the tree
   useEffect(() => {
@@ -196,7 +246,7 @@ export default function HierarchyNavigator({ doc, activeId, onSelect }: Hierarch
         fontFamily: 'system-ui, -apple-system, sans-serif'
       }}
     >
-      {/* Header with Search */}
+      {/* Header with Search and Level Dropdown */}
       <div style={{ 
         padding: '12px 16px', 
         borderBottom: '1px solid #374151',
@@ -207,6 +257,82 @@ export default function HierarchyNavigator({ doc, activeId, onSelect }: Hierarch
         <span style={{ fontWeight: 600, fontSize: '14px' }}>
           Factory Hierarchy
         </span>
+        
+        {/* Display Level Dropdown */}
+        {onDisplayLevelChange && (
+          <div>
+            <label style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '4px', display: 'block' }}>
+              Display Level:
+            </label>
+            <select
+              value={displayLevel || 'polje'}
+              onChange={(e) => onDisplayLevelChange(e.target.value as Level)}
+              style={{
+                padding: '6px 8px',
+                borderRadius: '4px',
+                border: '1px solid #374151',
+                backgroundColor: '#1F2937',
+                color: 'white',
+                fontSize: '12px',
+                outline: 'none',
+                width: '100%'
+              }}
+            >
+              <option value="polje">Polje</option>
+              <option value="subzone">Subzone</option>
+              <option value="vrsta">Vrsta</option>
+            </select>
+          </div>
+        )}
+
+        {/* Global Actions */}
+        {onNodeCheck && (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={() => {
+                // Check only visible polje nodes (respects search filter)
+                const visibleNodes = getVisibleNodes();
+                const visiblePoljeNodes = visibleNodes.filter(n => n.level === 'polje');
+                visiblePoljeNodes.forEach(node => {
+                  onNodeCheck(node.id, true);
+                });
+              }}
+              style={{
+                padding: '4px 8px',
+                borderRadius: '4px',
+                border: '1px solid #374151',
+                backgroundColor: '#3B82F6',
+                color: 'white',
+                fontSize: '10px',
+                cursor: 'pointer',
+                flex: 1
+              }}
+            >
+              {searchTerm ? 'Check Visible Poljas' : 'Check All Poljas'}
+            </button>
+            <button
+              onClick={() => {
+                // Uncheck only visible nodes (respects search filter)
+                const visibleNodes = getVisibleNodes();
+                visibleNodes.forEach(node => {
+                  onNodeCheck(node.id, false);
+                });
+              }}
+              style={{
+                padding: '4px 8px',
+                borderRadius: '4px',
+                border: '1px solid #374151',
+                backgroundColor: '#EF4444',
+                color: 'white',
+                fontSize: '10px',
+                cursor: 'pointer',
+                flex: 1
+              }}
+            >
+              {searchTerm ? 'Uncheck Visible' : 'Uncheck All'}
+            </button>
+          </div>
+        )}
         
         <input
           type="text"
@@ -240,7 +366,7 @@ export default function HierarchyNavigator({ doc, activeId, onSelect }: Hierarch
           selection={activeId}
           onSelect={handleSelect}
         >
-          {(props) => <Node {...props} onNavigate={handleNavigate} />}
+          {(props) => <Node {...props} onNavigate={handleNavigate} checkedNodes={checkedNodes} onNodeCheck={onNodeCheck} />}
         </Tree>
       </div>
     </div>

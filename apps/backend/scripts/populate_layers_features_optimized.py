@@ -134,13 +134,13 @@ class OptimizedDataMigrator:
         # Convert to MapLibre coordinates
         lng, lat = self.convert_to_maplibre_coords(x, y)
         
-        # Set size based on level (much larger for visibility)
+        # Set size based on level (4x bigger for better visibility)
         if level == "polje":
-            width = 0.01  # degrees (about 1km)
-            height = 0.01
+            width = 0.12  # degrees (about 4km) - 4x bigger
+            height = 0.12
         else:
-            width = 0.005  # degrees (about 500m)
-            height = 0.005
+            width = 0.06  # degrees (about 2km) - 4x bigger
+            height = 0.06
         
         # Create polygon coordinates
         half_width = width / 2
