@@ -107,3 +107,14 @@ infra/tiling/jpeg-8d/
 infra/tiling/**/.deps/
 infra/tiling/**/.libs/
 infra/tiling/*.gz
+
+# Large factory layout files (use tileserver instead)
+apps/frontend/public/factory_clean*.json
+apps/frontend/public/factory_*.json
+infra/1_tippecanoe_tileserver/data/*.ndjson
+infra/1_tippecanoe_tileserver/data/*.json
+infra/1_tippecanoe_tileserver/output/*.mbtiles
+
+# Docker volumes and temporary files
+infra/1_tippecanoe_tileserver/data/
+infra/1_tippecanoe_tileserver/output/ 
