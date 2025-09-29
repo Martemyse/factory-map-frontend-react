@@ -582,17 +582,50 @@ export default function Viewer() {
           id: 'factory-tiles-lines',
           type: 'line',
           source: 'factory-tiles',
-          'source-layer': 'layer0',
+          //'source-layer': 'LTH_simple_bigndjson',
+          'source-layer': 'factory',
+          minzoom: 0,
+          maxzoom: 16,
           paint: {
-            'line-color': '#ff0000',  // Red for debugging
-            'line-width': 3,
-            'line-opacity': 1.0
+            'line-color': '#ffffff',  // White
+            'line-width': 1,  // Much thinner
+            'line-opacity': 0.4  // 40% transparent
+          },
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round',
+            'visibility': 'visible'
           }
         });
         
         console.log('Factory tiles added to map');
         console.log('Map layers:', map.current.getStyle().layers.map(l => l.id));
         console.log('Map sources:', Object.keys(map.current.getStyle().sources));
+        
+        // Add event listener to detect when tiles are loaded
+        map.current.on('sourcedata', (e) => {
+          if (e.sourceId === 'factory-tiles' && e.isSourceLoaded) {
+            console.log('Factory tiles source loaded successfully');
+            // Check if layer is visible
+            const layer = map.current.getLayer('factory-tiles-lines');
+            if (layer) {
+              console.log('Factory layer found:', layer);
+              console.log('Layer visibility:', map.current.getLayoutProperty('factory-tiles-lines', 'visibility'));
+            }
+          }
+        });
+        
+        // Also check layer after a short delay
+        setTimeout(() => {
+          if (map.current) {
+            const layer = map.current.getLayer('factory-tiles-lines');
+            console.log('Factory layer after timeout:', layer);
+            if (layer) {
+              console.log('Layer paint properties:', map.current.getPaintProperty('factory-tiles-lines', 'line-color'));
+              console.log('Layer source:', map.current.getSource('factory-tiles'));
+            }
+          }
+        }, 2000);
       } catch (error) {
         console.error('Failed to add factory tiles:', error);
       }
@@ -1233,6 +1266,55 @@ export default function Viewer() {
           onClick={bringCheckedIntoView}
         >
           Bring Selected into View
+        </button>
+        
+        <button
+          style={{ ...btn, backgroundColor: '#8B5CF6' }}
+          onClick={() => {
+            if (!map.current) return;
+            // Zoom to factory layout bounds from TileJSON
+            // Bounds: [5.246049,43.261091,11.329715,47.162805] (west, south, east, north)
+            const bounds: [number, number, number, number] = [5.246049, 43.261091, 11.329715, 47.162805];
+            map.current.fitBounds(bounds, { padding: 50 });
+            
+            // Add a test marker to verify coordinates
+            if (!map.current.getSource('test-marker')) {
+              map.current.addSource('test-marker', {
+                type: 'geojson',
+                data: {
+                  type: 'Feature',
+                  geometry: {
+                    type: 'Point',
+                    coordinates: [10.857239, 45.504422] // Center of factory bounds
+                  },
+                  properties: {
+                    name: 'Test Marker'
+                  }
+                }
+              });
+              
+              map.current.addLayer({
+                id: 'test-marker-layer',
+                type: 'circle',
+                source: 'test-marker',
+                paint: {
+                  'circle-color': '#00ff00',
+                  'circle-radius': 10,
+                  'circle-opacity': 1.0
+                }
+              });
+              
+              console.log('Test marker added at factory location');
+            }
+            
+            // Debug zoom level and layer visibility
+            console.log('Current zoom level:', map.current.getZoom());
+            console.log('Factory layer visibility:', map.current.getLayoutProperty('factory-tiles-lines', 'visibility'));
+            console.log('Factory layer minzoom:', map.current.getLayer('factory-tiles-lines')?.minzoom);
+            console.log('Factory layer maxzoom:', map.current.getLayer('factory-tiles-lines')?.maxzoom);
+          }}
+        >
+          Zoom to Layout
         </button>
       </div>
     </div>

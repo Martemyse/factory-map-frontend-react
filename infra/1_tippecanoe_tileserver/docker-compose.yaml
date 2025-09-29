@@ -13,10 +13,12 @@ services:
     working_dir: /data
     command: >
       -o /output/LTH_factory.mbtiles 
-      -Z14 -z17 
-      --drop-smallest-as-needed 
+      -zg -z17 
+      --drop-smallest-as-needed
+      --coalesce-densest-as-needed
+      --extend-zooms-if-still-dropping
       --force
-      test_factory.ndjson
+      LTH_simple_big10.ndjson
 
   # Tile server for serving the converted MBTiles
   factory-maps:
