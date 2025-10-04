@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    build:
+      context: ./app/backend
+      dockerfile: Dockerfile
+    container_name: factory_backend
+    environment:
+      - DEV_MODE=false
+      - PG_HOST=postgres_c
+      - PG_USER=postgres
+      - PG_PASSWORD=martinmi
+      - PG_DB=layout_proizvodnja_libre_konva
+    ports:
+      - "7998:7998"
+    depends_on:
+      - postgres_c
+    networks:
+      - factory_network
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data:ro  # Mount data directory if needed
+
+  # Frontend
+  frontend:
+    build:
+      context: ./app/frontend
+      dockerfile: Dockerfile
+    container_name: factory_frontend
+    ports:
+      - "8077:8077"
+    depends_on:
+      - backend
+    networks:
+      - factory_network
+    restart: unless-stopped
+    volumes:
+      - ./app/frontend:/app:rw  # Mount frontend source for development
+      - /app/node_modules  # Anonymous volume to preserve node_modules
+
+  # Tile Server (if needed)
+  tileserver:
+    image: maptiler/tileserver-gl
+    container_name: factory_tileserver
+    volumes:
+      - ./infra/1_tippecanoe_tileserver/output:/data
+    ports:
+      - "8080:80"
+    command: >
+      tileserver-gl --port 80 --mbtiles /data/LTH_factory.mbtiles
+    networks:
+      - factory_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  factory_network:
+    driver: bridge

@@ -1,0 +1,61 @@
+{
+  "name": "factory-map",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Interactive Factory Mapping Application built with React, TypeScript, and MapLibre GL",
+  "keywords": [
+    "react",
+    "typescript",
+    "mapping",
+    "deck.gl",
+    "maplibre",
+    "factory",
+    "visualization"
+  ],
+  "author": "Martin Miller",
+  "license": "MIT",
+  "homepage": "https://github.com/martinmi/factory-map-frontend-react#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/martinmi/factory-map-frontend-react.git"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^9.1.14",
+    "@deck.gl/layers": "^9.1.14",
+    "@deck.gl/mapbox": "^9.1.14",
+    "@mapbox/mapbox-gl-draw": "^1.5.0",
+    "@turf/turf": "^7.2.0",
+    "deck.gl": "^9.1.14",
+    "mapbox-gl": "^3.15.0",
+    "maplibre-gl": "^5.7.1",
+    "react": "^19.1.1",
+    "react-arborist": "^3.4.3",
+    "react-dom": "^19.1.1",
+    "react-hook-form": "^7.62.0",
+    "react-router-dom": "^6.26.2",
+    "zod": "^4.1.8",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^5.0.0",
+    "eslint": "^9.33.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.39.1",
+    "vite": "^7.1.2"
+  }
+}

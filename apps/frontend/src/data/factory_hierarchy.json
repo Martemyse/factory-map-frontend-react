@@ -1,0 +1,74 @@
+{
+  "origin": [0, 0],
+  "units": "m",
+  "styleRules": {
+    "polje": { "defaultColor": "#CDEAFE" },
+    "subzone": { "defaultColor": "#FFE2B5" },
+    "vrsta": { "defaultColor": "#D5F2C3" },
+    "globina": { "defaultColor": "#F5D0FE" }
+  },
+  "nodes": [
+    {
+      "id": "polje1",
+      "level": "polje",
+      "name": "Polje 1",
+      "opomba": "Glavni vhod",
+      "color": "#d6f0ff",
+      "visible": true,
+      "polygon": [[0,0],[40,0],[40,25],[0,25],[0,0]],
+      "children": [
+        {
+          "id": "polje1-subA",
+          "level": "subzone",
+          "name": "Subcone A",
+          "opomba": "Za palete z livi",
+          "color": "#ffd8b1",
+          "visible": true,
+          "polygon": [[2,2],[22,2],[22,23],[2,23],[2,2]],
+          "children": [
+            {
+              "id": "polje1-subA-vrsta1",
+              "level": "vrsta",
+              "order": 1,
+              "name": "Vrsta 1",
+              "color": "#c9f7b3",
+              "visible": true,
+              "polygon": [[3,3],[11,3],[11,10],[3,10],[3,3]],
+              "children": [
+                {
+                  "id": "polje1-subA-vrsta1-g1",
+                  "level": "globina",
+                  "depth": 1,
+                  "name": "Globina 1",
+                  "color": "#f3c7ff",
+                  "visible": true,
+                  "polygon": [[3,3],[11,3],[11,6.5],[3,6.5],[3,3]]
+                },
+                {
+                  "id": "polje1-subA-vrsta1-g2",
+                  "level": "globina",
+                  "depth": 2,
+                  "name": "Globina 2",
+                  "color": "#eab8ff",
+                  "visible": true,
+                  "polygon": [[3,6.5],[11,6.5],[11,10],[3,10],[3,6.5]]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "polje2",
+      "level": "polje",
+      "name": "Polje 2",
+      "color": "#d6f0ff",
+      "visible": true,
+      "polygon": [[45,0],[90,0],[90,25],[45,25],[45,0]],
+      "children": []
+    }
+  ]
+}
+
+

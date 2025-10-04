@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  tippecanoe-z17:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.tippecanoe
+    volumes:
+      - ./data:/data:ro
+      - ./output:/output
+    working_dir: /data
+    command: >
+      -o /output/LTH_z17.mbtiles
+      -Z17 -z17
+      -l factory
+      --drop-densest-as-needed
+      --maximum-tile-bytes=2000000
+      --force
+      LTH_simple_big1.ndjson
+
+  tippecanoe-z18:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.tippecanoe
+    volumes:
+      - ./data:/data:ro
+      - ./output:/output
+    working_dir: /data
+    command: >
+      -o /output/LTH_z18.mbtiles
+      -Z18 -z18
+      -l factory
+      --drop-densest-as-needed
+      --maximum-tile-bytes=2000000
+      --force
+      LTH_simple_big1.ndjson
+
+  
+  # Tile server for serving the converted MBTiles
+  # factory-maps:
+  #   image: maptiler/tileserver-gl
+  #   container_name: factory-maps
+  #   working_dir: /data
+  #   volumes:
+  #     - ./output:/data        # Access to the converted mbtiles file
+  #   ports:
+  #     - "8080:80"
+  #   command: >
+  #     tileserver-gl --port 80 --mbtiles /data/LTH_factory.mbtiles

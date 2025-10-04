@@ -1,0 +1,36 @@
+FROM node:18-bookworm
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    git \
+    curl \
+    unzip \
+    ca-certificates \
+    libjpeg62-turbo \
+    libpng16-16 \
+    libwebp7 \
+    libtiff6 \
+    libgif7 \
+    libfreetype6 \
+    libharfbuzz0b \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangoft2-1.0-0 \
+    libicu72 \
+    libuv1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Build Tippecanoe
+RUN git clone https://github.com/mapbox/tippecanoe.git /tippecanoe \
+    && cd /tippecanoe \
+    && make -j \
+    && make install
+
+# Install a simpler tile server
+RUN npm install -g @maptiler/tileserver-gl
+
+WORKDIR /data
+
+# Default entrypoint
+CMD ["/bin/bash"]

@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  # tippecanoe:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile.tippecanoe
+  #   container_name: tippecanoe-converter
+  #   volumes:
+  #     - ./data:/data       # Input NDJSON/DXF/etc
+  #     - ./output:/output      # Where MBTiles will be written
+  #   working_dir: /data
+  #   stdin_open: true          # Keep container interactive
+  #   tty: true
+  #   entrypoint: ["sleep", "infinity"]   # Override tippecanoe default
+
+  factory-maps:
+    image: maptiler/tileserver-gl
+    container_name: factory-maps
+    working_dir: /data
+    volumes:
+      - ./output:/data
+    ports:
+      - "8080:80"
+    command: >
+      tileserver-gl --port 80 --mbtiles /data/LTH_factory.mbtiles

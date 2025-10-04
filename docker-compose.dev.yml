@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    build:
+      context: ./app/backend
+      dockerfile: Dockerfile
+    container_name: factory_backend_dev
+    environment:
+      - DEV_MODE=true
+      - PG_HOST=postgres_c
+      - PG_USER=postgres
+      - PG_PASSWORD=martinmi
+      - PG_DB=layout_proizvodnja_libre_konva
+    ports:
+      - "7998:7998"
+    depends_on:
+      - postgres_c
+    networks:
+      - factory_network
+    restart: unless-stopped
+    volumes:
+      - ./app/backend:/app:rw  # Mount backend source for development
+      - /app/__pycache__  # Anonymous volume to preserve Python cache
+
+  # Frontend (Development)
+  frontend:
+    build:
+      context: ./app/frontend
+      dockerfile: Dockerfile.dev
+    container_name: factory_frontend_dev
+    ports:
+      - "5173:5173"  # Vite dev server port
+    depends_on:
+      - backend
+    networks:
+      - factory_network
+    restart: unless-stopped
+    volumes:
+      - ./app/frontend:/app:rw  # Mount frontend source for development
+      - /app/node_modules  # Anonymous volume to preserve node_modules
+
+  # PostgreSQL Database
+  postgres_c:
+    image: postgres:15-alpine
+    container_name: factory_postgres_dev
+    environment:
+      - POSTGRES_DB=layout_proizvodnja_libre_konva
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=martinmi
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - factory_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  factory_network:
+    driver: bridge
