@@ -2,7 +2,7 @@
 """
 Factory Map Backend Server
 Automatically detects OS and runs in appropriate mode:
-- Windows: Development mode (port 8000)
+- Windows: Development mode (port 7998)
 - Linux: Production mode (port 7998)
 """
 

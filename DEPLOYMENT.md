@@ -2,7 +2,7 @@
 
 This application automatically detects the operating system and configures itself accordingly:
 
-- **Windows**: Development mode (Backend: 8000, Frontend: 5173)
+- **Windows**: Development mode (Backend: 7998, Frontend: 5173)
 - **Linux**: Production mode (Backend: 7998, Frontend: 8077)
 
 ## Quick Start
@@ -42,7 +42,7 @@ The application automatically detects the OS and sets:
 
 | Component | Windows (Dev) | Linux (Prod) |
 |-----------|---------------|--------------|
-| Backend Port | 8000 | 7998 |
+| Backend Port | 7998 | 7998 |
 | Frontend Port | 5173 | 8077 |
 | Database Host | localhost | postgres_c |
 | Auto-reload | Yes | No |
@@ -55,13 +55,13 @@ You can override default settings with environment variables:
 ```bash
 # Database configuration
 export PG_USER=postgres
-export PG_PASSWORD=your_password
+export PG_PASSWORD=martinmi
 export PG_HOST_DEV=localhost
 export PG_HOST_PROD=postgres_c
 export PG_DB=layout_proizvodnja_libre_konva
 
 # Port configuration
-export BACKEND_PORT_DEV=8000
+export BACKEND_PORT_DEV=7998
 export BACKEND_PORT_PROD=7998
 export FRONTEND_PORT_DEV=5173
 export FRONTEND_PORT_PROD=8077
@@ -124,7 +124,7 @@ npm run dev
 If you get port conflicts, check what's using the ports:
 ```bash
 # Windows
-netstat -ano | findstr :8000
+netstat -ano | findstr :7998
 netstat -ano | findstr :5173
 
 # Linux
@@ -165,7 +165,7 @@ factory-map-frontend-react/
 ## Monitoring
 
 ### Health Checks
-- Backend: `http://localhost:7998/health` (or 8000 on Windows)
+- Backend: `http://localhost:7998/health` (or 7998 on Windows)
 - Frontend: `http://localhost:8077/health` (or 5173 on Windows)
 
 ### Logs

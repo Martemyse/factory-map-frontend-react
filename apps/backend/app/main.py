@@ -16,23 +16,13 @@ async def health_check():
         "database_host": settings.pg_host
     }
 
-# CORS configuration based on environment
-if settings.dev_mode:
-    # Development CORS (Windows)
-    allowed_origins = [
-        f"http://localhost:{settings.frontend_port}",
-        f"http://127.0.0.1:{settings.frontend_port}",
-        "http://localhost:5173",  # Fallback for Vite dev server
-        "http://127.0.0.1:5173"
-    ]
-else:
-    # Production CORS (Linux)
-    allowed_origins = [
-        f"http://localhost:{settings.frontend_port}",
-        f"http://127.0.0.1:{settings.frontend_port}",
-        "http://localhost:8077",  # Fallback
-        "http://127.0.0.1:8077"
-    ]
+# CORS configuration - explicitly allow frontend origins (avoid '*' with credentials)
+allowed_origins = [
+    f"http://localhost:{settings.frontend_port}",
+    f"http://127.0.0.1:{settings.frontend_port}",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
 
 app.add_middleware(
     CORSMiddleware,

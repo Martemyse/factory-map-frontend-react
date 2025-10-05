@@ -94,3 +94,19 @@ class FeatureUpdate(BaseModel):
   cona: Optional[str] = None
   max_capacity: Optional[int] = None
   taken_capacity: Optional[int] = None
+
+
+class FeatureBulkUpdateItem(BaseModel):
+  id: int
+  coordinates: list
+  x_coord: float
+  y_coord: float
+
+
+class FeatureBulkUpdate(BaseModel):
+  features: list[FeatureBulkUpdateItem]
+
+
+class FeatureBulkUpdateResponse(BaseModel):
+  updated_count: int
+  failed_ids: list[int]

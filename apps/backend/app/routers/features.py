@@ -148,3 +148,13 @@ async def patch_feature(feature_id: int, payload: schemas.FeatureUpdate, db: Asy
   )
 
 
+@router.post('/bulk_update', response_model=schemas.FeatureBulkUpdateResponse)
+async def bulk_update_features(payload: schemas.FeatureBulkUpdate, db: AsyncSession = Depends(get_db)):
+  """Bulk update feature geometries in a single transaction."""
+  updated_count, failed_ids = await crud.bulk_update_features(db, payload.features)
+  return schemas.FeatureBulkUpdateResponse(
+    updated_count=updated_count,
+    failed_ids=failed_ids
+  )
+
+

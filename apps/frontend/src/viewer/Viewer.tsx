@@ -29,6 +29,198 @@ function calculateAnnotationBounds(_annotations: HierarchyNode[]): [number, numb
   return [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
 }
 
+// Calculate the orientation angle of a polygon (in radians)
+function calculatePolygonOrientation(coordinates: number[][]): number {
+  if (coordinates.length < 3) return 0;
+  
+  // Find the longest edge to determine orientation
+  let maxLength = 0;
+  let orientationAngle = 0;
+  
+  for (let i = 0; i < coordinates.length - 1; i++) {
+    const p1 = coordinates[i];
+    const p2 = coordinates[i + 1];
+    const dx = p2[0] - p1[0];
+    const dy = p2[1] - p1[1];
+    const length = Math.sqrt(dx * dx + dy * dy);
+    
+    if (length > maxLength) {
+      maxLength = length;
+      orientationAngle = Math.atan2(dy, dx);
+    }
+  }
+  
+  return orientationAngle;
+}
+
+// Normalize polygon to have the same orientation as reference polygon
+function normalizePolygonOrientation(coordinates: number[][], referenceOrientation: number): number[][] {
+  if (coordinates.length < 3) return coordinates;
+  
+  // Calculate current orientation
+  const currentOrientation = calculatePolygonOrientation(coordinates);
+  
+  // Calculate rotation angle needed
+  const rotationAngle = referenceOrientation - currentOrientation;
+  
+  // Find centroid for rotation
+  const centroid = coordinates.reduce(
+    (acc, coord) => [acc[0] + coord[0], acc[1] + coord[1]],
+    [0, 0]
+  ).map(sum => sum / coordinates.length);
+  
+  // Apply rotation around centroid
+  const cos = Math.cos(rotationAngle);
+  const sin = Math.sin(rotationAngle);
+  
+  return coordinates.map(coord => {
+    // Translate to origin
+    const x = coord[0] - centroid[0];
+    const y = coord[1] - centroid[1];
+    
+    // Apply rotation
+    const rotatedX = x * cos - y * sin;
+    const rotatedY = x * sin + y * cos;
+    
+    // Translate back
+    return [rotatedX + centroid[0], rotatedY + centroid[1]];
+  });
+}
+
+// Calculate reference orientation from the hardcoded reference polygon
+function calculateReferenceOrientation(): number {
+  // Hardcoded reference polygon from user - ID 19703
+  // POLYGON ((10.975172639350573 45.16873541903552, 9.753687796547522 45.1184584160307, 9.829368801142177 44.26715166696913, 11.029076321130045 44.3174412910695, 10.975172639350573 45.16873541903552))
+  const referenceCoords = [
+    [10.975172639350573, 45.16873541903552],
+    [9.753687796547522, 45.1184584160307],
+    [9.829368801142177, 44.26715166696913],
+    [11.029076321130045, 44.3174412910695],
+    [10.975172639350573, 45.16873541903552]  // Closed ring
+  ];
+  
+  const orientation = calculatePolygonOrientation(referenceCoords);
+  console.log(`Reference polygon orientation: ${(orientation * 180 / Math.PI).toFixed(2)}°`);
+  return orientation;
+}
+
+// Calculate reference aspect ratio (width/height) from the hardcoded reference polygon
+function calculateReferenceAspectRatio(): number {
+  // Hardcoded reference polygon from user - ID 19703
+  const referenceCoords: number[][] = [
+    [10.975172639350573, 45.16873541903552],
+    [9.753687796547522, 45.1184584160307],
+    [9.829368801142177, 44.26715166696913],
+    [11.029076321130045, 44.3174412910695],
+    [10.975172639350573, 45.16873541903552]
+  ];
+  const refOrientation = calculatePolygonOrientation(referenceCoords);
+  const cos = Math.cos(-refOrientation);
+  const sin = Math.sin(-refOrientation);
+  const rotated = referenceCoords.map(([x, y]) => [x * cos - y * sin, x * sin + y * cos]);
+  const xs = rotated.map(p => p[0]);
+  const ys = rotated.map(p => p[1]);
+  const width = Math.max(...xs) - Math.min(...xs);
+  const height = Math.max(...ys) - Math.min(...ys);
+  if (height === 0) return Infinity;
+  const aspect = width / height;
+  console.log(`Reference aspect ratio (w/h): ${aspect}`);
+  return aspect;
+}
+
+// Rotate to reference orientation and scale axes to match reference aspect ratio, preserving centroid
+function normalizePolygonShapeAndOrientation(
+  coordinates: number[][],
+  referenceOrientation: number,
+  referenceAspectRatio: number
+): number[][] {
+  if (coordinates.length < 3) return coordinates;
+  const isClosed = coordinates.length > 1 && coordinates[0][0] === coordinates[coordinates.length - 1][0] && coordinates[0][1] === coordinates[coordinates.length - 1][1];
+  const ring = isClosed ? coordinates.slice(0, -1) : [...coordinates];
+  const centroid = ring.reduce((acc, [x, y]) => [acc[0] + x, acc[1] + y], [0, 0]).map(sum => sum / ring.length);
+  const currentOrientation = calculatePolygonOrientation(coordinates);
+  const rot = referenceOrientation - currentOrientation;
+  const cosr = Math.cos(rot);
+  const sinr = Math.sin(rot);
+  const rotated = ring.map(([x, y]) => {
+    const dx = x - centroid[0];
+    const dy = y - centroid[1];
+    return [dx * cosr - dy * sinr, dx * sinr + dy * cosr];
+  });
+  const xs = rotated.map(p => p[0]);
+  const ys = rotated.map(p => p[1]);
+  const width = (Math.max(...xs) - Math.min(...xs)) || 0;
+  const height = (Math.max(...ys) - Math.min(...ys)) || 0;
+  if (height === 0) {
+    const out = rotated.map(([xr, yr]) => [xr + centroid[0], yr + centroid[1]]);
+    return isClosed ? [...out, out[0]] : out;
+  }
+  const currentAspect = width / height;
+  const sy = referenceAspectRatio === 0 ? 1 : currentAspect / referenceAspectRatio;
+  const scaled = rotated.map(([xr, yr]) => [xr, yr * sy]);
+  const normalized = scaled.map(([xs_, ys_]) => [xs_ + centroid[0], ys_ + centroid[1]]);
+  return isClosed ? [...normalized, normalized[0]] : normalized;
+}
+
+// Create a rectangle with reference shape (aspect ratio and orientation) that fits in a given cell
+function createReferenceShapedRectangle(
+  centerX: number,
+  centerY: number,
+  cellWidth: number,
+  cellHeight: number,
+  referenceOrientation: number,
+  referenceAspectRatio: number,
+  preferHeightFit: boolean = false
+): [number, number][] {
+  // Determine the size of the rectangle that fits in the cell with the reference aspect ratio
+  let width: number, height: number;
+
+  if (preferHeightFit) {
+    // Fit by height first (use full height), then clamp width to cell if needed
+    height = cellHeight;
+    width = height * referenceAspectRatio;
+    if (width > cellWidth) {
+      width = cellWidth;
+      height = width / referenceAspectRatio;
+    }
+  } else {
+    // Default: fit by width first
+    width = cellWidth;
+    height = width / referenceAspectRatio;
+    if (height > cellHeight) {
+      height = cellHeight;
+      width = height * referenceAspectRatio;
+    }
+  }
+  
+  // Create rectangle centered at origin with reference aspect ratio
+  const halfWidth = width / 2;
+  const halfHeight = height / 2;
+  
+  // Rectangle vertices in local coordinates (before rotation)
+  const localRect: [number, number][] = [
+    [-halfWidth, -halfHeight],  // bottom-left
+    [halfWidth, -halfHeight],   // bottom-right
+    [halfWidth, halfHeight],    // top-right
+    [-halfWidth, halfHeight],   // top-left
+  ];
+  
+  // Rotate by reference orientation
+  const cos = Math.cos(referenceOrientation);
+  const sin = Math.sin(referenceOrientation);
+  
+  const rotatedRect = localRect.map(([x, y]) => {
+    const rotatedX = x * cos - y * sin;
+    const rotatedY = x * sin + y * cos;
+    return [rotatedX + centerX, rotatedY + centerY] as [number, number];
+  });
+  
+  // Close the ring
+  rotatedRect.push(rotatedRect[0]);
+  
+  return rotatedRect;
+}
+
 export default function Viewer() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
@@ -46,6 +238,14 @@ export default function Viewer() {
   const [draggedVertexIndex, setDraggedVertexIndex] = useState<number | null>(null);
   const [vertexDragStart, setVertexDragStart] = useState<{ x: number; y: number } | null>(null);
   
+  // Track if actual dragging occurred (not just clicking)
+  const [hasDragged, setHasDragged] = useState<boolean>(false);
+  const [hasVertexDragged, setHasVertexDragged] = useState<boolean>(false);
+  
+  // Vertex dragging mode: 'free' or 'rectangular'
+  const [vertexDragMode, setVertexDragMode] = useState<'free' | 'rectangular'>('rectangular');
+  const vertexDragModeRef = useRef<'free' | 'rectangular'>('rectangular');
+  
   // Checkbox-based visibility system
   const [checkedNodes, setCheckedNodes] = useState<Set<string>>(new Set());
   
@@ -57,6 +257,7 @@ export default function Viewer() {
   const displayLevelRef = useRef<Level>('polje');
   useEffect(() => { checkedNodesRef.current = checkedNodes; }, [checkedNodes]);
   useEffect(() => { displayLevelRef.current = displayLevel; }, [displayLevel]);
+  useEffect(() => { vertexDragModeRef.current = vertexDragMode; }, [vertexDragMode]);
 
   // Live refs to avoid stale closures in map event handlers
   const allRef = useRef<HierarchyNode[]>([]);
@@ -65,6 +266,8 @@ export default function Viewer() {
   const vertexDragStartRef = useRef<{ x: number; y: number } | null>(null);
   const draggedVertexIndexRef = useRef<number | null>(null);
   const hoveredVertexIdRef = useRef<string | null>(null);
+  const hasDraggedRef = useRef<boolean>(false);
+  const hasVertexDraggedRef = useRef<boolean>(false);
 
   useEffect(() => { allRef.current = all; }, [all]);
   useEffect(() => { selectedAnnotationRef.current = selectedAnnotation; }, [selectedAnnotation]);
@@ -351,6 +554,175 @@ export default function Viewer() {
       const isClosed = ring.length > 1 && ring[0][0] === ring[ring.length - 1][0] && ring[0][1] === ring[ring.length - 1][1];
       const uniqueLen = isClosed ? ring.length - 1 : ring.length;
       
+      if (vertexDragModeRef.current === 'free') {
+        // FREE MODE: Allow free vertex movement - just move the dragged vertex
+        const idx = Math.min(Math.max(vertexIndex, 0), uniqueLen - 1);
+        ring[idx] = [ring[idx][0] + deltaLng, ring[idx][1] + deltaLat];
+        
+        // If closed ring, update the last point to match the first
+        if (isClosed) {
+          ring[ring.length - 1] = [...ring[0]];
+        }
+      } else {
+        // RECTANGULAR MODE: Maintain rectangular shape while preserving orientation
+      if (uniqueLen !== 4) {
+        // Fallback: move whole shape by delta if not a rectangle
+        const movedRing = ring.map(([x, y], idx) => {
+          if (isClosed && idx === ring.length - 1) return [ring[0][0] + deltaLng, ring[0][1] + deltaLat];
+          return [x + deltaLng, y + deltaLat];
+        });
+        const upd = { ...node, polygon: movedRing } as HierarchyNode;
+        if (dragData.startRingGL) {
+          const movedS = dragData.startRingGL.map((c: number[], idx: number) => {
+            if (idx === dragData.startRingGL.length - 1) return [dragData.startRingGL[0][0] + deltaLng, dragData.startRingGL[0][1] + deltaLat];
+            return [c[0] + deltaLng, c[1] + deltaLat];
+          });
+          (upd as any).shape_gl = { type: 'Polygon', coordinates: [movedS] };
+        }
+        return upd;
+      }
+      
+        // RECTANGULAR MODE: Maintain angles - adjacent vertices move along their opposite edges
+        const idx = Math.min(Math.max(vertexIndex, 0), uniqueLen - 1);
+        const opp = (idx + 2) % uniqueLen;
+        const prev = (idx - 1 + uniqueLen) % uniqueLen;
+        const nextIdx = (idx + 1) % uniqueLen;
+        
+        // Use starting ring to get original edge directions
+        let sring = [...(dragData.startRing as number[][])];
+        sring = ensureClosedRing(sring);
+        const sIsClosed = sring.length > 1 && sring[0][0] === sring[sring.length - 1][0] && sring[0][1] === sring[sring.length - 1][1];
+        const sUniqueLen = sIsClosed ? sring.length - 1 : sring.length;
+        
+        // Move the dragged vertex
+        const moved: [number, number] = [ring[idx][0] + deltaLng, ring[idx][1] + deltaLat];
+        ring[idx] = moved;
+        
+        // Get edge directions from the starting ring (to maintain angles)
+        // Edge from opposite to prev
+        const oppToPrevDir: [number, number] = [sring[prev][0] - sring[opp][0], sring[prev][1] - sring[opp][1]];
+        // Edge from opposite to next
+        const oppToNextDir: [number, number] = [sring[nextIdx][0] - sring[opp][0], sring[nextIdx][1] - sring[opp][1]];
+        
+        // Calculate where prev should be: intersection of line from moved through original prev direction
+        // and line from opposite along oppToPrev direction
+        const draggedToPrevDir: [number, number] = [sring[prev][0] - sring[idx][0], sring[prev][1] - sring[idx][1]];
+        const draggedToNextDir: [number, number] = [sring[nextIdx][0] - sring[idx][0], sring[nextIdx][1] - sring[idx][1]];
+        
+        // Find intersection: moved + t * draggedToPrevDir = opposite + s * oppToPrevDir
+        // Solve for s and t
+        const det1 = draggedToPrevDir[0] * oppToPrevDir[1] - draggedToPrevDir[1] * oppToPrevDir[0];
+        if (Math.abs(det1) > 1e-10) {
+          const dx1 = ring[opp][0] - moved[0];
+          const dy1 = ring[opp][1] - moved[1];
+          const t1 = (dx1 * oppToPrevDir[1] - dy1 * oppToPrevDir[0]) / det1;
+          ring[prev] = [moved[0] + t1 * draggedToPrevDir[0], moved[1] + t1 * draggedToPrevDir[1]];
+        }
+        
+        const det2 = draggedToNextDir[0] * oppToNextDir[1] - draggedToNextDir[1] * oppToNextDir[0];
+        if (Math.abs(det2) > 1e-10) {
+          const dx2 = ring[opp][0] - moved[0];
+          const dy2 = ring[opp][1] - moved[1];
+          const t2 = (dx2 * oppToNextDir[1] - dy2 * oppToNextDir[0]) / det2;
+          ring[nextIdx] = [moved[0] + t2 * draggedToNextDir[0], moved[1] + t2 * draggedToNextDir[1]];
+        }
+        
+        if (isClosed) {
+          ring[ring.length - 1] = [...ring[0]];
+        }
+      }
+      
+      const updated = { ...node, polygon: ring } as HierarchyNode;
+      
+      // Keep shape_gl in sync
+      if (dragData.startRingGL) {
+        let sgr = [...dragData.startRingGL] as number[][];
+        sgr = ensureClosedRing(sgr);
+        const sClosed = sgr.length > 1 && sgr[0][0] === sgr[sgr.length - 1][0] && sgr[0][1] === sgr[sgr.length - 1][1];
+        const sUnique = sClosed ? sgr.length - 1 : sgr.length;
+        
+        if (vertexDragModeRef.current === 'free') {
+          // FREE MODE: Just move the dragged vertex
+          const sIdx = Math.min(Math.max(vertexIndex, 0), sUnique - 1);
+          sgr[sIdx] = [sgr[sIdx][0] + deltaLng, sgr[sIdx][1] + deltaLat];
+          if (sClosed) {
+            sgr[sgr.length - 1] = [...sgr[0]];
+          }
+        } else {
+          // RECTANGULAR MODE: Maintain angles - adjacent vertices move along their opposite edges
+          if (sUnique !== 4) {
+            const movedS = sgr.map((c: number[], idx: number) => {
+              if (idx === sgr.length - 1) return [sgr[0][0] + deltaLng, sgr[0][1] + deltaLat];
+              return [c[0] + deltaLng, c[1] + deltaLat];
+            });
+            (updated as any).shape_gl = { type: 'Polygon', coordinates: [movedS] };
+            return updated;
+          }
+          
+          const sIdx = Math.min(Math.max(vertexIndex, 0), sUnique - 1);
+          const sOpp = (sIdx + 2) % sUnique;
+          const sPrev = (sIdx - 1 + sUnique) % sUnique;
+          const sNext = (sIdx + 1) % sUnique;
+          
+          // Use starting ring to get original edge directions
+          let ssring = [...(dragData.startRingGL as number[][])];
+          ssring = ensureClosedRing(ssring);
+          
+          // Move the dragged vertex
+          const sMoved: [number, number] = [sgr[sIdx][0] + deltaLng, sgr[sIdx][1] + deltaLat];
+          sgr[sIdx] = sMoved;
+          
+          // Get edge directions from the starting ring (to maintain angles)
+          const sOppToPrevDir: [number, number] = [ssring[sPrev][0] - ssring[sOpp][0], ssring[sPrev][1] - ssring[sOpp][1]];
+          const sOppToNextDir: [number, number] = [ssring[sNext][0] - ssring[sOpp][0], ssring[sNext][1] - ssring[sOpp][1]];
+          const sDraggedToPrevDir: [number, number] = [ssring[sPrev][0] - ssring[sIdx][0], ssring[sPrev][1] - ssring[sIdx][1]];
+          const sDraggedToNextDir: [number, number] = [ssring[sNext][0] - ssring[sIdx][0], ssring[sNext][1] - ssring[sIdx][1]];
+          
+          // Find intersection for prev vertex
+          const sDet1 = sDraggedToPrevDir[0] * sOppToPrevDir[1] - sDraggedToPrevDir[1] * sOppToPrevDir[0];
+          if (Math.abs(sDet1) > 1e-10) {
+            const sDx1 = sgr[sOpp][0] - sMoved[0];
+            const sDy1 = sgr[sOpp][1] - sMoved[1];
+            const sT1 = (sDx1 * sOppToPrevDir[1] - sDy1 * sOppToPrevDir[0]) / sDet1;
+            sgr[sPrev] = [sMoved[0] + sT1 * sDraggedToPrevDir[0], sMoved[1] + sT1 * sDraggedToPrevDir[1]];
+          }
+          
+          // Find intersection for next vertex
+          const sDet2 = sDraggedToNextDir[0] * sOppToNextDir[1] - sDraggedToNextDir[1] * sOppToNextDir[0];
+          if (Math.abs(sDet2) > 1e-10) {
+            const sDx2 = sgr[sOpp][0] - sMoved[0];
+            const sDy2 = sgr[sOpp][1] - sMoved[1];
+            const sT2 = (sDx2 * sOppToNextDir[1] - sDy2 * sOppToNextDir[0]) / sDet2;
+            sgr[sNext] = [sMoved[0] + sT2 * sDraggedToNextDir[0], sMoved[1] + sT2 * sDraggedToNextDir[1]];
+          }
+          
+          if (sClosed) {
+            sgr[sgr.length - 1] = [...sgr[0]];
+          }
+        }
+        (updated as any).shape_gl = { type: 'Polygon', coordinates: [sgr] };
+      }
+      return updated;
+    });
+    allRef.current = next;
+    refreshAnnotationsSource();
+  }
+
+  // ORIGINAL RECTANGLE CONSTRAINT LOGIC (COMMENTED OUT FOR TEMPORARY FREE MOVEMENT)
+  // This logic maintained rectangular shapes by moving opposite vertices
+  // To restore: replace the simple vertex movement above with this logic
+  /*
+  function updateAnnotationVertexOriginal(annotationId: string, vertexIndex: number, deltaLng: number, deltaLat: number) {
+    const dragData = vertexDragStartRef.current as any;
+    if (!dragData?.startRing) return;
+    
+    const next = allRef.current.map(node => {
+      if (node.id !== annotationId) return node;
+      let ring = [...dragData.startRing] as number[][];
+      ring = ensureClosedRing(ring);
+      const isClosed = ring.length > 1 && ring[0][0] === ring[ring.length - 1][0] && ring[0][1] === ring[ring.length - 1][1];
+      const uniqueLen = isClosed ? ring.length - 1 : ring.length;
+      
       if (uniqueLen !== 4) {
         // Fallback: move whole shape by delta if not a rectangle
         const movedRing = ring.map(([x, y], idx) => {
@@ -388,7 +760,6 @@ export default function Viewer() {
       }
       const updated = { ...node, polygon: ring } as HierarchyNode;
       
-      // Keep shape_gl in sync
       if (dragData.startRingGL) {
         let sgr = [...dragData.startRingGL] as number[][];
         sgr = ensureClosedRing(sgr);
@@ -418,7 +789,74 @@ export default function Viewer() {
     allRef.current = next;
     refreshAnnotationsSource();
   }
+  */
 
+
+  // Update annotation in database
+  async function updateAnnotationInDatabase(annotationId: string) {
+    try {
+      const annotation = allRef.current.find(node => node.id === annotationId);
+      if (!annotation) {
+        console.error('Annotation not found:', annotationId);
+        return;
+      }
+
+      // Extract remote ID from annotation ID (format: backend_123)
+      const remoteId = annotation.remoteId;
+      if (!remoteId) {
+        console.error('No remote ID found for annotation:', annotationId);
+        return;
+      }
+
+      // Get current polygon coordinates
+      let coordinates: number[][];
+      if ((annotation as any).shape_gl?.coordinates?.[0]) {
+        coordinates = (annotation as any).shape_gl.coordinates[0];
+      } else if (annotation.polygon) {
+        coordinates = annotation.polygon;
+      } else {
+        console.error('No coordinates found for annotation:', annotationId);
+        return;
+      }
+
+      // Calculate x_coord and y_coord from first point
+      const xCoord = coordinates[0][0];
+      const yCoord = coordinates[0][1];
+
+      // Prepare update payload
+      const updatePayload = {
+        coordinates: coordinates,
+        x_coord: xCoord,
+        y_coord: yCoord
+      };
+
+      console.log('Updating annotation in database:', {
+        id: remoteId,
+        coordinates: coordinates.length,
+        x_coord: xCoord,
+        y_coord: yCoord
+      });
+
+      // Send PATCH request to update the feature
+      const response = await fetch(`${API_BASE}/features/${remoteId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatePayload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const updatedFeature = await response.json();
+      console.log('Successfully updated annotation in database:', updatedFeature);
+      
+    } catch (error) {
+      console.error('Failed to update annotation in database:', error);
+    }
+  }
 
   // Resize annotation by scaling from center
   function resizeAnnotation(annotationId: string, scaleFactor: number) {
@@ -648,7 +1086,7 @@ export default function Viewer() {
           zoom: 16, // Zoom level to show factory details
           bearing: 0, // No map rotation
           pitch: 0, // Orthographic projection - no perspective skewness
-          projection: 'mercator' // Use Web Mercator projection for consistency
+         // projection: 'mercator' // Use Web Mercator projection for consistency
         });
 
       map.current.on('load', () => {
@@ -782,6 +1220,10 @@ export default function Viewer() {
         // Handle mouse move for dragging
         map.current!.on('mousemove', (e) => {
           if (dragStartRef.current && selectedAnnotationRef.current) {
+            // Mark that dragging has occurred
+            hasDraggedRef.current = true;
+            setHasDragged(true);
+            
             // Use lng/lat delta for accurate drag that matches cursor movement
             const startLngLat = (dragStartRef.current as any).lngLat as [number, number];
             const currLngLat = map.current!.unproject([e.point.x, e.point.y]);
@@ -792,6 +1234,10 @@ export default function Viewer() {
             dragStartRef.current.x = e.point.x;
             dragStartRef.current.y = e.point.y;
           } else if (vertexDragStartRef.current && selectedAnnotationRef.current !== null && draggedVertexIndexRef.current !== null) {
+            // Mark that vertex dragging has occurred
+            hasVertexDraggedRef.current = true;
+            setHasVertexDragged(true);
+            
             // Use lng/lat delta for accurate drag that matches cursor movement
             const startLngLat = (vertexDragStartRef.current as any).lngLat as [number, number];
             const currLngLat = map.current!.unproject([e.point.x, e.point.y]);
@@ -805,24 +1251,42 @@ export default function Viewer() {
         });
 
         // Handle mouse up to stop dragging
-        map.current!.on('mouseup', () => {
+        map.current!.on('mouseup', async () => {
           if (dragStartRef.current) {
+            const annotationId = selectedAnnotationRef.current;
+            const wasDragging = hasDraggedRef.current;
+            
             dragStartRef.current = null;
             setIsDragging(false);
             setDragStart(null);
+            hasDraggedRef.current = false;
+            setHasDragged(false);
+            
             // Commit ref changes to state
             setAll(allRef.current);
             // Force refresh to ensure visibility respects current filters
             refreshAnnotationsSource();
             map.current!.getCanvas().style.cursor = 'grab';
             try { map.current!.dragPan.enable(); } catch {}
+            
+            // Update annotation in database ONLY if actual dragging occurred
+            if (annotationId && wasDragging) {
+              console.log('Updating annotation in database after drag');
+              await updateAnnotationInDatabase(annotationId);
+            }
           }
           if (vertexDragStartRef.current) {
+            const annotationId = selectedAnnotationRef.current;
+            const wasVertexDragging = hasVertexDraggedRef.current;
+            
             vertexDragStartRef.current = null;
             draggedVertexIndexRef.current = null;
             setIsDraggingVertex(false);
             setDraggedVertexIndex(null);
             setVertexDragStart(null);
+            hasVertexDraggedRef.current = false;
+            setHasVertexDragged(false);
+            
             // Commit ref changes to state
             setAll(allRef.current);
             // Force refresh to ensure visibility respects current filters
@@ -830,6 +1294,12 @@ export default function Viewer() {
             map.current!.getCanvas().style.cursor = 'grab';
             try { map.current!.dragPan.enable(); } catch {}
             if (selectedAnnotationRef.current) addVertexMarkers(selectedAnnotationRef.current);
+            
+            // Update annotation in database ONLY if actual vertex dragging occurred
+            if (annotationId && wasVertexDragging) {
+              console.log('Updating annotation in database after vertex drag');
+              await updateAnnotationInDatabase(annotationId);
+            }
           }
         });
 
@@ -887,6 +1357,15 @@ export default function Viewer() {
         if (!factoryLoaded) {
           setFactoryLoaded(true);
           console.log('Factory layout tileserver ready');
+          
+          // Set initial view to factory layout center (matching "Reset View" functionality)
+          const factoryBounds: [number, number, number, number] = [5.246049, 43.261091, 11.329715, 47.162805];
+          try { 
+            map.current.fitBounds(factoryBounds, { padding: 50 }); 
+            console.log('Initial view set to factory layout center');
+          } catch (e) {
+            console.log('Could not set initial view:', e);
+          }
         }
       }
     };
@@ -998,22 +1477,30 @@ export default function Viewer() {
           }
         });
 
-      // Add text labels
+      // Add text labels with capacity information
       map.current.addLayer({
         id: 'annotations-labels',
         type: 'symbol',
         source: 'annotations',
         layout: {
-            'text-field': ['get', 'name'],
+            'text-field': [
+              'concat',
+              ['get', 'name'],
+              '\n',
+              ['to-string', ['get', 'taken_capacity']],
+              ' / ',
+              ['to-string', ['get', 'max_capacity']]
+            ],
             'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
-            'text-size': 14,
+            'text-size': 12,
             'text-anchor': 'center',
-            'text-offset': [0, 0]
+            'text-offset': [0, 0],
+            'text-line-height': 1.2
         },
         paint: {
           'text-color': '#000',
           'text-halo-color': '#fff',
-          'text-halo-width': 1
+          'text-halo-width': 1.5
         }
       });
 
@@ -1097,7 +1584,7 @@ export default function Viewer() {
   };
 
   // Bring checked annotations into the current camera view with optimal scaling
-  const bringCheckedIntoView = () => {
+  const bringCheckedIntoView = async () => {
     if (!map.current) return;
     
     // Get current map bounds
@@ -1113,92 +1600,122 @@ export default function Viewer() {
     
     console.log('Current view bounds:', viewBounds);
     
-    // Get all checked annotations
-    const checkedAnnotations = allRef.current.filter(node => checkedNodes.has(node.id));
+    // Get all checked annotations filtered by current display level
+    const targetLevel = displayLevelRef.current;
+    const checkedAnnotationsAll = allRef.current.filter(node => checkedNodes.has(node.id));
+    const checkedAnnotations = checkedAnnotationsAll.filter(node => node.level === targetLevel);
     
     if (checkedAnnotations.length === 0) {
-      alert('No annotations are checked. Please check some annotations first.');
+      alert(`No annotations at level "${targetLevel}" are checked. Please check some annotations first.`);
       return;
     }
     
-    console.log(`Fitting ${checkedAnnotations.length} checked annotations into view with scaling`);
+    console.log(`Fitting ${checkedAnnotations.length} checked annotations at level ${targetLevel} (from ${checkedAnnotationsAll.length} total checked)`);
     
-    // Calculate available space - use entire viewport with no padding
-    const viewWidth = viewBounds.east - viewBounds.west;
-    const viewHeight = viewBounds.north - viewBounds.south;
+    // Calculate reference orientation and aspect from the hardcoded reference polygon
+    const referenceOrientation = calculateReferenceOrientation();
+    const referenceAspect = calculateReferenceAspectRatio();
     
-    // Determine optimal layout: prefer horizontal arrangement for better use of screen space
-    let cols, rows;
-    if (checkedAnnotations.length <= 4) {
-      // For 1-4 annotations, arrange horizontally
-      cols = checkedAnnotations.length;
-      rows = 1;
-    } else {
-      // For more annotations, use a more square-ish grid
-      cols = Math.ceil(Math.sqrt(checkedAnnotations.length));
-      rows = Math.ceil(checkedAnnotations.length / cols);
-    }
+    // Use pixel-space layout based on current zoom so polygons fill the viewport visually
+    const containerEl = map.current.getContainer() as HTMLElement;
+    const viewportWidthPx = containerEl.clientWidth;
+    const viewportHeightPx = containerEl.clientHeight;
     
-    // Each annotation gets exact equal share of space - no gaps
-    const annotationWidth = viewWidth / cols;
-    const annotationHeight = viewHeight / rows;
+    console.log('=== VIEWPORT INFO ===');
+    console.log(`Viewport size: ${viewportWidthPx}px x ${viewportHeightPx}px`);
+    console.log(`Geographic bounds:`, viewBounds);
+    console.log(`Current zoom: ${map.current.getZoom()}`);
     
-    console.log(`Layout: ${cols}x${rows}, Each annotation: ${annotationWidth.toFixed(6)} x ${annotationHeight.toFixed(6)} (shoulder-to-shoulder)`);
-    
-    // Calculate the center of the entire grid for rotation
-    const gridCenterX = (viewBounds.west + viewBounds.east) / 2;
-    const gridCenterY = (viewBounds.south + viewBounds.north) / 2;
-    const rotationAngle = 3.35; // degrees
-    const angleRad = (rotationAngle * Math.PI) / 180;
+    // Layout: 5 annotations per row, multiple rows; each row fills viewport width
+    const perRow = 5;
+    const total = checkedAnnotations.length;
+    const rows = Math.max(1, Math.ceil(total / perRow));
+    const rowHeightPx = viewportHeightPx / rows;
+    console.log(`\n=== LAYOUT ===`);
+    console.log(`Rows: ${rows}, perRow: ${perRow}, rowHeightPx: ${rowHeightPx.toFixed(2)}px`);
     
     // Reposition and rescale each checked annotation to fill their allocated space completely
     const updatedAnnotations = allRef.current.map(node => {
       if (!checkedNodes.has(node.id)) return node;
       
       const index = checkedAnnotations.findIndex(a => a.id === node.id);
-      const row = Math.floor(index / cols);
-      const col = index % cols;
+      const row = Math.floor(index / perRow);
+      const col = index % perRow;
+      // Determine how many items are in this row (last row can be shorter)
+      const itemsInThisRow = Math.min(perRow, total - row * perRow);
       
-      // Calculate exact boundaries for this annotation (no gaps)
-      const left = viewBounds.west + (col * annotationWidth);
-      const right = viewBounds.west + ((col + 1) * annotationWidth);
-      const bottom = viewBounds.south + (row * annotationHeight);
-      const top = viewBounds.south + ((row + 1) * annotationHeight);
+      // Compute cell size for this row and center in pixel coordinates
+      const cellWidthPx = viewportWidthPx / itemsInThisRow;
+      const cellHeightPx = rowHeightPx;
+      const centerXPx = col * cellWidthPx + cellWidthPx / 2;
+      const centerYPx = row * rowHeightPx + rowHeightPx / 2;
       
-      // Create polygon that exactly fills the allocated rectangle
-      const newPolygon: [number, number][] = [
-        [left, bottom],   // bottom-left
-        [right, bottom],  // bottom-right
-        [right, top],     // top-right
-        [left, top],      // top-left
-        [left, bottom]    // close the ring
+      // Compute rectangle size in pixels to preserve reference aspect and fill height if possible
+      let rectHeightPx = cellHeightPx;
+      let rectWidthPx = rectHeightPx * referenceAspect;
+      if (rectWidthPx > cellWidthPx) {
+        rectWidthPx = cellWidthPx;
+        rectHeightPx = rectWidthPx / referenceAspect;
+      }
+      
+      if (index === 0) {
+        console.log(`\n=== FIRST ANNOTATION (${node.name}) ===`);
+        console.log(`Cell center: (${centerXPx.toFixed(2)}px, ${centerYPx.toFixed(2)}px)`);
+        console.log(`Rectangle size: ${rectWidthPx.toFixed(2)}px x ${rectHeightPx.toFixed(2)}px`);
+        console.log(`Reference aspect: ${referenceAspect.toFixed(4)}`);
+        console.log(`Reference orientation: ${(referenceOrientation * 180 / Math.PI).toFixed(2)}°`);
+      }
+      
+      // Build rectangle in pixel space, rotate by reference orientation, then unproject to lng/lat
+      const halfW = rectWidthPx / 2;
+      const halfH = rectHeightPx / 2;
+      const localPx: [number, number][] = [
+        [-halfW, -halfH],
+        [ halfW, -halfH],
+        [ halfW,  halfH],
+        [-halfW,  halfH]
       ];
-      
-      // Apply rotation to each corner around the grid center to maintain rectangularity
-      const rotatedPolygon = newPolygon.map(([x, y]) => {
-        // Translate to grid center
-        const translatedX = x - gridCenterX;
-        const translatedY = y - gridCenterY;
-        
-        // Apply rotation
-        const rotatedX = translatedX * Math.cos(angleRad) - translatedY * Math.sin(angleRad);
-        const rotatedY = translatedX * Math.sin(angleRad) + translatedY * Math.cos(angleRad);
-        
-        // Translate back
-        return [rotatedX + gridCenterX, rotatedY + gridCenterY] as [number, number];
+      const cos = Math.cos(referenceOrientation);
+      const sin = Math.sin(referenceOrientation);
+      const rotatePx = (x: number, y: number): [number, number] => {
+        // Pixel Y grows down; convert to math coords (Y up), rotate, then convert back
+        const yUp = -y;
+        const xr = x * cos - yUp * sin;
+        const yrUp = x * sin + yUp * cos;
+        const yr = -yrUp;
+        return [xr, yr];
+      };
+      const ringLngLat: [number, number][] = localPx.map(([x, y]) => {
+        const [rx, ry] = rotatePx(x, y);
+        const px = centerXPx + rx;
+        const py = centerYPx + ry;
+        const ll = map.current!.unproject([px, py]);
+        return [ll.lng, ll.lat];
       });
+      // close ring
+      ringLngLat.push(ringLngLat[0]);
+      const normalizedPolygon = ringLngLat as [number, number][];
+      
+      if (index === 0) {
+        console.log(`\n=== UNPROJECTED COORDINATES ===`);
+        console.log(`First vertex pixel: (${(centerXPx - halfW).toFixed(2)}px, ${(centerYPx - halfH).toFixed(2)}px)`);
+        console.log(`First vertex lng/lat:`, normalizedPolygon[0]);
+        console.log(`Second vertex lng/lat:`, normalizedPolygon[1]);
+        console.log(`Polygon width in degrees: ${(normalizedPolygon[1][0] - normalizedPolygon[0][0]).toFixed(6)}`);
+        console.log(`Polygon height in degrees: ${(normalizedPolygon[2][1] - normalizedPolygon[1][1]).toFixed(6)}`);
+      }
       
       // Update both polygon and shape_gl
       const updatedNode = {
         ...node,
-        polygon: rotatedPolygon
+        polygon: normalizedPolygon
       };
       
       // Update shape_gl if it exists
       if ((node as any).shape_gl) {
         (updatedNode as any).shape_gl = {
           type: 'Polygon',
-          coordinates: [rotatedPolygon]
+          coordinates: [normalizedPolygon]
         };
       }
       
@@ -1212,7 +1729,73 @@ export default function Viewer() {
     // Update the map source to reflect the new positions
     refreshAnnotationsSource();
     
-    console.log(`Annotations repositioned shoulder-to-shoulder into current view. Grid: ${cols}x${rows}, Each: ${annotationWidth.toFixed(6)}x${annotationHeight.toFixed(6)}`);
+    // Fit the map to show all the placed annotations (use the original viewport bounds)
+    const finalBounds: [number, number, number, number] = [
+      viewBounds.west,
+      viewBounds.south,
+      viewBounds.east,
+      viewBounds.north
+    ];
+    
+    try {
+      map.current.fitBounds(finalBounds, { padding: 0, animate: false });
+      console.log('Fitted map to annotation bounds');
+    } catch (e) {
+      console.error('Failed to fit bounds:', e);
+    }
+    
+    console.log(`Annotations repositioned into view. Rows: ${rows}, perRow: 5, viewport: ${viewportWidthPx}x${viewportHeightPx}px`);
+
+    // Bulk update moved annotations to backend in a single transaction
+    try {
+      const targetLevel = displayLevelRef.current;
+      console.log(`Bulk updating ${checkedAnnotations.length} annotations at level ${targetLevel}...`);
+      
+      // Prepare bulk update payload
+      const updates = checkedAnnotations.map(node => {
+        const annotation = allRef.current.find(a => a.id === node.id);
+        if (!annotation) return null;
+        
+        let coordinates: number[][];
+        if ((annotation as any).shape_gl?.coordinates?.[0]) {
+          coordinates = (annotation as any).shape_gl.coordinates[0];
+        } else if (annotation.polygon) {
+          coordinates = annotation.polygon;
+        } else {
+          return null;
+        }
+        
+        return {
+          id: annotation.remoteId,
+          coordinates: coordinates,
+          x_coord: coordinates[0][0],
+          y_coord: coordinates[0][1]
+        };
+      }).filter(item => item !== null);
+      
+      if (updates.length === 0) {
+        console.warn('No valid annotations to update');
+        return;
+      }
+      
+      const response = await fetch(`${API_BASE}/features/bulk_update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ features: updates })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      console.log(`Bulk update finished: ${result.updated_count} updated, ${result.failed_ids.length} failed`);
+      if (result.failed_ids.length > 0) {
+        console.warn('Failed IDs:', result.failed_ids);
+      }
+    } catch (err) {
+      console.error('Bulk update failed:', err);
+    }
   };
 
 
@@ -1267,18 +1850,14 @@ export default function Viewer() {
           style={btn}
           onClick={() => {
             if (!map.current) return;
-            // Fit to all annotation polygons
-            const coords: number[][] = [];
-            for (const n of allRef.current) {
-              if (n.polygon && n.polygon.length) coords.push(...n.polygon);
-            }
-            const lngs = coords.map(c => c[0]).filter(lng => isFinite(lng) && lng >= -180 && lng <= 180);
-            const lats = coords.map(c => c[1]).filter(lat => isFinite(lat) && lat >= -90 && lat <= 90);
-            if (lngs.length && lats.length) {
-              const bbox: [number, number, number, number] = [
-                Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)
-              ];
-              try { map.current.fitBounds(bbox, { padding: 60 }); } catch {}
+            // Center on factory layout bounds (derived from reference polygon and annotations)
+            // Factory layout bounds: approximately [5.25, 43.26, 11.33, 47.16]
+            const factoryBounds: [number, number, number, number] = [5.246049, 43.261091, 11.329715, 47.162805];
+            try { 
+              map.current.fitBounds(factoryBounds, { padding: 50 });
+              console.log('Reset view to factory layout center');
+            } catch (e) {
+              console.error('Failed to reset view:', e);
             }
           }}
         >
@@ -1293,101 +1872,18 @@ export default function Viewer() {
         </button>
         
         <button
-          style={{ ...btn, backgroundColor: '#8B5CF6' }}
+          style={{ 
+            ...btn, 
+            backgroundColor: vertexDragMode === 'free' ? '#EF4444' : '#10B981',
+            fontWeight: 'bold'
+          }}
           onClick={() => {
-            if (!map.current) return;
-            // Zoom to factory layout bounds from TileJSON
-            // Bounds: [5.246049,43.261091,11.329715,47.162805] (west, south, east, north)
-            const bounds: [number, number, number, number] = [5.246049, 43.261091, 11.329715, 47.162805];
-            map.current.fitBounds(bounds, { padding: 50 });
-            
-            // Add a test marker to verify coordinates
-            if (!map.current.getSource('test-marker')) {
-              map.current.addSource('test-marker', {
-                type: 'geojson',
-                data: {
-                  type: 'Feature',
-                  geometry: {
-                    type: 'Point',
-                    coordinates: [10.857239, 45.504422] // Center of factory bounds
-                  },
-                  properties: {
-                    name: 'Test Marker'
-                  }
-                }
-              });
-              
-              map.current.addLayer({
-                id: 'test-marker-layer',
-                type: 'circle',
-                source: 'test-marker',
-                paint: {
-                  'circle-color': '#00ff00',
-                  'circle-radius': 10,
-                  'circle-opacity': 1.0
-                }
-              });
-              
-              console.log('Test marker added at factory location');
-            }
-            
-            // Debug zoom level and layer visibility
-            console.log('Current zoom level:', map.current.getZoom());
-            console.log('Factory layer visibility:', map.current.getLayoutProperty('factory-tiles-lines', 'visibility'));
-            console.log('Factory layer minzoom:', map.current.getLayer('factory-tiles-lines')?.minzoom);
-            console.log('Factory layer maxzoom:', map.current.getLayer('factory-tiles-lines')?.maxzoom);
+            const newMode = vertexDragMode === 'free' ? 'rectangular' : 'free';
+            setVertexDragMode(newMode);
+            console.log(`Vertex drag mode switched to: ${newMode}`);
           }}
         >
-          Zoom to Layout
-        </button>
-        
-        {/* Rotation Controls */}
-        <button
-          style={{ ...btn, backgroundColor: '#F59E0B' }}
-          onClick={() => {
-            if (!map.current) return;
-            map.current.setBearing(-4.65);
-            console.log('Rotated map to -4.65°');
-          }}
-        >
-          Test Map Rotation
-        </button>
-        
-        <button
-          style={{ ...btn, backgroundColor: '#EF4444' }}
-          onClick={() => {
-            if (!map.current) return;
-            map.current.setBearing(0);
-            console.log('Reset rotation to 0°');
-          }}
-        >
-          Reset Rotation
-        </button>
-        
-        <button
-          style={{ ...btn, backgroundColor: '#8B5CF6' }}
-          onClick={() => {
-            if (!map.current) return;
-            const currentBearing = map.current.getBearing();
-            const newBearing = currentBearing + 1;
-            map.current.setBearing(newBearing);
-            console.log(`Rotated to ${newBearing.toFixed(2)}°`);
-          }}
-        >
-          +1°
-        </button>
-        
-        <button
-          style={{ ...btn, backgroundColor: '#8B5CF6' }}
-          onClick={() => {
-            if (!map.current) return;
-            const currentBearing = map.current.getBearing();
-            const newBearing = currentBearing - 1;
-            map.current.setBearing(newBearing);
-            console.log(`Rotated to ${newBearing.toFixed(2)}°`);
-          }}
-        >
-          -1°
+          {vertexDragMode === 'free' ? 'Free Vertex Drag' : 'Rectangular Drag'}
         </button>
       </div>
     </div>

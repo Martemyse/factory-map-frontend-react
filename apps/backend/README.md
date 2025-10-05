@@ -10,7 +10,7 @@ cd backend
 python -m venv .layout_proizvodnja_backend_fastapi
 .layout_proizvodnja_backend_fastapi\Scripts\activate.bat
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 7998
 ```
 
 Migrations:

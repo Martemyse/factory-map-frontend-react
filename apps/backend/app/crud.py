@@ -101,3 +101,43 @@ async def update_feature(db: AsyncSession, feature_id: int, data: schemas.Featur
   await db.commit()
   await db.refresh(obj)
   return obj
+
+
+async def bulk_update_features(db: AsyncSession, updates: list[schemas.FeatureBulkUpdateItem]) -> tuple[int, list[int]]:
+  """Bulk update feature geometries in a single transaction.
+  
+  Returns:
+    tuple: (updated_count, failed_ids)
+  """
+  updated_count = 0
+  failed_ids = []
+  
+  for item in updates:
+    try:
+      obj = await db.get(models.Feature, item.id)
+      if obj is None:
+        failed_ids.append(item.id)
+        continue
+      
+      ring = item.coordinates
+      if len(ring) < 3:
+        failed_ids.append(item.id)
+        continue
+      
+      # Ensure polygon is closed
+      if ring[0] != ring[-1]:
+        ring = ring + [ring[0]]
+      
+      wkt = 'POLYGON((' + ','.join(f"{x} {y}" for x, y in ring) + '))'
+      obj.geom = wkt
+      obj.x_coord = item.x_coord
+      obj.y_coord = item.y_coord
+      
+      updated_count += 1
+    except Exception as e:
+      print(f"Failed to update feature {item.id}: {e}")
+      failed_ids.append(item.id)
+  
+  # Commit all updates in a single transaction
+  await db.commit()
+  return updated_count, failed_ids
