@@ -81,7 +81,6 @@ function calculateReferenceAspectRatio(): number {
 export default function Viewer() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
-  const fittedRef = useRef<boolean>(false); // kept for future use
   const [showHierarchy, setShowHierarchy] = useState(true);
   const [doc, setDoc] = useState<{ origin: [number, number]; units: 'm' | 'cm' | 'mm' | 'px'; nodes: HierarchyNode[] }>({ origin: [0, 0], units: 'm', nodes: [] });
   const [all, setAll] = useState<HierarchyNode[]>([]);
@@ -90,14 +89,7 @@ export default function Viewer() {
   // Annotation editing state
   const [selectedAnnotation, setSelectedAnnotation] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const [isDraggingVertex, setIsDraggingVertex] = useState<boolean>(false);
-  const [draggedVertexIndex, setDraggedVertexIndex] = useState<number | null>(null);
-  const [vertexDragStart, setVertexDragStart] = useState<{ x: number; y: number } | null>(null);
-  
-  // Track if actual dragging occurred (not just clicking)
-  const [hasDragged, setHasDragged] = useState<boolean>(false);
-  const [hasVertexDragged, setHasVertexDragged] = useState<boolean>(false);
   
   // Vertex dragging mode: 'free' or 'rectangular'
   const [vertexDragMode, setVertexDragMode] = useState<'free' | 'rectangular'>('rectangular');
@@ -129,7 +121,6 @@ export default function Viewer() {
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const vertexDragStartRef = useRef<{ x: number; y: number } | null>(null);
   const draggedVertexIndexRef = useRef<number | null>(null);
-  const hoveredVertexIdRef = useRef<string | null>(null);
   const hasDraggedRef = useRef<boolean>(false);
   const hasVertexDraggedRef = useRef<boolean>(false);
 
@@ -349,10 +340,6 @@ export default function Viewer() {
     }
   }
 
-  // Update map source with current annotation data (fallback legacy)
-  function updateMapSource() {
-    refreshAnnotationsSource();
-  }
 
   // Add vertex markers for selected annotation
   function addVertexMarkers(annotationId: string) {
@@ -1080,7 +1067,7 @@ export default function Viewer() {
             const annotationId = feature.properties?.annotationId;
             const vertexIndex = feature.properties?.vertexIndex;
             if (annotationId !== undefined && vertexIndex !== undefined) {
-              setDraggedVertexIndex(vertexIndex);
+              draggedVertexIndexRef.current = vertexIndex;
               console.log('Selected vertex:', vertexIndex, 'for annotation:', annotationId);
             }
           }
@@ -1098,11 +1085,9 @@ export default function Viewer() {
             const vertexIndex = feature.properties?.vertexIndex;
             if (annotationId !== undefined && vertexIndex !== undefined) {
               setIsDraggingVertex(true);
-              setDraggedVertexIndex(vertexIndex);
               draggedVertexIndexRef.current = vertexIndex;
               setSelectedAnnotation(annotationId);
               selectedAnnotationRef.current = annotationId;
-              setVertexDragStart({ x: e.point.x, y: e.point.y });
               vertexDragStartRef.current = { x: e.point.x, y: e.point.y };
               // Store initial position for accurate delta calculations
               const startLngLat = map.current!.unproject([e.point.x, e.point.y]);
@@ -1145,7 +1130,6 @@ export default function Viewer() {
               setSelectedAnnotation(annotationId);
               selectedAnnotationRef.current = annotationId;
               setIsDragging(true);
-              setDragStart({ x: e.point.x, y: e.point.y });
               dragStartRef.current = { x: e.point.x, y: e.point.y };
               // Store initial position for accurate delta calculations
               const startLngLat = map.current!.unproject([e.point.x, e.point.y]);
@@ -1172,7 +1156,6 @@ export default function Viewer() {
           if (dragStartRef.current && selectedAnnotationRef.current) {
             // Mark that dragging has occurred
             hasDraggedRef.current = true;
-            setHasDragged(true);
             
             // Use lng/lat delta for accurate drag that matches cursor movement
             const startLngLat = (dragStartRef.current as any).lngLat as [number, number];
@@ -1180,13 +1163,11 @@ export default function Viewer() {
             const deltaLng = currLngLat.lng - startLngLat[0];
             const deltaLat = currLngLat.lat - startLngLat[1];
             updateAnnotationPosition(selectedAnnotationRef.current, deltaLng, deltaLat);
-            setDragStart({ x: e.point.x, y: e.point.y });
             dragStartRef.current.x = e.point.x;
             dragStartRef.current.y = e.point.y;
           } else if (vertexDragStartRef.current && selectedAnnotationRef.current !== null && draggedVertexIndexRef.current !== null) {
             // Mark that vertex dragging has occurred
             hasVertexDraggedRef.current = true;
-            setHasVertexDragged(true);
             
             // Use lng/lat delta for accurate drag that matches cursor movement
             const startLngLat = (vertexDragStartRef.current as any).lngLat as [number, number];
@@ -1194,7 +1175,6 @@ export default function Viewer() {
             const deltaLng = currLngLat.lng - startLngLat[0];
             const deltaLat = currLngLat.lat - startLngLat[1];
             updateAnnotationVertex(selectedAnnotationRef.current, draggedVertexIndexRef.current, deltaLng, deltaLat);
-            setVertexDragStart({ x: e.point.x, y: e.point.y });
             vertexDragStartRef.current.x = e.point.x;
             vertexDragStartRef.current.y = e.point.y;
           }
@@ -1215,9 +1195,7 @@ export default function Viewer() {
             
             dragStartRef.current = null;
             setIsDragging(false);
-            setDragStart(null);
             hasDraggedRef.current = false;
-            setHasDragged(false);
             
             // Commit ref changes to state
             setAll(allRef.current);
@@ -1239,10 +1217,7 @@ export default function Viewer() {
             vertexDragStartRef.current = null;
             draggedVertexIndexRef.current = null;
             setIsDraggingVertex(false);
-            setDraggedVertexIndex(null);
-            setVertexDragStart(null);
             hasVertexDraggedRef.current = false;
-            setHasVertexDragged(false);
             
             // Commit ref changes to state
             setAll(allRef.current);
