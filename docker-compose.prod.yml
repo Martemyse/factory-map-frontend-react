@@ -4,7 +4,7 @@ services:
   # Backend API
   react_app_factory_map_backend:
     build:
-      context: ./app/backend
+      context: ./apps/backend
       dockerfile: Dockerfile
     container_name: React_App_Factory_Map_Backend
     environment:
@@ -27,18 +27,18 @@ services:
   # Frontend
   react_app_factory_map_frontend:
     build:
-      context: ./app/frontend
+      context: ./apps/frontend
       dockerfile: Dockerfile
     container_name: React_App_Factory_Map_Frontend
     ports:
       - "8077:8077"
     depends_on:
-      - backend
+      - react_app_factory_map_backend
     networks:
       - postgres_network
     restart: unless-stopped
     volumes:
-      - ./app/frontend:/app:rw  # Mount frontend source for development
+      - ./apps/frontend:/app:rw  # Mount frontend source for development
       - /app/node_modules  # Anonymous volume to preserve node_modules
 
   # Tile Server (if needed)
