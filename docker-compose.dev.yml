@@ -2,11 +2,11 @@ version: '3.8'
 
 services:
   # Backend API
-  backend:
+  react_app_factory_map_backend:
     build:
       context: ./app/backend
       dockerfile: Dockerfile
-    container_name: factory_backend_dev
+    container_name: React_App_Factory_Map_Backend
     environment:
       - DEV_MODE=true
       - PG_HOST=postgres_c
@@ -25,11 +25,11 @@ services:
       - /app/__pycache__  # Anonymous volume to preserve Python cache
 
   # Frontend (Development)
-  frontend:
+  react_app_factory_map_frontend:
     build:
       context: ./app/frontend
       dockerfile: Dockerfile.dev
-    container_name: factory_frontend_dev
+    container_name: React_App_Factory_Map_Frontend
     ports:
       - "5173:5173"  # Vite dev server port
     depends_on:

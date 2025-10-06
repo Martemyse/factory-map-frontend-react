@@ -2,11 +2,11 @@ version: '3.8'
 
 services:
   # Backend API
-  backend:
+  react_app_factory_map_backend:
     build:
       context: ./app/backend
       dockerfile: Dockerfile
-    container_name: factory_backend
+    container_name: React_App_Factory_Map_Backend
     environment:
       - DEV_MODE=false
       - PG_HOST=postgres_c
@@ -22,13 +22,14 @@ services:
     restart: unless-stopped
     volumes:
       - ./data:/app/data:ro  # Mount data directory if needed
+      - /app/__pycache__  # Anonymous volume to preserve Python cache
 
   # Frontend
-  frontend:
+  react_app_factory_map_frontend:
     build:
       context: ./app/frontend
       dockerfile: Dockerfile
-    container_name: factory_frontend
+    container_name: React_App_Factory_Map_Frontend
     ports:
       - "8077:8077"
     depends_on:
