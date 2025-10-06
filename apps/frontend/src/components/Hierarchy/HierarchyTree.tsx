@@ -1,5 +1,4 @@
-import React from 'react';
-import type { HierarchyNode } from '../model/types';
+import type { HierarchyNode } from '../../model/types';
 
 interface Props {
   nodes: HierarchyNode[];
@@ -37,7 +36,7 @@ function TreeNode({ node, selectedId, onSelect }: { node: HierarchyNode; selecte
       </button>
       {node.children && node.children.length > 0 && (
         <ul style={{ listStyle: 'none', paddingLeft: 12, margin: 0 }}>
-          {node.children.map((c) => (
+          {node.children.map((c: HierarchyNode) => (
             <TreeNode key={c.id} node={c} selectedId={selectedId} onSelect={onSelect} />
           ))}
         </ul>

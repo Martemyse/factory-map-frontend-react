@@ -19,7 +19,7 @@ services:
     container_name: factory-maps
     working_dir: /data
     volumes:
-      - ./output:/data
+      - ./data:/data
     ports:
       - "7999:80"
     command: >

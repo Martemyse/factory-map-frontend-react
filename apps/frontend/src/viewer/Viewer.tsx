@@ -2032,7 +2032,6 @@ export default function Viewer() {
       {/* Edit Modal */}
       {editModalAnnotation && (
         <AnnotationEditModal
-          annotationId={editModalAnnotation.id}
           annotationName={editModalAnnotation.name}
           maxCapacity={editModalAnnotation.max_capacity}
           onClose={() => setEditModalAnnotation(null)}

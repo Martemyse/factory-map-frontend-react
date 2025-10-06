@@ -122,6 +122,7 @@ async def post_feature(payload: schemas.FeatureCreate, db: AsyncSession = Depend
     id=f.id, layer_id=f.layer_id, parent_id=f.parent_id, name=f.name, opomba=f.opomba,
     color=f.color, level=f.level, order_index=f.order_index, depth=f.depth, properties=f.properties,
     coordinates=payload.coordinates, x_coord=f.x_coord, y_coord=f.y_coord,
+    cona=f.cona, max_capacity=f.max_capacity, taken_capacity=f.taken_capacity,
     shape_gl=None, x_coord_gl=f.x_coord, y_coord_gl=f.y_coord
   )
 
@@ -144,6 +145,7 @@ async def patch_feature(feature_id: int, payload: schemas.FeatureUpdate, db: Asy
     id=f.id, layer_id=f.layer_id, parent_id=f.parent_id, name=f.name, opomba=f.opomba,
     color=f.color, level=f.level, order_index=f.order_index, depth=f.depth, properties=f.properties,
     coordinates=coords, x_coord=f.x_coord, y_coord=f.y_coord,
+    cona=f.cona, max_capacity=f.max_capacity, taken_capacity=f.taken_capacity,
     shape_gl=None, x_coord_gl=f.x_coord, y_coord_gl=f.y_coord
   )
 

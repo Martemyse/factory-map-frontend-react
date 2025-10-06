@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { config } from '../../config';
 
 interface AnnotationEditModalProps {
-  annotationId: string;
   annotationName: string;
   maxCapacity: number | undefined;
   onClose: () => void;
@@ -18,7 +17,6 @@ function extractNumberFromName(name: string): string | null {
 }
 
 export default function AnnotationEditModal({
-  annotationId,
   annotationName,
   maxCapacity,
   onClose,

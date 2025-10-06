@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { Tree } from 'react-arborist';
-import type { HierarchyDocument, HierarchyNode, Level } from '../model/types';
+import type { HierarchyDocument, HierarchyNode, Level } from '../../model/types';
 
 type TreeNode = {
   id: string;
@@ -45,7 +45,7 @@ function flattenToArboristData(nodes: HierarchyNode[]): any[] {
     });
     
     if (node.children) {
-      node.children.forEach(child => processNode(child, node.id));
+      node.children.forEach((child: HierarchyNode) => processNode(child, node.id));
     }
   }
   
