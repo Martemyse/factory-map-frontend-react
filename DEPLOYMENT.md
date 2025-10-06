@@ -85,7 +85,7 @@ docker-compose -f docker-compose.prod.yml down
 - **postgres_c**: PostgreSQL database
 - **backend**: FastAPI backend (port 7998)
 - **frontend**: React frontend (port 8077)
-- **tileserver**: Map tiles server (port 8080)
+- **tileserver**: Map tiles server (port 7999)
 
 ## Manual Setup
 

@@ -44,6 +44,6 @@ services:
   #   volumes:
   #     - ./output:/data        # Access to the converted mbtiles file
   #   ports:
-  #     - "8080:80"
+  #     - "7999:80"
   #   command: >
   #     tileserver-gl --port 80 --mbtiles /data/LTH_factory.mbtiles

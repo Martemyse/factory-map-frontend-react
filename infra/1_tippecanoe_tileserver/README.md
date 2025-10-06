@@ -63,7 +63,7 @@ docker-compose up factory-maps
 
 ## Accessing the Services
 
-- **Tile Server**: http://localhost:8080
+- **Tile Server**: http://localhost:7999
 - **Frontend**: http://localhost:3000
 
 ## Files Generated

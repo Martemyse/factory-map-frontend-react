@@ -21,6 +21,6 @@ services:
     volumes:
       - ./output:/data
     ports:
-      - "8080:80"
+      - "7999:80"
     command: >
       tileserver-gl --port 80 --mbtiles /data/LTH_factory.mbtiles
