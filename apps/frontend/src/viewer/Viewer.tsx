@@ -12,24 +12,6 @@ import { config } from '../config';
 const API_BASE = config.API_BASE;
 
 // Helper functions
-function calculateAnnotationBounds(_annotations: HierarchyNode[]): [number, number, number, number] | null {
-  const coords: number[][] = [];
-  for (const annotation of _annotations) {
-    if (annotation.polygon && annotation.polygon.length) {
-      coords.push(...annotation.polygon);
-    }
-  }
-  
-  if (coords.length === 0) return null;
-  
-  const lngs = coords.map(c => c[0]).filter(lng => isFinite(lng) && lng >= -180 && lng <= 180);
-  const lats = coords.map(c => c[1]).filter(lat => isFinite(lat) && lat >= -90 && lat <= 90);
-  
-  if (lngs.length === 0 || lats.length === 0) return null;
-  
-  return [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
-}
-
 // Calculate the orientation angle of a polygon (in radians)
 function calculatePolygonOrientation(coordinates: number[][]): number {
   if (coordinates.length < 3) return 0;
@@ -54,39 +36,6 @@ function calculatePolygonOrientation(coordinates: number[][]): number {
   return orientationAngle;
 }
 
-// Normalize polygon to have the same orientation as reference polygon
-function normalizePolygonOrientation(coordinates: number[][], referenceOrientation: number): number[][] {
-  if (coordinates.length < 3) return coordinates;
-  
-  // Calculate current orientation
-  const currentOrientation = calculatePolygonOrientation(coordinates);
-  
-  // Calculate rotation angle needed
-  const rotationAngle = referenceOrientation - currentOrientation;
-  
-  // Find centroid for rotation
-  const centroid = coordinates.reduce(
-    (acc, coord) => [acc[0] + coord[0], acc[1] + coord[1]],
-    [0, 0]
-  ).map(sum => sum / coordinates.length);
-  
-  // Apply rotation around centroid
-  const cos = Math.cos(rotationAngle);
-  const sin = Math.sin(rotationAngle);
-  
-  return coordinates.map(coord => {
-    // Translate to origin
-    const x = coord[0] - centroid[0];
-    const y = coord[1] - centroid[1];
-    
-    // Apply rotation
-    const rotatedX = x * cos - y * sin;
-    const rotatedY = x * sin + y * cos;
-    
-    // Translate back
-    return [rotatedX + centroid[0], rotatedY + centroid[1]];
-  });
-}
 
 // Calculate reference orientation from the hardcoded reference polygon
 function calculateReferenceOrientation(): number {
@@ -127,99 +76,6 @@ function calculateReferenceAspectRatio(): number {
   const aspect = width / height;
   console.log(`Reference aspect ratio (w/h): ${aspect}`);
   return aspect;
-}
-
-// Rotate to reference orientation and scale axes to match reference aspect ratio, preserving centroid
-function normalizePolygonShapeAndOrientation(
-  coordinates: number[][],
-  referenceOrientation: number,
-  referenceAspectRatio: number
-): number[][] {
-  if (coordinates.length < 3) return coordinates;
-  const isClosed = coordinates.length > 1 && coordinates[0][0] === coordinates[coordinates.length - 1][0] && coordinates[0][1] === coordinates[coordinates.length - 1][1];
-  const ring = isClosed ? coordinates.slice(0, -1) : [...coordinates];
-  const centroid = ring.reduce((acc, [x, y]) => [acc[0] + x, acc[1] + y], [0, 0]).map(sum => sum / ring.length);
-  const currentOrientation = calculatePolygonOrientation(coordinates);
-  const rot = referenceOrientation - currentOrientation;
-  const cosr = Math.cos(rot);
-  const sinr = Math.sin(rot);
-  const rotated = ring.map(([x, y]) => {
-    const dx = x - centroid[0];
-    const dy = y - centroid[1];
-    return [dx * cosr - dy * sinr, dx * sinr + dy * cosr];
-  });
-  const xs = rotated.map(p => p[0]);
-  const ys = rotated.map(p => p[1]);
-  const width = (Math.max(...xs) - Math.min(...xs)) || 0;
-  const height = (Math.max(...ys) - Math.min(...ys)) || 0;
-  if (height === 0) {
-    const out = rotated.map(([xr, yr]) => [xr + centroid[0], yr + centroid[1]]);
-    return isClosed ? [...out, out[0]] : out;
-  }
-  const currentAspect = width / height;
-  const sy = referenceAspectRatio === 0 ? 1 : currentAspect / referenceAspectRatio;
-  const scaled = rotated.map(([xr, yr]) => [xr, yr * sy]);
-  const normalized = scaled.map(([xs_, ys_]) => [xs_ + centroid[0], ys_ + centroid[1]]);
-  return isClosed ? [...normalized, normalized[0]] : normalized;
-}
-
-// Create a rectangle with reference shape (aspect ratio and orientation) that fits in a given cell
-function createReferenceShapedRectangle(
-  centerX: number,
-  centerY: number,
-  cellWidth: number,
-  cellHeight: number,
-  referenceOrientation: number,
-  referenceAspectRatio: number,
-  preferHeightFit: boolean = false
-): [number, number][] {
-  // Determine the size of the rectangle that fits in the cell with the reference aspect ratio
-  let width: number, height: number;
-
-  if (preferHeightFit) {
-    // Fit by height first (use full height), then clamp width to cell if needed
-    height = cellHeight;
-    width = height * referenceAspectRatio;
-    if (width > cellWidth) {
-      width = cellWidth;
-      height = width / referenceAspectRatio;
-    }
-  } else {
-    // Default: fit by width first
-    width = cellWidth;
-    height = width / referenceAspectRatio;
-    if (height > cellHeight) {
-      height = cellHeight;
-      width = height * referenceAspectRatio;
-    }
-  }
-  
-  // Create rectangle centered at origin with reference aspect ratio
-  const halfWidth = width / 2;
-  const halfHeight = height / 2;
-  
-  // Rectangle vertices in local coordinates (before rotation)
-  const localRect: [number, number][] = [
-    [-halfWidth, -halfHeight],  // bottom-left
-    [halfWidth, -halfHeight],   // bottom-right
-    [halfWidth, halfHeight],    // top-right
-    [-halfWidth, halfHeight],   // top-left
-  ];
-  
-  // Rotate by reference orientation
-  const cos = Math.cos(referenceOrientation);
-  const sin = Math.sin(referenceOrientation);
-  
-  const rotatedRect = localRect.map(([x, y]) => {
-    const rotatedX = x * cos - y * sin;
-    const rotatedY = x * sin + y * cos;
-    return [rotatedX + centerX, rotatedY + centerY] as [number, number];
-  });
-  
-  // Close the ring
-  rotatedRect.push(rotatedRect[0]);
-  
-  return rotatedRect;
 }
 
 export default function Viewer() {
@@ -651,8 +507,6 @@ export default function Viewer() {
         // Use starting ring to get original edge directions
         let sring = [...(dragData.startRing as number[][])];
         sring = ensureClosedRing(sring);
-        const sIsClosed = sring.length > 1 && sring[0][0] === sring[sring.length - 1][0] && sring[0][1] === sring[sring.length - 1][1];
-        const sUniqueLen = sIsClosed ? sring.length - 1 : sring.length;
         
         // Move the dragged vertex
         const moved: [number, number] = [ring[idx][0] + deltaLng, ring[idx][1] + deltaLat];
@@ -970,39 +824,6 @@ export default function Viewer() {
     }
   }
 
-  // Resize annotation by scaling from center
-  function resizeAnnotation(annotationId: string, scaleFactor: number) {
-    const annotation = all.find(node => node.id === annotationId);
-    if (!annotation || !annotation.shape_gl) return;
-    
-    // Calculate center point
-    const coords = annotation.shape_gl.coordinates[0];
-    const centerLng = coords.reduce((sum: number, coord: number[]) => sum + coord[0], 0) / coords.length;
-    const centerLat = coords.reduce((sum: number, coord: number[]) => sum + coord[1], 0) / coords.length;
-    
-    // Scale coordinates relative to center
-    const newCoords = coords.map((coord: number[]) => [
-      centerLng + (coord[0] - centerLng) * scaleFactor,
-      centerLat + (coord[1] - centerLat) * scaleFactor
-    ]);
-    
-    // Update the annotation data
-    const updatedAnnotation = {
-      ...annotation,
-      shape_gl: {
-        ...annotation.shape_gl,
-        coordinates: [newCoords]
-      }
-    };
-    
-    // Update the all state
-    setAll(prev => prev.map(node => 
-      node.id === annotationId ? updatedAnnotation : node
-    ));
-    
-    // Update the map source
-    updateMapSource();
-  }
 
   // Load annotations from backend using GL coordinates
   async function loadAnnotations(): Promise<HierarchyNode[]> {
@@ -1486,7 +1307,7 @@ export default function Viewer() {
   // Load data and setup map
   useEffect(() => {
     const setupMap = async () => {
-      const [annotations, layoutData] = await Promise.all([
+      const [annotations] = await Promise.all([
         loadAnnotations(),
         loadFactoryLayout()
       ]);
