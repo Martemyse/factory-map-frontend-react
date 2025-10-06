@@ -18,7 +18,7 @@ services:
     depends_on:
       - postgres_c
     networks:
-      - factory_network
+      - postgres_network
     restart: unless-stopped
     volumes:
       - ./app/backend:/app:rw  # Mount backend source for development
@@ -35,7 +35,7 @@ services:
     depends_on:
       - backend
     networks:
-      - factory_network
+      - postgres_network
     restart: unless-stopped
     volumes:
       - ./app/frontend:/app:rw  # Mount frontend source for development
@@ -43,5 +43,5 @@ services:
 
 
 networks:
-  factory_network:
+  postgres_network:
     driver: bridge

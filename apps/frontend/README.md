@@ -156,7 +156,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Author
 
-**Martin Miller**
+**Martin Misson**
 - GitHub: [@martinmi](https://github.com/martinmi)
 - Portfolio: [Your Portfolio URL]
 - LinkedIn: [Your LinkedIn URL]
