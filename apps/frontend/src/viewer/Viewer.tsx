@@ -5,6 +5,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 // @ts-ignore - No types available for mapbox-gl-draw
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import HierarchyNavigator from '../components/Hierarchy/HierarchyNavigator';
+import AnnotationEditModal from '../components/AnnotationModal/AnnotationEditModal';
 import type { HierarchyNode, Level } from '../model/types';
 import { config } from '../config';
 
@@ -252,12 +253,19 @@ export default function Viewer() {
   
   const [displayLevel, setDisplayLevel] = useState<Level>('polje');
 
+  // Modal state for editing annotations
+  const [editModalAnnotation, setEditModalAnnotation] = useState<HierarchyNode | null>(null);
+
   // Refs to avoid stale values during drag
   const checkedNodesRef = useRef<Set<string>>(new Set());
   const displayLevelRef = useRef<Level>('polje');
   useEffect(() => { checkedNodesRef.current = checkedNodes; }, [checkedNodes]);
   useEffect(() => { displayLevelRef.current = displayLevel; }, [displayLevel]);
   useEffect(() => { vertexDragModeRef.current = vertexDragMode; }, [vertexDragMode]);
+
+  // Animation frame for smooth dragging
+  const animationFrameRef = useRef<number | null>(null);
+  const pendingUpdateRef = useRef<{ type: 'position' | 'vertex', annotationId: string, deltaLng: number, deltaLat: number, vertexIndex?: number } | null>(null);
 
   // Live refs to avoid stale closures in map event handlers
   const allRef = useRef<HierarchyNode[]>([]);
@@ -409,9 +417,54 @@ export default function Viewer() {
     source.setData(featureCollection);
   }
 
-  // Update annotation position by delta (fast path: refs + source update; commit to state on mouseup)
-  function updateAnnotationPosition(annotationId: string, deltaLng: number, deltaLat: number) {
-    // Instead of accumulating deltas, set absolute position based on start + total delta
+  // Optimized refresh for drag performance (uses requestAnimationFrame throttling)
+  function refreshSingleAnnotation() {
+    if (!map.current) return;
+    const source = map.current.getSource('annotations') as maplibregl.GeoJSONSource | undefined;
+    if (!source) return;
+    
+    // Get current data and update all visible features
+    const visible = computeVisibleAnnotations();
+    const featureCollection = {
+      type: 'FeatureCollection' as const,
+      features: visible.map(node => ({
+        type: 'Feature' as const,
+        properties: {
+          id: node.id,
+          name: node.name,
+          level: node.level,
+          color: node.color,
+          cona: node.cona,
+          max_capacity: node.max_capacity,
+          taken_capacity: node.taken_capacity
+        },
+        geometry: {
+          type: 'Polygon' as const,
+          coordinates: [ringForNode(node)]
+        }
+      }))
+    };
+    source.setData(featureCollection);
+  }
+
+  // Process pending updates using requestAnimationFrame for smooth dragging
+  function processPendingUpdate() {
+    if (!pendingUpdateRef.current) return;
+    
+    const update = pendingUpdateRef.current;
+    pendingUpdateRef.current = null;
+    
+    if (update.type === 'position') {
+      updateAnnotationPositionImmediate(update.annotationId, update.deltaLng, update.deltaLat);
+    } else if (update.type === 'vertex' && update.vertexIndex !== undefined) {
+      updateAnnotationVertexImmediate(update.annotationId, update.vertexIndex, update.deltaLng, update.deltaLat);
+    }
+    
+    animationFrameRef.current = null;
+  }
+
+  // Immediate update for annotation position (called by requestAnimationFrame)
+  function updateAnnotationPositionImmediate(annotationId: string, deltaLng: number, deltaLat: number) {
     const dragData = dragStartRef.current as any;
     if (!dragData?.startRing) return;
     
@@ -421,7 +474,6 @@ export default function Viewer() {
         ...node,
         polygon: dragData.startRing.map(([lng, lat]: number[]) => [lng + deltaLng, lat + deltaLat]) as any
       } as HierarchyNode;
-      // Also update shape_gl if present
       if (dragData.startRingGL) {
         const updatedRing = dragData.startRingGL.map((coord: number[]) => [coord[0] + deltaLng, coord[1] + deltaLat]);
         (moved as any).shape_gl = { type: 'Polygon', coordinates: [updatedRing] };
@@ -429,7 +481,16 @@ export default function Viewer() {
       return moved;
     });
     allRef.current = next;
-    refreshAnnotationsSource();
+    refreshSingleAnnotation();
+  }
+
+  // Throttled update for annotation position using requestAnimationFrame
+  function updateAnnotationPosition(annotationId: string, deltaLng: number, deltaLat: number) {
+    pendingUpdateRef.current = { type: 'position', annotationId, deltaLng, deltaLat };
+    
+    if (animationFrameRef.current === null) {
+      animationFrameRef.current = requestAnimationFrame(processPendingUpdate);
+    }
   }
 
   // Update map source with current annotation data (fallback legacy)
@@ -540,9 +601,8 @@ export default function Viewer() {
     }
   }
 
-  // Update a specific vertex of an annotation
-  function updateAnnotationVertex(annotationId: string, vertexIndex: number, deltaLng: number, deltaLat: number) {
-    // Use absolute positioning from starting ring for accuracy
+  // Immediate update for annotation vertex (called by requestAnimationFrame)
+  function updateAnnotationVertexImmediate(annotationId: string, vertexIndex: number, deltaLng: number, deltaLat: number) {
     const dragData = vertexDragStartRef.current as any;
     if (!dragData?.startRing) return;
     
@@ -705,7 +765,16 @@ export default function Viewer() {
       return updated;
     });
     allRef.current = next;
-    refreshAnnotationsSource();
+    refreshSingleAnnotation();
+  }
+
+  // Throttled update for annotation vertex using requestAnimationFrame
+  function updateAnnotationVertex(annotationId: string, vertexIndex: number, deltaLng: number, deltaLat: number) {
+    pendingUpdateRef.current = { type: 'vertex', annotationId, deltaLng, deltaLat, vertexIndex };
+    
+    if (animationFrameRef.current === null) {
+      animationFrameRef.current = requestAnimationFrame(processPendingUpdate);
+    }
   }
 
   // ORIGINAL RECTANGLE CONSTRAINT LOGIC (COMMENTED OUT FOR TEMPORARY FREE MOVEMENT)
@@ -855,6 +924,49 @@ export default function Viewer() {
       
     } catch (error) {
       console.error('Failed to update annotation in database:', error);
+    }
+  }
+
+  // Update annotation max_capacity in database
+  async function updateAnnotationCapacity(annotationId: string, newCapacity: number) {
+    try {
+      const annotation = allRef.current.find(node => node.id === annotationId);
+      if (!annotation) {
+        console.error('Annotation not found:', annotationId);
+        return;
+      }
+
+      const remoteId = annotation.remoteId;
+      if (!remoteId) {
+        console.error('No remote ID found for annotation:', annotationId);
+        return;
+      }
+
+      // Update local state immediately for responsive UI
+      const updatedAnnotations = allRef.current.map(node => 
+        node.id === annotationId ? { ...node, max_capacity: newCapacity } : node
+      );
+      allRef.current = updatedAnnotations;
+      setAll([...updatedAnnotations]);
+      refreshAnnotationsSource();
+
+      // Send PATCH request to update the feature
+      const response = await fetch(`${API_BASE}/features/${remoteId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ max_capacity: newCapacity })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      console.log('Successfully updated max_capacity to:', newCapacity);
+      
+    } catch (error) {
+      console.error('Failed to update max_capacity:', error);
     }
   }
 
@@ -1122,6 +1234,23 @@ export default function Viewer() {
           }
         });
 
+        // Handle double-click to open edit modal
+        map.current!.on('dblclick', 'annotations-fill', (e) => {
+          e.originalEvent.stopPropagation();
+          try { (e.originalEvent as any)?.preventDefault?.(); } catch {}
+          if (e.features && e.features.length > 0) {
+            const feature = e.features[0];
+            const annotationId = feature.properties?.id;
+            if (annotationId) {
+              const annotation = allRef.current.find(node => node.id === annotationId);
+              if (annotation) {
+                setEditModalAnnotation(annotation);
+                console.log('Opening edit modal for annotation:', annotationId);
+              }
+            }
+          }
+        });
+
         // Handle vertex selection and dragging
         map.current!.on('click', 'vertices', (e) => {
           e.originalEvent.stopPropagation();
@@ -1252,6 +1381,13 @@ export default function Viewer() {
 
         // Handle mouse up to stop dragging
         map.current!.on('mouseup', async () => {
+          // Cancel any pending animation frames
+          if (animationFrameRef.current !== null) {
+            cancelAnimationFrame(animationFrameRef.current);
+            animationFrameRef.current = null;
+          }
+          pendingUpdateRef.current = null;
+          
           if (dragStartRef.current) {
             const annotationId = selectedAnnotationRef.current;
             const wasDragging = hasDraggedRef.current;
@@ -1334,6 +1470,12 @@ export default function Viewer() {
     }
 
     return () => {
+      // Cancel any pending animation frames
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      
       if (map.current) {
         map.current.remove();
         map.current = null;
@@ -1886,6 +2028,19 @@ export default function Viewer() {
           {vertexDragMode === 'free' ? 'Free Vertex Drag' : 'Rectangular Drag'}
         </button>
       </div>
+
+      {/* Edit Modal */}
+      {editModalAnnotation && (
+        <AnnotationEditModal
+          annotationId={editModalAnnotation.id}
+          annotationName={editModalAnnotation.name}
+          maxCapacity={editModalAnnotation.max_capacity}
+          onClose={() => setEditModalAnnotation(null)}
+          onUpdateCapacity={(newCapacity) => {
+            updateAnnotationCapacity(editModalAnnotation.id, newCapacity);
+          }}
+        />
+      )}
     </div>
   );
 }
