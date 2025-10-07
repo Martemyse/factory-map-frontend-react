@@ -932,7 +932,7 @@ export default function Viewer() {
       try {
         map.current.addSource('factory-tiles', {
           type: 'vector',
-          tiles: ['http://localhost:7999/data/LTH_factory/{z}/{x}/{y}.pbf']
+          tiles: [`${config.TILESERVER_BASE}/data/LTH_factory/{z}/{x}/{y}.pbf`]
         });
         
         map.current.addLayer({

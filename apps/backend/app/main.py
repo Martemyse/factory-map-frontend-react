@@ -16,18 +16,26 @@ async def health_check():
         "database_host": settings.pg_host
     }
 
-# CORS configuration - explicitly allow frontend origins (avoid '*' with credentials)
-allowed_origins = [
-    f"http://localhost:{settings.frontend_port}",
-    f"http://127.0.0.1:{settings.frontend_port}",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+# CORS configuration
+# In development: allow specific localhost origins
+# In production: allow all origins since requests come through nginx proxy
+if settings.dev_mode:
+    allowed_origins = [
+        f"http://localhost:{settings.frontend_port}",
+        f"http://127.0.0.1:{settings.frontend_port}",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ]
+    allow_credentials = True
+else:
+    # Production: allow all origins since nginx handles the proxying
+    allowed_origins = ["*"]
+    allow_credentials = False
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_credentials=True,
+    allow_credentials=allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )

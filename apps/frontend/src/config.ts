@@ -11,8 +11,11 @@ const isLinux = navigator.userAgent.includes('Linux')
 const backendPort = 7998  // Both dev and prod use port 7998
 
 export const config = {
-  // Backend API configuration
-  API_BASE: `http://localhost:${backendPort}`,
+  // Backend API configuration - use relative URLs for Docker compatibility
+  API_BASE: isWindows ? `http://localhost:${backendPort}` : '/api',
+  
+  // Tileserver configuration - use relative URLs for Docker compatibility
+  TILESERVER_BASE: isWindows ? 'http://localhost:7999' : '/tiles',
   
   // Environment info
   isDevelopment: isWindows,
