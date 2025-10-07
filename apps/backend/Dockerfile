@@ -26,9 +26,9 @@ USER appuser
 # Expose port (will be 7998 in production)
 EXPOSE 7998
 
-# Health check
+# Health check - using urllib instead of requests
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:7998/health', timeout=10)" || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:7998/health', timeout=10)" || exit 1
 
 # Run the application
 CMD ["python", "run_server.py"]
