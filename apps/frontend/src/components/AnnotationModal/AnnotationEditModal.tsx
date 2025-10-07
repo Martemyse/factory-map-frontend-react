@@ -28,7 +28,7 @@ export default function AnnotationEditModal({
   // Determine the iframe URL based on environment
   const baseUrl = config.isDevelopment 
     ? 'http://127.0.0.1:8050' 
-    : 'http://ecotech.utlth-ol.si:8080';
+    : 'http://ecotech.utlth-ol.si:8087/iframe';
   
   const iframeUrl = locationCode 
     ? `${baseUrl}/findzabojnikilokacije?input_odlagalne_zone=${locationCode}`

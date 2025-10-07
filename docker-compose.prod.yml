@@ -32,6 +32,8 @@ services:
     container_name: React_App_Factory_Map_Frontend
     ports:
       - "8087:8087"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - postgres_network
     restart: unless-stopped
