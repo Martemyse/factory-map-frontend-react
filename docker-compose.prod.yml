@@ -15,8 +15,6 @@ services:
       - PG_DB=layout_proizvodnja_libre_konva
     ports:
       - "7998:7998"
-    depends_on:
-      - postgres_c
     networks:
       - postgres_network
     restart: unless-stopped
