@@ -46,7 +46,7 @@ services:
     image: maptiler/tileserver-gl
     container_name: factory_tileserver
     volumes:
-      - ./infra/1_tippecanoe_tileserver/output:/data
+      - ./infra/1_tippecanoe_tileserver/data:/data
     ports:
       - "7999:80"
     command: >

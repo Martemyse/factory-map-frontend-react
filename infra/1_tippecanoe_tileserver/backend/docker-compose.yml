@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  tippecanoe:
+    build:
+      context: .
+      dockerfile: Dockerfile.tippecanoe
+    image: local/tippecanoe:latest
+    working_dir: /data
+    volumes:
+      - ./:/data
+    entrypoint: ["tippecanoe"]
+
+  tileserver:
+    image: maptiler/tileserver-gl:latest
+    restart: unless-stopped
+    working_dir: /data
+    volumes:
+      - ./:/data
+    environment:
+      - TILESERVER_VERBOSE=true
+    ports:
+      - "7999:7999"
+    command: ["--verbose", "--port", "7999", "--public", "--mbtiles", "/data/factory.mbtiles"]
+
+volumes: {}
+
+
