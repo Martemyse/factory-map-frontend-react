@@ -24,7 +24,7 @@ class Settings(BaseModel):
   # Port configuration based on OS
   backend_port_dev: int = int(os.getenv('BACKEND_PORT_DEV', '7998'))
   backend_port_prod: int = int(os.getenv('BACKEND_PORT_PROD', '7998'))
-  frontend_port_dev: int = int(os.getenv('FRONTEND_PORT_DEV', '5173'))
+  frontend_port_dev: int = int(os.getenv('FRONTEND_PORT_DEV', '8077'))
   frontend_port_prod: int = int(os.getenv('FRONTEND_PORT_PROD', '8077'))
 
   @property
@@ -41,7 +41,10 @@ class Settings(BaseModel):
 
   @property
   def frontend_url(self) -> str:
-    return f"http://localhost:{self.frontend_port}"
+    if self.dev_mode:
+      return f"http://localhost:{self.frontend_port}"
+    else:
+      return f"http://React_App_Factory_Map_Frontend:{self.frontend_port}"
 
   @property
   def sync_database_url(self) -> str:

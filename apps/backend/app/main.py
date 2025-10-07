@@ -23,8 +23,8 @@ if settings.dev_mode:
     allowed_origins = [
         f"http://localhost:{settings.frontend_port}",
         f"http://127.0.0.1:{settings.frontend_port}",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
+        "http://localhost:8077",
+        "http://127.0.0.1:8077",
     ]
     allow_credentials = True
 else:

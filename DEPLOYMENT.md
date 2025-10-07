@@ -2,7 +2,7 @@
 
 This application automatically detects the operating system and configures itself accordingly:
 
-- **Windows**: Development mode (Backend: 7998, Frontend: 5173)
+- **Windows**: Development mode (Backend: 7998, Frontend: 8077)
 - **Linux**: Production mode (Backend: 7998, Frontend: 8077)
 
 ## Quick Start
@@ -43,7 +43,7 @@ The application automatically detects the OS and sets:
 | Component | Windows (Dev) | Linux (Prod) |
 |-----------|---------------|--------------|
 | Backend Port | 7998 | 7998 |
-| Frontend Port | 5173 | 8077 |
+| Frontend Port | 8077 | 8077 |
 | Database Host | localhost | postgres_c |
 | Auto-reload | Yes | No |
 | Sourcemaps | Yes | No |
@@ -63,7 +63,7 @@ export PG_DB=layout_proizvodnja_libre_konva
 # Port configuration
 export BACKEND_PORT_DEV=7998
 export BACKEND_PORT_PROD=7998
-export FRONTEND_PORT_DEV=5173
+export FRONTEND_PORT_DEV=8077
 export FRONTEND_PORT_PROD=8077
 ```
 
@@ -125,7 +125,7 @@ If you get port conflicts, check what's using the ports:
 ```bash
 # Windows
 netstat -ano | findstr :7998
-netstat -ano | findstr :5173
+netstat -ano | findstr :8077
 
 # Linux
 sudo netstat -tulpn | grep :7998
@@ -166,7 +166,7 @@ factory-map-frontend-react/
 
 ### Health Checks
 - Backend: `http://localhost:7998/health` (or 7998 on Windows)
-- Frontend: `http://localhost:8077/health` (or 5173 on Windows)
+- Frontend: `http://localhost:8077/health` (or 8077 on Windows)
 
 ### Logs
 - **Development**: Check console output

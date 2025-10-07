@@ -44,7 +44,7 @@ A modern, interactive factory mapping and monitoring application built with Reac
    ```
 
 4. **Open your browser**
-   Navigate to `http://localhost:5173`
+   Navigate to `http://localhost:8077`
 
 ## 🏗️ Project Structure
 
@@ -123,14 +123,6 @@ src/
 - Touch-friendly controls
 - Optimized for tablets and desktops
 
-## 🔧 Configuration
-
-### Environment Variables
-Create a `.env` file in the root directory:
-```env
-VITE_MAPBOX_TOKEN=your_mapbox_token_here
-VITE_API_BASE_URL=http://localhost:3000/api
-```
 
 ### Map Configuration
 The application uses MapLibre GL for map rendering. You can customize the map style and configuration in the `DeckGLMap` component.

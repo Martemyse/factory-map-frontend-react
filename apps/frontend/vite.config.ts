@@ -4,7 +4,7 @@ import os from 'os'
 
 // Detect OS and set appropriate port
 const isWindows = os.platform() === 'win32'
-const port = isWindows ? 5173 : 8077
+const port = isWindows ? 8077 : 8077
 
 // https://vite.dev/config/
 export default defineConfig({

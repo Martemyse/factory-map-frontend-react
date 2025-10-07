@@ -2,7 +2,7 @@
 """
 Universal Factory Map Startup Script
 Automatically detects OS and starts appropriate services:
-- Windows: Development mode (backend: 7998, frontend: 5173)
+- Windows: Development mode (backend: 7998, frontend: 8077)
 - Linux: Production mode (backend: 7998, frontend: 8077)
 """
 
@@ -25,7 +25,7 @@ class FactoryMapStarter:
         # Port configuration
         if self.is_windows:
             self.backend_port = 7998
-            self.frontend_port = 5173
+            self.frontend_port = 8077
             self.mode = "Development"
         else:
             self.backend_port = 7998

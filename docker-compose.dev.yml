@@ -31,7 +31,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: React_App_Factory_Map_Frontend
     ports:
-      - "5173:5173"  # Vite dev server port
+      - "8077:8077"  # Vite dev server port
     depends_on:
       - backend
     networks:

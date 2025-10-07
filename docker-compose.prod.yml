@@ -30,14 +30,9 @@ services:
     container_name: React_App_Factory_Map_Frontend
     ports:
       - "8077:8077"
-    depends_on:
-      - react_app_factory_map_backend
     networks:
       - postgres_network
     restart: unless-stopped
-    volumes:
-      - ./apps/frontend:/app:rw  # Mount frontend source for development
-      - /app/node_modules  # Anonymous volume to preserve node_modules
 
   # Tile Server (if needed)
   tileserver:
@@ -52,12 +47,12 @@ services:
     networks:
       - postgres_network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    # healthcheck:
+    #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 40s
 
 networks:
   postgres_network:

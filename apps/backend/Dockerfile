@@ -27,8 +27,8 @@ USER appuser
 EXPOSE 7998
 
 # Health check - using urllib instead of requests
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:7998/health', timeout=10)" || exit 1
+# HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+#     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:7998/health', timeout=10)" || exit 1
 
 # Run the application
 CMD ["python", "run_server.py"]

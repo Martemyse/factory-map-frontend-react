@@ -14,7 +14,7 @@ start_dev.bat
 cd apps\backend
 python run_server.py
 
-# Frontend (Port 5173) 
+# Frontend (Port 8077) 
 cd apps\frontend
 npm install
 npm run dev
