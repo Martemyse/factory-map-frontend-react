@@ -16,24 +16,21 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Production stage - use Node.js to serve static files
-FROM node:18-alpine
-
-# Install a simple HTTP server
-RUN npm install -g serve
-
-# Set working directory
-WORKDIR /app
+# Production stage - use Nginx to serve static files and proxy API/tiles
+FROM nginx:alpine
 
 # Copy built application from builder stage
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Expose port (will be 8077 in production)
-EXPOSE 8077
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose port 8087
+EXPOSE 8087
 
 # Health check
-# HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-#     CMD wget --no-verbose --tries=1 --spider http://localhost:8077/ || exit 1
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8087/health || exit 1
 
-# Start the server on port 8077
-CMD ["serve", "-s", "dist", "-l", "8077"]
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]

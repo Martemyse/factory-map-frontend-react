@@ -2,8 +2,8 @@
 
 This application automatically detects the operating system and configures itself accordingly:
 
-- **Windows**: Development mode (Backend: 7998, Frontend: 8077)
-- **Linux**: Production mode (Backend: 7998, Frontend: 8077)
+- **Windows**: Development mode (Backend: 7998, Frontend: 8087)
+- **Linux**: Production mode (Backend: 7998, Frontend: 8087)
 
 ## Quick Start
 
@@ -43,7 +43,7 @@ The application automatically detects the OS and sets:
 | Component | Windows (Dev) | Linux (Prod) |
 |-----------|---------------|--------------|
 | Backend Port | 7998 | 7998 |
-| Frontend Port | 8077 | 8077 |
+| Frontend Port | 8087 | 8087 |
 | Database Host | localhost | postgres_c |
 | Auto-reload | Yes | No |
 | Sourcemaps | Yes | No |
@@ -63,8 +63,8 @@ export PG_DB=layout_proizvodnja_libre_konva
 # Port configuration
 export BACKEND_PORT_DEV=7998
 export BACKEND_PORT_PROD=7998
-export FRONTEND_PORT_DEV=8077
-export FRONTEND_PORT_PROD=8077
+export FRONTEND_PORT_DEV=8087
+export FRONTEND_PORT_PROD=8087
 ```
 
 ## Docker Deployment
@@ -84,7 +84,7 @@ docker-compose -f docker-compose.prod.yml down
 ### Services Included
 - **postgres_c**: PostgreSQL database
 - **backend**: FastAPI backend (port 7998)
-- **frontend**: React frontend (port 8077)
+- **frontend**: React frontend (port 8087)
 - **tileserver**: Map tiles server (port 7999)
 
 ## Manual Setup
@@ -125,11 +125,11 @@ If you get port conflicts, check what's using the ports:
 ```bash
 # Windows
 netstat -ano | findstr :7998
-netstat -ano | findstr :8077
+netstat -ano | findstr :8087
 
 # Linux
 sudo netstat -tulpn | grep :7998
-sudo netstat -tulpn | grep :8077
+sudo netstat -tulpn | grep :8087
 ```
 
 ### Database Connection Issues
@@ -166,7 +166,7 @@ factory-map-frontend-react/
 
 ### Health Checks
 - Backend: `http://localhost:7998/health` (or 7998 on Windows)
-- Frontend: `http://localhost:8077/health` (or 8077 on Windows)
+- Frontend: `http://localhost:8087/health` (or 8087 on Windows)
 
 ### Logs
 - **Development**: Check console output

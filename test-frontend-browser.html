@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Diagnostics</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Frontend Diagnostics Tool</h1>
+    
+    <div class="test-section">
+        <h2>1. Environment Detection</h2>
+        <div id="env-info"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Test Backend Connection</h2>
+        <button onclick="testBackend()">Test Backend (Port 7998)</button>
+        <div id="backend-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Test Tileserver Connection</h2>
+        <button onclick="testTileserver()">Test Tileserver (Port 7999)</button>
+        <div id="tileserver-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Test Tile JSON</h2>
+        <button onclick="testTileJSON()">Test Tile JSON</button>
+        <div id="tilejson-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. Test Actual Tile (PBF)</h2>
+        <button onclick="testTilePBF()">Test Tile PBF</button>
+        <div id="tilepbf-result"></div>
+    </div>
+
+    <script>
+        // Get hostname from URL parameter or use window.location.hostname
+        const urlParams = new URLSearchParams(window.location.search);
+        const customHostname = urlParams.get('hostname') || window.location.hostname || 'ecotech.utlth-ol.si';
+        
+        // Display environment info on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const hostname = customHostname;
+            const port = window.location.port;
+            const protocol = window.location.protocol.includes('file') ? 'http:' : window.location.protocol;
+            
+            document.getElementById('env-info').innerHTML = `
+                <div class="result">
+                    <strong>Current Location:</strong><br>
+                    Protocol: ${window.location.protocol}<br>
+                    Hostname: ${window.location.hostname || '(opened from file system)'}<br>
+                    Port: ${port || '(none)'}<br>
+                    Full URL: ${window.location.href}<br><br>
+                    
+                    <strong>Testing Hostname:</strong> <span style="color: blue; font-weight: bold;">${hostname}</span><br><br>
+                    
+                    <strong>Expected API URLs:</strong><br>
+                    Backend: http://${hostname}:7998<br>
+                    Tileserver: http://${hostname}:7999<br><br>
+                    
+                    <em>Note: If opened locally, add ?hostname=ecotech.utlth-ol.si to URL</em>
+                </div>
+            `;
+        });
+
+        async function testBackend() {
+            const hostname = customHostname;
+            const url = `http://${hostname}:7998/health`;
+            const resultDiv = document.getElementById('backend-result');
+            
+            resultDiv.innerHTML = `<div class="result">Testing ${url}...</div>`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <span class="success">✅ SUCCESS</span><br>
+                        URL: ${url}<br>
+                        Status: ${response.status}<br>
+                        Response: <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <span class="error">❌ ERROR</span><br>
+                        URL: ${url}<br>
+                        Error: ${error.message}<br>
+                        <br>
+                        <strong>Possible Issues:</strong><br>
+                        1. CORS not configured on backend<br>
+                        2. Backend not accessible from browser<br>
+                        3. Port 7998 not exposed or blocked by firewall
+                    </div>
+                `;
+            }
+        }
+
+        async function testTileserver() {
+            const hostname = customHostname;
+            const url = `http://${hostname}:7999/`;
+            const resultDiv = document.getElementById('tileserver-result');
+            
+            resultDiv.innerHTML = `<div class="result">Testing ${url}...</div>`;
+            
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+                
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <span class="success">✅ SUCCESS</span><br>
+                        URL: ${url}<br>
+                        Status: ${response.status}<br>
+                        Content-Type: ${response.headers.get('content-type')}<br>
+                        Response Length: ${text.length} bytes
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <span class="error">❌ ERROR</span><br>
+                        URL: ${url}<br>
+                        Error: ${error.message}<br>
+                        <br>
+                        <strong>Possible Issues:</strong><br>
+                        1. Tileserver not accessible from browser<br>
+                        2. Port 7999 not exposed or blocked by firewall
+                    </div>
+                `;
+            }
+        }
+
+        async function testTileJSON() {
+            const hostname = customHostname;
+            const url = `http://${hostname}:7999/data/LTH_factory.json`;
+            const resultDiv = document.getElementById('tilejson-result');
+            
+            resultDiv.innerHTML = `<div class="result">Testing ${url}...</div>`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <span class="success">✅ SUCCESS</span><br>
+                        URL: ${url}<br>
+                        Status: ${response.status}<br>
+                        Tile URL Pattern: ${data.tiles ? data.tiles[0] : 'N/A'}<br>
+                        Min Zoom: ${data.minzoom}<br>
+                        Max Zoom: ${data.maxzoom}
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <span class="error">❌ ERROR</span><br>
+                        URL: ${url}<br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testTilePBF() {
+            const hostname = customHostname;
+            const url = `http://${hostname}:7999/data/LTH_factory/7/69/45.pbf`;
+            const resultDiv = document.getElementById('tilepbf-result');
+            
+            resultDiv.innerHTML = `<div class="result">Testing ${url}...</div>`;
+            
+            try {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <span class="success">✅ SUCCESS</span><br>
+                        URL: ${url}<br>
+                        Status: ${response.status}<br>
+                        Content-Type: ${response.headers.get('content-type')}<br>
+                        Size: ${blob.size} bytes<br>
+                        <br>
+                        ${blob.size === 0 ? '<em>Note: Size is 0 bytes - this tile might be empty (204 No Content)</em>' : ''}
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <span class="error">❌ ERROR</span><br>
+                        URL: ${url}<br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
+

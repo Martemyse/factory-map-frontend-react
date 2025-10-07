@@ -13,8 +13,10 @@ services:
       - PG_USER=postgres
       - PG_PASSWORD=martinmi
       - PG_DB=layout_proizvodnja_libre_konva
-    ports:
-      - "7998:7998"
+    # Port 7998 is only accessible within Docker network (via Nginx proxy)
+    # No external port mapping needed
+    expose:
+      - "7998"
     networks:
       - postgres_network
     restart: unless-stopped
@@ -29,7 +31,7 @@ services:
       dockerfile: Dockerfile
     container_name: React_App_Factory_Map_Frontend
     ports:
-      - "8077:8077"
+      - "8087:8087"
     networks:
       - postgres_network
     restart: unless-stopped
@@ -40,8 +42,10 @@ services:
     container_name: factory_tileserver
     volumes:
       - ./infra/1_tippecanoe_tileserver/data:/data
-    ports:
-      - "7999:80"
+    # Port 80 is only accessible within Docker network (via Nginx proxy)
+    # No external port mapping needed
+    expose:
+      - "80"
     command: >
       tileserver-gl --port 80 --mbtiles /data/LTH_factory.mbtiles
     networks:

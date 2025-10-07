@@ -1,0 +1,84 @@
+feat: Implement Nginx reverse proxy for single-port production deployment
+
+## Problem Solved
+Previously, the application required ports 7998 (backend) and 7999 (tileserver) 
+to be exposed to the internet, which was blocked by the firewall causing 
+"Failed to fetch" errors in the browser.
+
+## Solution
+Implemented Nginx as a reverse proxy in the frontend container. Now only port 8087 
+needs to be open. Nginx routes:
+- `/` → Static React app
+- `/api/*` → Backend at internal port 7998
+- `/tiles/*` → Tileserver at internal port 80
+
+## Changes Made
+
+### Configuration Files
+- ✅ `apps/frontend/nginx.conf` - Uncommented and configured reverse proxy
+- ✅ `apps/frontend/Dockerfile` - Switched from `serve` to Nginx
+- ✅ `apps/frontend/src/config.ts` - Use relative paths (/api, /tiles) in production
+- ✅ `docker-compose.prod.yml` - Removed external port mappings for backend/tileserver
+- ✅ `apps/backend/Dockerfile` - Fixed healthcheck to use urllib instead of requests
+- ✅ `apps/backend/app/main.py` - Updated CORS for production
+
+### New Documentation
+- ✅ `PRODUCTION_DEPLOYMENT.md` - Complete production deployment guide
+- ✅ `NGINX_PROXY_SETUP.md` - Nginx architecture and configuration details
+- ✅ `CHANGES_SUMMARY.md` - Detailed changelog of all changes
+- ✅ `deploy-production.sh` - Automated deployment script
+- ✅ `test-deployment.sh` - Automated testing script
+- ✅ `test-frontend-browser.html` - Browser diagnostic tool
+- ✅ `README.md` - Updated with new architecture information
+
+## Port Configuration
+
+### Before (Problematic)
+- Frontend: 8087 ✅ (exposed)
+- Backend: 7998 ❌ (blocked by firewall)
+- Tileserver: 7999 ❌ (blocked by firewall)
+
+### After (Fixed)
+- Frontend (Nginx): 8087 ✅ (only exposed port)
+- Backend: Internal only (accessed via /api proxy)
+- Tileserver: Internal only (accessed via /tiles proxy)
+
+## Benefits
+- 🔒 Enhanced security (backend/tileserver not directly accessible)
+- 🚀 Simplified deployment (single port configuration)
+- ✅ No CORS issues (same-origin requests)
+- 🔧 Easy SSL/TLS integration
+- 📊 Better monitoring capabilities
+
+## Testing
+Verified with:
+- Container health checks all passing
+- Frontend loads correctly at http://ecotech.utlth-ol.si:8087
+- API requests routed through /api path
+- Tile requests routed through /tiles path
+- All network requests use port 8087 only
+
+## Deployment Instructions
+On production server:
+```bash
+git pull
+./deploy-production.sh
+```
+
+Or manually:
+```bash
+docker-compose -f docker-compose.prod.yml down
+docker-compose -f docker-compose.prod.yml up --build -d
+```
+
+## Verification
+```bash
+./test-deployment.sh
+```
+
+Expected result: All tests pass, application accessible at http://ecotech.utlth-ol.si:8087
+
+---
+
+Closes: Firewall blocking issue with ports 7998 and 7999
+

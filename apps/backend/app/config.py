@@ -24,8 +24,8 @@ class Settings(BaseModel):
   # Port configuration based on OS
   backend_port_dev: int = int(os.getenv('BACKEND_PORT_DEV', '7998'))
   backend_port_prod: int = int(os.getenv('BACKEND_PORT_PROD', '7998'))
-  frontend_port_dev: int = int(os.getenv('FRONTEND_PORT_DEV', '8077'))
-  frontend_port_prod: int = int(os.getenv('FRONTEND_PORT_PROD', '8077'))
+  frontend_port_dev: int = int(os.getenv('FRONTEND_PORT_DEV', '8087'))
+  frontend_port_prod: int = int(os.getenv('FRONTEND_PORT_PROD', '8087'))
 
   @property
   def pg_host(self) -> str:

@@ -12,16 +12,18 @@ const backendPort = 7998  // Both dev and prod use port 7998
 
 export const config = {
   // Backend API configuration
-  // In development: use localhost
-  // In production: use window.location.hostname to get the current host
+  // In development: use localhost directly
+  // In production: use relative paths (Nginx proxies /api -> backend:7998)
   API_BASE: isDevelopment 
     ? `http://localhost:${backendPort}` 
-    : `http://${window.location.hostname}:7998`,
+    : '/api',
   
   // Tileserver configuration
+  // In development: use localhost directly
+  // In production: use relative paths (Nginx proxies /tiles -> tileserver:80)
   TILESERVER_BASE: isDevelopment 
     ? 'http://localhost:7999' 
-    : `http://${window.location.hostname}:7999`,
+    : '/tiles',
   
   // Environment info
   isDevelopment,
@@ -29,7 +31,7 @@ export const config = {
   
   // Ports
   backendPort,
-  frontendPort: isDevelopment ? 8077 : 8077,
+  frontendPort: isDevelopment ? 8087 : 8087,
   
   // Debug info
   mode: import.meta.env.MODE
