@@ -20,10 +20,10 @@ export const config = {
   
   // Tileserver configuration
   // In development: use localhost directly
-  // In production: use relative paths (Nginx proxies /tiles -> tileserver:80)
+  // In production: use absolute URL (MapLibre GL needs absolute URLs for tiles)
   TILESERVER_BASE: isDevelopment 
     ? 'http://localhost:7999' 
-    : '/tiles',
+    : 'http://ecotech.utlth-ol.si:8087/tiles',
   
   // Environment info
   isDevelopment,
