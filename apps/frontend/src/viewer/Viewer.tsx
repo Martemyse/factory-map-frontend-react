@@ -6,6 +6,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import HierarchyNavigator from '../components/Hierarchy/HierarchyNavigator';
 import AnnotationEditModal from '../components/AnnotationModal/AnnotationEditModal';
+import AdvancedSearchModal, { type SearchFilters } from '../components/AdvancedSearchModal/AdvancedSearchModal';
 import type { HierarchyNode, Level } from '../model/types';
 import { config } from '../config';
 
@@ -103,6 +104,8 @@ export default function Viewer() {
 
   // Modal state for editing annotations
   const [editModalAnnotation, setEditModalAnnotation] = useState<HierarchyNode | null>(null);
+  const [advancedSearchFilters, setAdvancedSearchFilters] = useState<SearchFilters | null>(null);
+  const [isAdvancedSearchMode, setIsAdvancedSearchMode] = useState<boolean>(false);
 
   // Refs to avoid stale values during drag
   const checkedNodesRef = useRef<Set<string>>(new Set());
@@ -812,6 +815,102 @@ export default function Viewer() {
   }
 
 
+  // Load filtered annotations from backend using advanced search
+  async function loadFilteredAnnotations(filters: SearchFilters): Promise<HierarchyNode[]> {
+    try {
+      console.log('Loading filtered annotations with filters:', filters);
+      
+      // Build query parameters
+      const params = new URLSearchParams();
+      
+      if (filters.odlagalne_zone) {
+        params.append('odlagalne_zone', filters.odlagalne_zone);
+      }
+      if (filters.od_operacije) {
+        params.append('od_operacije', filters.od_operacije.toString());
+      }
+      if (filters.do_operacije) {
+        params.append('do_operacije', filters.do_operacije.toString());
+      }
+      if (filters.status && filters.status.length > 0) {
+        params.append('status', filters.status.join(','));
+      }
+      if (filters.artikel) {
+        params.append('artikel', filters.artikel);
+      }
+      if (filters.dodatne_oznake && filters.dodatne_oznake.length > 0) {
+        params.append('dodatne_oznake', filters.dodatne_oznake.join(','));
+      }
+      if (filters.mode) {
+        params.append('mode', filters.mode);
+      }
+      if (filters.indicator_mode) {
+        params.append('indicator_mode', filters.indicator_mode);
+      }
+      
+      const queryString = params.toString();
+      const url = queryString 
+        ? `${API_BASE}/advanced-search/annotations?${queryString}`
+        : `${API_BASE}/advanced-search/annotations`;
+      
+      console.log('Fetching from:', url);
+      const response = await fetch(url);
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Loaded filtered annotations:', data.total_count);
+      
+      // Convert the annotations to HierarchyNode format
+      const nodes: HierarchyNode[] = [];
+      
+      for (const annotation of data.annotations) {
+        // Extract geometry from the annotation
+        let polygon: [number, number][] = [];
+        
+        if (annotation.geom && annotation.geom.coordinates) {
+          if (annotation.geom.type === 'Polygon') {
+            polygon = annotation.geom.coordinates[0].map((coord: number[]) => [coord[0], coord[1]]);
+          } else if (annotation.geom.type === 'MultiPolygon') {
+            polygon = annotation.geom.coordinates[0][0].map((coord: number[]) => [coord[0], coord[1]]);
+          }
+        }
+        
+        if (polygon.length < 3) {
+          console.error('Invalid polygon for annotation', annotation.id, polygon);
+          continue;
+        }
+        
+        const node: HierarchyNode = {
+          id: `backend_${annotation.id}`,
+          remoteId: annotation.id,
+          name: annotation.name,
+          level: 'polje' as Level, // Default level for filtered annotations
+          color: annotation.color || colorByLevel('polje' as Level),
+          polygon: polygon,
+          children: [],
+          parentLocalId: undefined,
+          cona: annotation.cona,
+          max_capacity: annotation.max_capacity,
+          taken_capacity: annotation.taken_capacity, // Use the count from zabojniki
+          shape_gl: annotation.geom,
+          x_coord_gl: annotation.x_coord_gl,
+          y_coord_gl: annotation.y_coord_gl,
+        };
+        
+        nodes.push(node);
+      }
+      
+      return nodes;
+    } catch (error) {
+      console.error('Failed to load filtered annotations:', error);
+      return [];
+    }
+  }
+
   // Load annotations from backend using GL coordinates
   async function loadAnnotations(): Promise<HierarchyNode[]> {
     try {
@@ -1283,7 +1382,9 @@ export default function Viewer() {
   useEffect(() => {
     const setupMap = async () => {
       const [annotations] = await Promise.all([
-        loadAnnotations(),
+        isAdvancedSearchMode && advancedSearchFilters 
+          ? loadFilteredAnnotations(advancedSearchFilters)
+          : loadAnnotations(),
         loadFactoryLayout()
       ]);
 
@@ -1309,7 +1410,7 @@ export default function Viewer() {
     };
 
     setupMap();
-  }, []);
+  }, [isAdvancedSearchMode, advancedSearchFilters]);
 
   // Removed automatic post-load fit to avoid camera jumps
 
@@ -1741,34 +1842,89 @@ export default function Viewer() {
     background: '#3B82F6',
     color: 'white',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '8px',
     padding: '8px 12px',
     cursor: 'pointer',
     fontSize: '14px',
-    fontWeight: '500'
+    fontWeight: '500',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh' }}>
+    <div style={{ 
+      display: 'flex', 
+      height: '100vh', 
+      overflow: 'hidden',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+    }}>
       {/* Hierarchy Navigator */}
-      <div style={{ width: '300px', borderRight: '1px solid #ccc', padding: '10px' }}>
-        <h3>Factory Hierarchy</h3>
-        <button 
-          style={{ ...btn, marginBottom: '10px' }} 
-          onClick={() => setShowHierarchy(!showHierarchy)}
-        >
-          {showHierarchy ? 'Hide Hierarchy' : 'Show Hierarchy'}
-        </button>
-        {showHierarchy && (
-          <HierarchyNavigator
-            doc={doc}
-            onSelect={handleSelect}
-            checkedNodes={checkedNodes}
-            onNodeCheck={handleNodeCheck}
-            displayLevel={displayLevel}
-            onDisplayLevelChange={handleDisplayLevelChange}
-          />
-        )}
+      <div style={{ 
+        width: '300px', 
+        backgroundColor: 'black',
+        borderRight: '1px solid #e2e8f0',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
+      }}>
+        {/* Sidebar Header */}
+        <div style={{
+          // padding: '20px 16px',
+          borderBottom: '1px solid #e2e8f0',
+          backgroundColor: 'black',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <button 
+            style={{ 
+              ...btn, 
+              marginBottom: '0',
+              width: '100%',
+              padding: '10px 16px',
+              fontSize: '14px',
+              fontWeight: '500',
+              backgroundColor: showHierarchy ? '#ef4444' : '#3b82f6',
+              transition: 'all 0.2s ease',
+              display:'none',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
+            }} 
+            onClick={() => setShowHierarchy(!showHierarchy)}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.1)';
+            }}
+          >
+            {showHierarchy ? 'Skrij' : 'Prikaži'}
+          </button>
+        </div>
+
+        {/* Scrollable Hierarchy Content */}
+        <div style={{
+          flex: 1,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          {showHierarchy && (
+            <div style={{
+              flex: 1,
+              overflow: 'auto',
+              padding: '16px'
+            }}>
+              <HierarchyNavigator
+                doc={doc}
+                onSelect={handleSelect}
+                checkedNodes={checkedNodes}
+                onNodeCheck={handleNodeCheck}
+                displayLevel={displayLevel}
+                onDisplayLevelChange={handleDisplayLevelChange}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Map Container */}
@@ -1777,15 +1933,35 @@ export default function Viewer() {
         style={{ 
           flex: 1, 
           height: '100%',
-          position: 'relative'
+          position: 'relative',
+          overflow: 'hidden'
         }} 
       />
       
 
       {/* View Controls */}
-      <div style={{ position: 'absolute', left: '320px', top: '10px', zIndex: 1000, display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      <div style={{ 
+        position: 'absolute', 
+        left: '320px', 
+        top: '7px', 
+        zIndex: 1000, 
+        display: 'flex', 
+        gap: '12px', 
+        flexWrap: 'wrap',
+        maxWidth: 'calc(100vw - 340px)'
+      }}>
         <button
-          style={btn}
+          style={{
+            ...btn,
+            padding: '12px 20px',
+            fontSize: '14px',
+            fontWeight: '500',
+            backgroundColor: '#ffffff',
+            color: '#374151',
+            border: '1px solid #d1d5db',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            transition: 'all 0.2s ease'
+          }}
           onClick={() => {
             if (!map.current) return;
             // Center on factory layout bounds (derived from reference polygon and annotations)
@@ -1798,13 +1974,41 @@ export default function Viewer() {
               console.error('Failed to reset view:', e);
             }
           }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#f9fafb';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#ffffff';
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+          }}
         >
           Reset View
         </button>
         
         <button
-          style={{ ...btn, backgroundColor: '#10B981' }}
+          style={{ 
+            ...btn, 
+            backgroundColor: '#10b981',
+            padding: '12px 20px',
+            fontSize: '14px',
+            fontWeight: '500',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            transition: 'all 0.2s ease'
+          }}
           onClick={bringCheckedIntoView}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#059669';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#10b981';
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+          }}
         >
           Bring Selected into View
         </button>
@@ -1812,16 +2016,69 @@ export default function Viewer() {
         <button
           style={{ 
             ...btn, 
-            backgroundColor: vertexDragMode === 'free' ? '#EF4444' : '#10B981',
-            fontWeight: 'bold'
+            backgroundColor: vertexDragMode === 'free' ? '#ef4444' : '#10b981',
+            padding: '12px 20px',
+            fontSize: '14px',
+            fontWeight: '600',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            transition: 'all 0.2s ease'
           }}
           onClick={() => {
             const newMode = vertexDragMode === 'free' ? 'rectangular' : 'free';
             setVertexDragMode(newMode);
             console.log(`Vertex drag mode switched to: ${newMode}`);
           }}
+          onMouseEnter={(e) => {
+            const hoverColor = vertexDragMode === 'free' ? '#dc2626' : '#059669';
+            e.currentTarget.style.backgroundColor = hoverColor;
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            const normalColor = vertexDragMode === 'free' ? '#ef4444' : '#10b981';
+            e.currentTarget.style.backgroundColor = normalColor;
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+          }}
         >
           {vertexDragMode === 'free' ? 'Free Vertex Drag' : 'Rectangular Drag'}
+        </button>
+        
+        <button
+          style={{ 
+            ...btn, 
+            backgroundColor: isAdvancedSearchMode ? '#8b5cf6' : '#3b82f6',
+            padding: '12px 20px',
+            fontSize: '14px',
+            fontWeight: '600',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            transition: 'all 0.2s ease'
+          }}
+          onClick={() => {
+            if (isAdvancedSearchMode) {
+              // Reset to normal mode
+              setIsAdvancedSearchMode(false);
+              setAdvancedSearchFilters(null);
+            } else {
+              // Open advanced search modal
+              // For now, we'll just toggle the mode - the modal will be handled by the AnnotationEditModal
+              setIsAdvancedSearchMode(true);
+            }
+          }}
+          onMouseEnter={(e) => {
+            const hoverColor = isAdvancedSearchMode ? '#7c3aed' : '#2563eb';
+            e.currentTarget.style.backgroundColor = hoverColor;
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            const normalColor = isAdvancedSearchMode ? '#8b5cf6' : '#3b82f6';
+            e.currentTarget.style.backgroundColor = normalColor;
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+          }}
+        >
+          {isAdvancedSearchMode ? 'Exit Advanced Search' : 'Napredno iskanje'}
         </button>
       </div>
 
@@ -1833,6 +2090,21 @@ export default function Viewer() {
           onClose={() => setEditModalAnnotation(null)}
           onUpdateCapacity={(newCapacity) => {
             updateAnnotationCapacity(editModalAnnotation.id, newCapacity);
+          }}
+        />
+      )}
+
+      {/* Advanced Search Modal */}
+      {isAdvancedSearchMode && (
+        <AdvancedSearchModal
+          show={isAdvancedSearchMode}
+          onHide={() => {
+            setIsAdvancedSearchMode(false);
+            setAdvancedSearchFilters(null);
+          }}
+          onSearch={(filters) => {
+            setAdvancedSearchFilters(filters);
+            // The useEffect will trigger reload with new filters
           }}
         />
       )}

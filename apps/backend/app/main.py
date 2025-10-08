@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import layers, features
+from .api import advanced_search
 from .config import settings
 
 app = FastAPI(title='Factory Map Backend')
@@ -23,8 +24,8 @@ if settings.dev_mode:
     allowed_origins = [
         f"http://localhost:{settings.frontend_port}",
         f"http://127.0.0.1:{settings.frontend_port}",
-        "http://localhost:8087",
-        "http://127.0.0.1:8087",
+        "http://localhost:8077",
+        "http://127.0.0.1:8077",
     ]
     allow_credentials = True
 else:
@@ -42,5 +43,6 @@ app.add_middleware(
 
 app.include_router(layers.router)
 app.include_router(features.router)
+app.include_router(advanced_search.router, prefix="/api", tags=["advanced-search"])
 
 

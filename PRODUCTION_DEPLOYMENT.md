@@ -20,20 +20,20 @@ chmod +x test-deployment.sh
 
 ### Expected Result
 
-✅ Application accessible at: **http://ecotech.utlth-ol.si:8087**
+✅ Application accessible at: **http://ecotech.utlth-ol.si:8077**
 
 ## Architecture
 
 ### Single Port Access
 ```
                     ┌─────────────────────────────────┐
-                    │  Firewall: Only Port 8087 Open │
+                    │  Firewall: Only Port 8077 Open │
                     └─────────────────┬───────────────┘
                                       │
                                       ▼
                     ┌─────────────────────────────────┐
                     │   Nginx (Frontend Container)    │
-                    │         Port 8087               │
+                    │         Port 8077               │
                     └─────────────────┬───────────────┘
                                       │
                     ┌─────────────────┴─────────────────┐
@@ -58,9 +58,9 @@ chmod +x test-deployment.sh
 
 | URL Pattern | Nginx Action | Backend Service |
 |-------------|-------------|-----------------|
-| `http://ecotech.utlth-ol.si:8087/` | Serve static files | React App |
-| `http://ecotech.utlth-ol.si:8087/api/*` | Proxy to `http://React_App_Factory_Map_Backend:7998/` | FastAPI Backend |
-| `http://ecotech.utlth-ol.si:8087/tiles/*` | Proxy to `http://factory_tileserver:80/` | TileServer GL |
+| `http://ecotech.utlth-ol.si:8077/` | Serve static files | React App |
+| `http://ecotech.utlth-ol.si:8077/api/*` | Proxy to `http://React_App_Factory_Map_Backend:7998/` | FastAPI Backend |
+| `http://ecotech.utlth-ol.si:8077/tiles/*` | Proxy to `http://factory_tileserver:80/` | TileServer GL |
 
 ## Files Overview
 
@@ -108,15 +108,15 @@ sleep 45
 ### 5. Verify Deployment
 ```bash
 sudo docker ps
-curl http://localhost:8087/
-curl http://localhost:8087/api/health
-curl http://localhost:8087/tiles/
+curl http://localhost:8077/
+curl http://localhost:8077/api/health
+curl http://localhost:8077/tiles/
 ```
 
 ## Port Configuration
 
 ### ✅ Exposed Ports (External)
-- **8087** - Frontend (Nginx) - HTTP
+- **8077** - Frontend (Nginx) - HTTP
 
 ### 🔒 Internal Ports (Docker Network Only)
 - **7998** - Backend (FastAPI)
@@ -124,14 +124,14 @@ curl http://localhost:8087/tiles/
 
 ### Firewall Rules
 
-**Open port 8087 ONLY:**
+**Open port 8077 ONLY:**
 ```bash
 # UFW
-sudo ufw allow 8087/tcp
+sudo ufw allow 8077/tcp
 sudo ufw status
 
 # Firewalld
-sudo firewall-cmd --permanent --add-port=8087/tcp
+sudo firewall-cmd --permanent --add-port=8077/tcp
 sudo firewall-cmd --reload
 sudo firewall-cmd --list-ports
 ```
@@ -158,7 +158,7 @@ sudo docker ps
 Expected output:
 ```
 CONTAINER ID   IMAGE                      STATUS                    PORTS                    NAMES
-xxxxxxxxxx     ...frontend                Up X minutes (healthy)    0.0.0.0:8087->8087/tcp   React_App_Factory_Map_Frontend
+xxxxxxxxxx     ...frontend                Up X minutes (healthy)    0.0.0.0:8077->8077/tcp   React_App_Factory_Map_Frontend
 xxxxxxxxxx     ...backend                 Up X minutes (healthy)                             React_App_Factory_Map_Backend
 xxxxxxxxxx     maptiler/tileserver-gl     Up X minutes (healthy)                             factory_tileserver
 ```
@@ -166,21 +166,21 @@ xxxxxxxxxx     maptiler/tileserver-gl     Up X minutes (healthy)                
 ### 2. Health Checks
 ```bash
 # Frontend
-curl http://localhost:8087/health
+curl http://localhost:8077/health
 # Expected: "healthy"
 
 # API via proxy
-curl http://localhost:8087/api/health
+curl http://localhost:8077/api/health
 # Expected: {"status":"healthy","mode":"production",...}
 
 # Tiles via proxy
-curl -I http://localhost:8087/tiles/
+curl -I http://localhost:8077/tiles/
 # Expected: HTTP/1.1 200 OK
 ```
 
 ### 3. Browser Test
 
-**Open:** `http://ecotech.utlth-ol.si:8087/`
+**Open:** `http://ecotech.utlth-ol.si:8077/`
 
 **Press F12 (Developer Tools) → Console Tab**
 
@@ -196,7 +196,7 @@ TILESERVER_BASE: /tiles
 ```
 
 **Check Network Tab:**
-- All requests should go to `http://ecotech.utlth-ol.si:8087/*`
+- All requests should go to `http://ecotech.utlth-ol.si:8077/*`
 - No requests should go to ports 7998 or 7999
 - `/api/features/geojson` → 200 OK
 - `/tiles/data/LTH_factory/{z}/{x}/{y}.pbf` → 200/204
@@ -264,10 +264,10 @@ sudo docker compose -f docker-compose.prod.yml up --build -d react_app_factory_m
 **Check if proxying works:**
 ```bash
 # Test API proxy
-curl http://localhost:8087/api/health
+curl http://localhost:8077/api/health
 
 # Test tiles proxy
-curl http://localhost:8087/tiles/data/LTH_factory.json
+curl http://localhost:8077/tiles/data/LTH_factory.json
 ```
 
 ### Issue: Old Version Still Showing
@@ -322,11 +322,11 @@ sudo docker stats React_App_Factory_Map_Frontend
 sudo docker network inspect 2_react_app_factory_map_frontend_postgres_network
 
 # Check which ports are listening
-sudo netstat -tulpn | grep -E "8087|7998|7999"
-# Should only see 8087!
+sudo netstat -tulpn | grep -E "8077|7998|7999"
+# Should only see 8077!
 
 # Check connections
-sudo ss -tulpn | grep 8087
+sudo ss -tulpn | grep 8077
 ```
 
 ## Backup & Rollback
@@ -380,7 +380,7 @@ location /tiles/ {
 sudo docker exec React_App_Factory_Map_Frontend tail -f /var/log/nginx/access.log
 
 # Response times
-curl -w "@curl-format.txt" -o /dev/null -s http://localhost:8087/api/health
+curl -w "@curl-format.txt" -o /dev/null -s http://localhost:8077/api/health
 ```
 
 ## Security Best Practices
@@ -399,7 +399,7 @@ sudo certbot --nginx -d ecotech.utlth-ol.si
 
 In `apps/backend/app/main.py`:
 ```python
-allowed_origins = ["http://ecotech.utlth-ol.si:8087"]  # Instead of ["*"]
+allowed_origins = ["http://ecotech.utlth-ol.si:8077"]  # Instead of ["*"]
 ```
 
 ### 3. Add Rate Limiting
@@ -494,12 +494,12 @@ sudo docker exec React_App_Factory_Map_Frontend wget -O- http://React_App_Factor
 ✅ Deployment is successful when:
 
 1. All three containers show `(healthy)` status
-2. Port 8087 is listening, ports 7998 and 7999 are NOT exposed
-3. `http://ecotech.utlth-ol.si:8087/` loads the application
+2. Port 8077 is listening, ports 7998 and 7999 are NOT exposed
+3. `http://ecotech.utlth-ol.si:8077/` loads the application
 4. Browser console shows `/api` and `/tiles` (relative paths)
 5. Map loads and renders tiles correctly
 6. No CORS errors in browser console
-7. All network requests go to port 8087 only
+7. All network requests go to port 8077 only
 
 ---
 

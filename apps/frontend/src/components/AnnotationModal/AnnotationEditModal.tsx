@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { config } from '../../config';
+import AdvancedSearchModal, { type SearchFilters } from '../AdvancedSearchModal/AdvancedSearchModal';
 
 interface AnnotationEditModalProps {
   annotationName: string;
@@ -23,16 +24,57 @@ export default function AnnotationEditModal({
   onUpdateCapacity
 }: AnnotationEditModalProps) {
   const [capacity, setCapacity] = useState<string>(maxCapacity?.toString() || '0');
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [searchFilters, setSearchFilters] = useState<SearchFilters>({});
   const locationCode = extractNumberFromName(annotationName);
 
   // Determine the iframe URL based on environment
   const baseUrl = config.isDevelopment 
     ? 'http://127.0.0.1:8050' 
-    : 'http://ecotech.utlth-ol.si:8087/iframe';
+    : 'http://ecotech.utlth-ol.si:8077/iframe';
   
-  const iframeUrl = locationCode 
-    ? `${baseUrl}/findzabojnikilokacije?input_odlagalne_zone=${locationCode}`
-    : `${baseUrl}/findzabojnikilokacije`;
+  // Build iframe URL with search filters
+  const buildIframeUrl = () => {
+    const params = new URLSearchParams();
+    
+    // Add location code if available
+    if (locationCode) {
+      params.append('input_odlagalne_zone', locationCode);
+    }
+    
+    // Add search filters
+    if (searchFilters.odlagalne_zone) {
+      params.set('input_odlagalne_zone', searchFilters.odlagalne_zone);
+    }
+    if (searchFilters.od_operacije) {
+      params.append('input_od_operacije', searchFilters.od_operacije.toString());
+    }
+    if (searchFilters.do_operacije) {
+      params.append('input_do_operacije', searchFilters.do_operacije.toString());
+    }
+    if (searchFilters.status && searchFilters.status.length > 0) {
+      params.append('dropdown_status', searchFilters.status.join(','));
+    }
+    if (searchFilters.artikel) {
+      params.append('input_artikel', searchFilters.artikel);
+    }
+    if (searchFilters.dodatne_oznake && searchFilters.dodatne_oznake.length > 0) {
+      params.append('logistika_dropdown_dodatne_oznake', searchFilters.dodatne_oznake.join(','));
+    }
+    if (searchFilters.mode) {
+      params.append('radiobutton_mode_agg', searchFilters.mode);
+    }
+    if (searchFilters.indicator_mode) {
+      params.append('radiobutton_indicator_mode', searchFilters.indicator_mode);
+    }
+    
+    const queryString = params.toString();
+    return queryString 
+      ? `${baseUrl}/findzabojnikilokacije?${queryString}`
+      : `${baseUrl}/findzabojnikilokacije`;
+  };
+  
+  const iframeUrl = buildIframeUrl();
 
   // Update capacity immediately when input changes
   const handleCapacityChange = (value: string) => {
@@ -187,6 +229,44 @@ export default function AnnotationEditModal({
             </div>
           )}
 
+          {/* Advanced Search Button */}
+          <div style={{
+            display: 'flex',
+            gap: '12px',
+            alignItems: 'center'
+          }}>
+            <button
+              onClick={() => setShowAdvancedSearch(true)}
+              style={{
+                padding: '10px 16px',
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3b82f6'}
+            >
+              Napredno iskanje
+            </button>
+            {Object.keys(searchFilters).length > 0 && (
+              <div style={{
+                padding: '6px 12px',
+                backgroundColor: '#f0f9ff',
+                border: '1px solid #bfdbfe',
+                borderRadius: '4px',
+                fontSize: '12px',
+                color: '#1e40af'
+              }}>
+                Filters applied: {Object.keys(searchFilters).length}
+              </div>
+            )}
+          </div>
+
           {/* Iframe */}
           <div style={{ 
             flex: 1,
@@ -215,6 +295,16 @@ export default function AnnotationEditModal({
           </div>
         </div>
       </div>
+
+      {/* Advanced Search Modal */}
+      <AdvancedSearchModal
+        show={showAdvancedSearch}
+        onHide={() => setShowAdvancedSearch(false)}
+        onSearch={(filters) => {
+          setSearchFilters(filters);
+          setShowAdvancedSearch(false);
+        }}
+      />
     </div>
   );
 }

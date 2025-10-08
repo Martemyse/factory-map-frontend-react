@@ -44,7 +44,7 @@ A modern, interactive factory mapping and monitoring application built with Reac
    ```
 
 4. **Open your browser**
-   Navigate to `http://localhost:8087`
+   Navigate to `http://localhost:8077`
 
 ## 🏗️ Project Structure
 

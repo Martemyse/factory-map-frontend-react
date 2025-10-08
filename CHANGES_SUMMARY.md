@@ -4,7 +4,7 @@
 The application required ports 7998 (backend) and 7999 (tileserver) to be exposed and accessible from the internet, which was blocked by firewall. This created "Failed to fetch" errors in the browser.
 
 ## Solution
-Implemented **Nginx as a reverse proxy** so only port 8087 needs to be open. Nginx routes:
+Implemented **Nginx as a reverse proxy** so only port 8077 needs to be open. Nginx routes:
 - `/api/*` → Backend (internal port 7998)
 - `/tiles/*` → Tileserver (internal port 80)
 - `/*` → Static React app
@@ -15,7 +15,7 @@ Implemented **Nginx as a reverse proxy** so only port 8087 needs to be open. Ngi
 **Status**: Uncommented and configured
 
 **Changes**:
-- Enabled Nginx server on port 8087
+- Enabled Nginx server on port 8077
 - Added proxy for `/api/` → `http://React_App_Factory_Map_Backend:7998/`
 - Added proxy for `/tiles/` → `http://factory_tileserver:80/`
 - Added health check endpoint at `/health`
@@ -30,7 +30,7 @@ Implemented **Nginx as a reverse proxy** so only port 8087 needs to be open. Ngi
 # Before: Node.js with 'serve' package
 FROM node:18-alpine
 RUN npm install -g serve
-CMD ["serve", "-s", "dist", "-l", "8087"]
+CMD ["serve", "-s", "dist", "-l", "8077"]
 
 # After: Nginx
 FROM nginx:alpine
@@ -104,7 +104,7 @@ CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:7
 ```python
 # Production mode: Allow all origins (since Nginx proxies)
 if settings.dev_mode:
-    allowed_origins = ["http://localhost:8087", ...]
+    allowed_origins = ["http://localhost:8077", ...]
 else:
     allowed_origins = ["*"]  # Nginx handles origin
 ```
@@ -140,14 +140,14 @@ Browser-based diagnostic tool to test:
 ### Before (Problematic)
 | Service | External Port | Firewall Requirement |
 |---------|--------------|---------------------|
-| Frontend | 8087 | ✅ Open |
+| Frontend | 8077 | ✅ Open |
 | Backend | 7998 | ❌ Blocked (PROBLEM) |
 | Tileserver | 7999 | ❌ Blocked (PROBLEM) |
 
 ### After (Fixed)
 | Service | External Port | Firewall Requirement |
 |---------|--------------|---------------------|
-| Frontend (Nginx) | 8087 | ✅ Open (ONLY THIS) |
+| Frontend (Nginx) | 8077 | ✅ Open (ONLY THIS) |
 | Backend | - | Internal only |
 | Tileserver | - | Internal only |
 
@@ -155,16 +155,16 @@ Browser-based diagnostic tool to test:
 
 ### Before
 ```
-Browser → http://ecotech.utlth-ol.si:8087 → Frontend ✅
+Browser → http://ecotech.utlth-ol.si:8077 → Frontend ✅
 Browser → http://ecotech.utlth-ol.si:7998 → Backend ❌ (firewall blocked)
 Browser → http://ecotech.utlth-ol.si:7999 → Tileserver ❌ (firewall blocked)
 ```
 
 ### After
 ```
-Browser → http://ecotech.utlth-ol.si:8087/ → Nginx → React App ✅
-Browser → http://ecotech.utlth-ol.si:8087/api → Nginx → Backend:7998 ✅
-Browser → http://ecotech.utlth-ol.si:8087/tiles → Nginx → Tileserver:80 ✅
+Browser → http://ecotech.utlth-ol.si:8077/ → Nginx → React App ✅
+Browser → http://ecotech.utlth-ol.si:8077/api → Nginx → Backend:7998 ✅
+Browser → http://ecotech.utlth-ol.si:8077/tiles → Nginx → Tileserver:80 ✅
 ```
 
 ## Deployment Steps
@@ -203,15 +203,15 @@ sudo docker ps
 
 ### 1. From Linux Server (localhost)
 ```bash
-curl http://localhost:8087/                          # Frontend HTML
-curl http://localhost:8087/health                    # Nginx health
-curl http://localhost:8087/api/health                # Backend via proxy
-curl http://localhost:8087/tiles/                    # Tileserver via proxy
-curl http://localhost:8087/tiles/data/LTH_factory.json  # Tile JSON
+curl http://localhost:8077/                          # Frontend HTML
+curl http://localhost:8077/health                    # Nginx health
+curl http://localhost:8077/api/health                # Backend via proxy
+curl http://localhost:8077/tiles/                    # Tileserver via proxy
+curl http://localhost:8077/tiles/data/LTH_factory.json  # Tile JSON
 ```
 
 ### 2. From Browser (external)
-Open: `http://ecotech.utlth-ol.si:8087/`
+Open: `http://ecotech.utlth-ol.si:8077/`
 
 **Press F12 to check console:**
 ```
@@ -225,7 +225,7 @@ TILESERVER_BASE: /tiles           ← Should be /tiles (not full URL)
 ```
 
 **Check Network tab:**
-- All requests should go to `http://ecotech.utlth-ol.si:8087/*`
+- All requests should go to `http://ecotech.utlth-ol.si:8077/*`
 - No requests to ports 7998 or 7999
 - `/api/*` and `/tiles/*` should return 200
 
@@ -255,11 +255,11 @@ TILESERVER_BASE: /tiles           ← Should be /tiles (not full URL)
 
 - [ ] All containers running: `sudo docker ps`
 - [ ] All containers healthy: Check STATUS column
-- [ ] Port 8087 listening: `sudo netstat -tulpn | grep 8087`
+- [ ] Port 8077 listening: `sudo netstat -tulpn | grep 8077`
 - [ ] Ports 7998, 7999 NOT exposed: `sudo netstat -tulpn | grep -E "7998|7999"` should be empty
-- [ ] Frontend loads: `http://ecotech.utlth-ol.si:8087/`
+- [ ] Frontend loads: `http://ecotech.utlth-ol.si:8077/`
 - [ ] Browser console shows `/api` and `/tiles` (not full URLs)
-- [ ] Network tab shows all requests to port 8087
+- [ ] Network tab shows all requests to port 8077
 - [ ] Map loads and tiles render
 
 ## Troubleshooting
@@ -318,7 +318,7 @@ feat: Implement Nginx reverse proxy for single-port deployment
 - Add deployment documentation and test scripts
 
 This change allows the entire application to be accessed through
-a single port (8087), simplifying firewall configuration and
+a single port (8077), simplifying firewall configuration and
 improving security. Only the frontend port needs to be exposed;
 backend and tileserver are now internal-only services accessed
 via Nginx reverse proxy.

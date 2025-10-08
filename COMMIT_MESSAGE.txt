@@ -6,7 +6,7 @@ to be exposed to the internet, which was blocked by the firewall causing
 "Failed to fetch" errors in the browser.
 
 ## Solution
-Implemented Nginx as a reverse proxy in the frontend container. Now only port 8087 
+Implemented Nginx as a reverse proxy in the frontend container. Now only port 8077 
 needs to be open. Nginx routes:
 - `/` → Static React app
 - `/api/*` → Backend at internal port 7998
@@ -34,12 +34,12 @@ needs to be open. Nginx routes:
 ## Port Configuration
 
 ### Before (Problematic)
-- Frontend: 8087 ✅ (exposed)
+- Frontend: 8077 ✅ (exposed)
 - Backend: 7998 ❌ (blocked by firewall)
 - Tileserver: 7999 ❌ (blocked by firewall)
 
 ### After (Fixed)
-- Frontend (Nginx): 8087 ✅ (only exposed port)
+- Frontend (Nginx): 8077 ✅ (only exposed port)
 - Backend: Internal only (accessed via /api proxy)
 - Tileserver: Internal only (accessed via /tiles proxy)
 
@@ -53,10 +53,10 @@ needs to be open. Nginx routes:
 ## Testing
 Verified with:
 - Container health checks all passing
-- Frontend loads correctly at http://ecotech.utlth-ol.si:8087
+- Frontend loads correctly at http://ecotech.utlth-ol.si:8077
 - API requests routed through /api path
 - Tile requests routed through /tiles path
-- All network requests use port 8087 only
+- All network requests use port 8077 only
 
 ## Deployment Instructions
 On production server:
@@ -76,7 +76,7 @@ docker-compose -f docker-compose.prod.yml up --build -d
 ./test-deployment.sh
 ```
 
-Expected result: All tests pass, application accessible at http://ecotech.utlth-ol.si:8087
+Expected result: All tests pass, application accessible at http://ecotech.utlth-ol.si:8077
 
 ---
 

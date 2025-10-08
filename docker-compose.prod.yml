@@ -31,7 +31,7 @@ services:
       dockerfile: Dockerfile
     container_name: React_App_Factory_Map_Frontend
     ports:
-      - "8087:8087"
+      - "8077:8077"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:

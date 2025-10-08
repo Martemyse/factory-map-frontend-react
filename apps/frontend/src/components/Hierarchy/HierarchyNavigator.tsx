@@ -254,10 +254,7 @@ export default function HierarchyNavigator({
         flexDirection: 'column',
         gap: '8px'
       }}>
-        <span style={{ fontWeight: 600, fontSize: '14px' }}>
-          Factory Hierarchy
-        </span>
-        
+
         {/* Display Level Dropdown */}
         {onDisplayLevelChange && (
           <div>
