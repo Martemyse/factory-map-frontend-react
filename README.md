@@ -14,7 +14,7 @@ start_dev.bat
 cd apps\backend
 python run_server.py
 
-# Frontend (Port 8077) 
+# Frontend (Port 8082) 
 cd apps\frontend
 npm install
 npm run dev
@@ -28,7 +28,7 @@ npm run dev
 # Or manually:
 docker-compose -f docker-compose.prod.yml up --build -d
 
-# Access at: http://ecotech.utlth-ol.si:8077
+# Access at: http://ecotech.utlth-ol.si:8082
 ```
 
 📚 **[See Full Production Deployment Guide →](PRODUCTION_DEPLOYMENT.md)**
@@ -87,10 +87,10 @@ Uses PostgreSQL with PostGIS extension for spatial data storage and queries.
 ## Architecture
 
 ### Production Setup
-All services are accessible through a single port (8077) using Nginx as a reverse proxy:
+All services are accessible through a single port (8082) using Nginx as a reverse proxy:
 
 ```
-Browser (Port 8077)
+Browser (Port 8082)
     ├── / → Static React App
     ├── /api/* → Backend (FastAPI on port 7998)
     └── /tiles/* → Tileserver (TileServer GL on port 80)

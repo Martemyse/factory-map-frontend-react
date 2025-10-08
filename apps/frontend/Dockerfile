@@ -28,12 +28,12 @@ COPY --from=builder /app/public /usr/share/nginx/html/assets
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 8077
-EXPOSE 8077
+# Expose port 8082
+EXPOSE 8082
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8077/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8082/health || exit 1
 
 # Start Nginx
 CMD ["nginx", "-g", "daemon off;"]

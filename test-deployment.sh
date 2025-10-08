@@ -34,19 +34,19 @@ echo "Backend: $BACKEND_HEALTH"
 echo "Tileserver: $TILESERVER_HEALTH"
 echo ""
 
-# Test 3: Check port 8077 is listening
-echo -e "${YELLOW}3. Checking port 8077...${NC}"
-if sudo netstat -tulpn | grep -q ":8077"; then
-    echo -e "${GREEN}✓ Port 8077 is listening${NC}"
+# Test 3: Check port 8082 is listening
+echo -e "${YELLOW}3. Checking port 8082...${NC}"
+if sudo netstat -tulpn | grep -q ":8082"; then
+    echo -e "${GREEN}✓ Port 8082 is listening${NC}"
 else
-    echo -e "${RED}✗ Port 8077 is NOT listening${NC}"
+    echo -e "${RED}✗ Port 8082 is NOT listening${NC}"
     exit 1
 fi
 echo ""
 
 # Test 4: Test frontend HTML
-echo -e "${YELLOW}4. Testing frontend (http://localhost:8077/)...${NC}"
-FRONTEND_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8077/)
+echo -e "${YELLOW}4. Testing frontend (http://localhost:8082/)...${NC}"
+FRONTEND_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8082/)
 if [ "$FRONTEND_RESPONSE" = "200" ]; then
     echo -e "${GREEN}✓ Frontend responding (HTTP $FRONTEND_RESPONSE)${NC}"
 else
@@ -56,7 +56,7 @@ echo ""
 
 # Test 5: Test Nginx health endpoint
 echo -e "${YELLOW}5. Testing Nginx health endpoint...${NC}"
-HEALTH_RESPONSE=$(curl -s http://localhost:8077/health)
+HEALTH_RESPONSE=$(curl -s http://localhost:8082/health)
 if [ "$HEALTH_RESPONSE" = "healthy" ]; then
     echo -e "${GREEN}✓ Nginx health check passed${NC}"
 else
@@ -65,8 +65,8 @@ fi
 echo ""
 
 # Test 6: Test API proxy
-echo -e "${YELLOW}6. Testing API proxy (http://localhost:8077/api/health)...${NC}"
-API_RESPONSE=$(curl -s http://localhost:8077/api/health)
+echo -e "${YELLOW}6. Testing API proxy (http://localhost:8082/api/health)...${NC}"
+API_RESPONSE=$(curl -s http://localhost:8082/api/health)
 if echo "$API_RESPONSE" | grep -q "healthy"; then
     echo -e "${GREEN}✓ API proxy working${NC}"
     echo "Response: $API_RESPONSE"
@@ -77,8 +77,8 @@ fi
 echo ""
 
 # Test 7: Test tileserver proxy
-echo -e "${YELLOW}7. Testing tileserver proxy (http://localhost:8077/tiles/)...${NC}"
-TILES_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8077/tiles/)
+echo -e "${YELLOW}7. Testing tileserver proxy (http://localhost:8082/tiles/)...${NC}"
+TILES_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8082/tiles/)
 if [ "$TILES_RESPONSE" = "200" ]; then
     echo -e "${GREEN}✓ Tileserver proxy working (HTTP $TILES_RESPONSE)${NC}"
 else
@@ -87,8 +87,8 @@ fi
 echo ""
 
 # Test 8: Test tile JSON
-echo -e "${YELLOW}8. Testing tile JSON (http://localhost:8077/tiles/data/LTH_factory.json)...${NC}"
-TILEJSON_RESPONSE=$(curl -s http://localhost:8077/tiles/data/LTH_factory.json | jq -r '.id' 2>/dev/null)
+echo -e "${YELLOW}8. Testing tile JSON (http://localhost:8082/tiles/data/LTH_factory.json)...${NC}"
+TILEJSON_RESPONSE=$(curl -s http://localhost:8082/tiles/data/LTH_factory.json | jq -r '.id' 2>/dev/null)
 if [ "$TILEJSON_RESPONSE" = "LTH_factory" ]; then
     echo -e "${GREEN}✓ Tile JSON accessible${NC}"
 else
@@ -104,8 +104,8 @@ echo "Hostname: $HOSTNAME"
 echo "IP Address: $IP"
 echo ""
 echo "Access from browser:"
-echo -e "${GREEN}http://$IP:8077${NC}"
-echo -e "${GREEN}http://ecotech.utlth-ol.si:8077${NC}"
+echo -e "${GREEN}http://$IP:8082${NC}"
+echo -e "${GREEN}http://ecotech.utlth-ol.si:8082${NC}"
 echo ""
 
 # Test 10: Check Nginx config
@@ -123,7 +123,7 @@ echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}  Summary${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
-echo "1. All services should be accessible through port 8077 ONLY"
+echo "1. All services should be accessible through port 8082 ONLY"
 echo "2. Ports 7998 and 7999 should NOT be exposed to host"
 echo "3. Nginx routes:"
 echo "   - / → Static React app"

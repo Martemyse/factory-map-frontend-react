@@ -2,20 +2,20 @@
 
 ## Architecture Overview
 
-This application uses **Nginx as a reverse proxy** to handle all external traffic through a single port (8077). This provides better security and simplifies firewall configuration.
+This application uses **Nginx as a reverse proxy** to handle all external traffic through a single port (8082). This provides better security and simplifies firewall configuration.
 
 ### Port Configuration
 
 | Service | Internal Port | External Port | Access |
 |---------|--------------|---------------|---------|
-| Frontend (Nginx) | 8077 | 8077 | ✅ Public |
+| Frontend (Nginx) | 8082 | 8082 | ✅ Public |
 | Backend API | 7998 | - | ❌ Internal only |
 | Tileserver | 80 | - | ❌ Internal only |
 
 ### Request Flow
 
 ```
-Browser → http://ecotech.utlth-ol.si:8077/
+Browser → http://ecotech.utlth-ol.si:8082/
          ├─ / → Nginx serves static React app
          ├─ /api/* → Nginx proxies to Backend:7998
          └─ /tiles/* → Nginx proxies to Tileserver:80
@@ -24,14 +24,14 @@ Browser → http://ecotech.utlth-ol.si:8077/
 ## Why Use Nginx?
 
 ### ✅ Advantages
-1. **Single Port**: Only port 8077 needs to be open in firewall
+1. **Single Port**: Only port 8082 needs to be open in firewall
 2. **Security**: Backend and tileserver are not directly exposed
 3. **CORS**: No CORS issues since all requests appear to come from same origin
 4. **Caching**: Nginx can cache static assets and tiles
 5. **SSL/TLS**: Easy to add HTTPS with Let's Encrypt
 
 ### ❌ Without Nginx (previous setup)
-- Required ports 8077, 7998, 7999 all open
+- Required ports 8082, 7998, 7999 all open
 - CORS configuration needed on backend
 - Browser directly connects to multiple services
 - More firewall rules needed
@@ -42,7 +42,7 @@ Browser → http://ecotech.utlth-ol.si:8077/
 
 ```nginx
 server {
-    listen 8077;
+    listen 8082;
     server_name _;
     
     # Serve static React app
@@ -89,10 +89,10 @@ services:
     expose:
       - "7998"  # Only accessible within Docker network
     
-  # Frontend - Nginx with port 8077
+  # Frontend - Nginx with port 8082
   react_app_factory_map_frontend:
     ports:
-      - "8077:8077"  # Only port exposed to host
+      - "8082:8082"  # Only port exposed to host
     
   # Tileserver - no external port
   tileserver:
@@ -125,28 +125,28 @@ sudo docker ps
 
 ```bash
 # Check Nginx is serving frontend
-curl http://localhost:8077/
+curl http://localhost:8082/
 
 # Check health endpoint
-curl http://localhost:8077/health
+curl http://localhost:8082/health
 
 # Check API proxy
-curl http://localhost:8077/api/health
+curl http://localhost:8082/api/health
 
 # From browser
-open http://ecotech.utlth-ol.si:8077/
+open http://ecotech.utlth-ol.si:8082/
 ```
 
 ### 3. Firewall Configuration
 
-Only port 8077 needs to be open:
+Only port 8082 needs to be open:
 
 ```bash
 # UFW
-sudo ufw allow 8077/tcp
+sudo ufw allow 8082/tcp
 
 # Firewalld
-sudo firewall-cmd --permanent --add-port=8077/tcp
+sudo firewall-cmd --permanent --add-port=8082/tcp
 sudo firewall-cmd --reload
 
 # Close previously opened ports (if any)
@@ -166,10 +166,10 @@ sudo docker logs React_App_Factory_Map_Frontend
 **Check if proxying works:**
 ```bash
 # Should return backend health
-curl http://localhost:8077/api/health
+curl http://localhost:8082/api/health
 
 # Should return tileserver HTML
-curl http://localhost:8077/tiles/
+curl http://localhost:8082/tiles/
 ```
 
 ### Issue: 502 Bad Gateway
@@ -198,7 +198,7 @@ sudo docker compose -f docker-compose.prod.yml up --build -d react_app_factory_m
 
 ## Browser Console Debugging
 
-When you open `http://ecotech.utlth-ol.si:8077/`, the console should show:
+When you open `http://ecotech.utlth-ol.si:8082/`, the console should show:
 
 ```
 === Frontend Configuration ===
@@ -212,13 +212,13 @@ TILESERVER_BASE: /tiles
 
 ### Expected Network Requests
 
-1. `http://ecotech.utlth-ol.si:8077/` → 200 (HTML)
-2. `http://ecotech.utlth-ol.si:8077/assets/index-XXX.js` → 200 (JS)
-3. `http://ecotech.utlth-ol.si:8077/assets/index-XXX.css` → 200 (CSS)
-4. `http://ecotech.utlth-ol.si:8077/api/features/geojson` → 200 (API)
-5. `http://ecotech.utlth-ol.si:8077/tiles/data/LTH_factory/{z}/{x}/{y}.pbf` → 200/204 (Tiles)
+1. `http://ecotech.utlth-ol.si:8082/` → 200 (HTML)
+2. `http://ecotech.utlth-ol.si:8082/assets/index-XXX.js` → 200 (JS)
+3. `http://ecotech.utlth-ol.si:8082/assets/index-XXX.css` → 200 (CSS)
+4. `http://ecotech.utlth-ol.si:8082/api/features/geojson` → 200 (API)
+5. `http://ecotech.utlth-ol.si:8082/tiles/data/LTH_factory/{z}/{x}/{y}.pbf` → 200/204 (Tiles)
 
-**All requests go to port 8077** - Nginx handles the routing internally!
+**All requests go to port 8082** - Nginx handles the routing internally!
 
 ## Development vs Production
 
@@ -229,8 +229,8 @@ TILESERVER_BASE: /tiles
 - All ports exposed
 
 ### Production (Linux)
-- Everything: `http://ecotech.utlth-ol.si:8077`
-- Only port 8077 exposed
+- Everything: `http://ecotech.utlth-ol.si:8082`
+- Only port 8082 exposed
 - Nginx routes `/api` and `/tiles`
 
 ## Next Steps

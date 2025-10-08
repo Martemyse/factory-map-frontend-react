@@ -73,9 +73,9 @@ echo ""
 
 # Step 6: Quick health check
 echo -e "${YELLOW}Step 6: Running health checks...${NC}"
-FRONTEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8077/)
-API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8077/api/health)
-TILES_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8077/tiles/)
+FRONTEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8082/)
+API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8082/api/health)
+TILES_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8082/tiles/)
 
 if [ "$FRONTEND_STATUS" = "200" ]; then
     echo -e "${GREEN}✓ Frontend: OK (HTTP $FRONTEND_STATUS)${NC}"
@@ -103,8 +103,8 @@ echo -e "${BLUE}================================================${NC}"
 echo ""
 IP=$(hostname -I | awk '{print $1}')
 echo -e "Access the application at:"
-echo -e "  ${GREEN}http://$IP:8077${NC}"
-echo -e "  ${GREEN}http://ecotech.utlth-ol.si:8077${NC}"
+echo -e "  ${GREEN}http://$IP:8082${NC}"
+echo -e "  ${GREEN}http://ecotech.utlth-ol.si:8082${NC}"
 echo ""
 echo "Useful commands:"
 echo "  ${BLUE}sudo docker ps${NC}                                    # Check container status"

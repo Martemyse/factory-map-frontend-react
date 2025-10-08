@@ -118,13 +118,13 @@
 
 ### React App (Advanced Search):
 ```
-http://ecotech.utlth-ol.si:8077/
+http://ecotech.utlth-ol.si:8082/
 # Click "Napredno iskanje", set filters
 ```
 
 ### Iframe (Dash App) with Filters:
 ```
-http://ecotech.utlth-ol.si:8077/iframe/findzabojnikilokacije?input_odlagalne_zone=5012&input_artikel=02&dropdown_status=Prevzeto&input_od_operacije=30&input_do_operacije=200
+http://ecotech.utlth-ol.si:8082/iframe/findzabojnikilokacije?input_odlagalne_zone=5012&input_artikel=02&dropdown_status=Prevzeto&input_od_operacije=30&input_do_operacije=200
 ```
 
 ## Testing Checklist

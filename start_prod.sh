@@ -36,7 +36,7 @@ BACKEND_PID=$!
 echo "Waiting for backend to start..."
 sleep 3
 
-echo "Starting Frontend Server (Port 8077)..."
+echo "Starting Frontend Server (Port 8082)..."
 cd ../frontend
 npm run dev &
 FRONTEND_PID=$!
@@ -44,7 +44,7 @@ FRONTEND_PID=$!
 echo
 echo "Both servers are starting..."
 echo "Backend: http://localhost:7998"
-echo "Frontend: http://localhost:8077"
+echo "Frontend: http://localhost:8082"
 echo
 echo "Backend PID: $BACKEND_PID"
 echo "Frontend PID: $FRONTEND_PID"

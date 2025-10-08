@@ -106,7 +106,7 @@ WHERE cona = ANY(:odlagalne_cone)
 - Key columns: `id`, `cona` (matches zabojniki's `Odlagalna cona`), `name`, `geom`, `max_capacity`
 
 ### Iframe Integration
-- Production URL: `http://ecotech.utlth-ol.si:8077/iframe/findzabojnikilokacije`
+- Production URL: `http://ecotech.utlth-ol.si:8082/iframe/findzabojnikilokacije`
 - Development URL: `http://127.0.0.1:8050/findzabojnikilokacije`
 - All filters passed as query parameters
 

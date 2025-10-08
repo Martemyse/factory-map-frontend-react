@@ -201,7 +201,7 @@ async def get_iframe_url(
             query_params['radiobutton_indicator_mode'] = indicator_mode
         
         # Generate URL
-        base_url = "http://ecotech.utlth-ol.si:8077/iframe/findzabojnikilokacije"
+        base_url = "http://ecotech.utlth-ol.si:8082/iframe/findzabojnikilokacije"
         if query_params:
             query_string = urlencode(query_params)
             iframe_url = f"{base_url}?{query_string}"

@@ -23,7 +23,7 @@ export const config = {
   // In production: use absolute URL (MapLibre GL needs absolute URLs for tiles)
   TILESERVER_BASE: isDevelopment 
     ? 'http://localhost:7999' 
-    : 'http://ecotech.utlth-ol.si:8077/tiles',
+    : 'http://ecotech.utlth-ol.si:8082/tiles',
   
   // Environment info
   isDevelopment,
@@ -31,7 +31,7 @@ export const config = {
   
   // Ports
   backendPort,
-  frontendPort: isDevelopment ? 8077 : 8077,
+  frontendPort: isDevelopment ? 8082 : 8082,
   
   // Debug info
   mode: import.meta.env.MODE
