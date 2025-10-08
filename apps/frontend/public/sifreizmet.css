@@ -1,0 +1,49 @@
+/* Stylish input */
+.stylish-input {
+    width: 120px;
+    height: 45px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s ease-in-out;
+}
+
+.stylish-input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Stylish dropdown */
+.stylish-dropdown .Select-control {
+    border-radius: 5px;
+    border: 1px solid #cccccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Stylish date picker */
+.stylish-date-picker .DateRangePickerInput {
+    border-radius: 5px;
+    border: 1px solid #cccccc;
+}
+
+/* Stylish graph container */
+.stylish-graph {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+/* Stylish labels and headers */
+.stylish-label, .stylish-header-div {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Main layout styling for overall consistency */
+.main-stylish-layout {
+    font-family: 'Trebuchet MS', sans-serif;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}

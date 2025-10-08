@@ -1,0 +1,19 @@
+#navbar_button_preventiva > div > a {
+    height: 100% !important;
+}
+
+#navbar_button_pregledna_plosca > div > a {
+    height: 100% !important;
+}
+
+#navbar_button_ocene_strojev > div > a {
+    height: 100% !important;
+}
+
+#navbar_button_nastavitve > div > a {
+    height: 100% !important;
+}
+
+#magnifying_search_title > div > a {
+    height: 100% !important;
+}

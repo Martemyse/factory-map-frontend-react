@@ -1,0 +1,16 @@
+
+
+g.slice {
+   /* filter: drop-shadow(2px 3px 4px rgb(120, 120, 120)); */
+   /* transition: filter 0.5s ease-in-out; */
+}
+
+g.slicetext {
+    /* filter: drop-shadow(2px 2px 11px white) brightness(1.6); */
+}
+
+g.slice:hover {
+    /* transition: filter 0.5s ease-in-out; */
+    /* filter: drop-shadow(2px 3px 3px rgb(82, 82, 82)) url('data:image/svg+xml,\    <svg xmlns="http://www.w3.org/2000/svg">\      <filter id="waves" x="-20%" y="-20%" width="163%" height="164%" filterUnits="objectBoundingBox" primitiveUnits="userSpaceOnUse" color-interpolation-filters="linearRGB">\<feOffset in="SourceGraphic" dx="-2" dy="-4" />      </filter>\    </svg>#waves'); */
+}
+

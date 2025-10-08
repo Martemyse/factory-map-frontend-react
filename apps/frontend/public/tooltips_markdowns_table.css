@@ -1,0 +1,304 @@
+div.dash-tooltip {
+    /* filter: drop-shadow(2px 3px 5px black); */
+    
+    border: 0px solid white;
+    /* transform: translateX(220px); */
+    /* z-index: 100; */
+}
+
+div.dash-tooltip > div > table > tbody > tr:first-child {
+    font-weight: bold;
+}
+
+/* Align all table data and header cells to the left */
+.dash-tooltip .dash-table-tooltip table th {
+    /* text-align: center !important; */
+}
+
+div.dash-tooltip > div > table > thead > tr > th {
+    text-align: center !important;
+}
+
+div.dash-tooltip > div > table > tbody > tr > td {
+    text-align: left !important;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+
+/* Add right border to the first and second columns */
+.dash-tooltip .dash-table-tooltip table td:nth-child(1),
+.dash-tooltip .dash-table-tooltip table th:nth-child(1),
+.dash-tooltip .dash-table-tooltip table td:nth-child(2),
+.dash-tooltip .dash-table-tooltip table th:nth-child(2) {
+    border-right: 1px solid gainsboro;
+}
+
+
+#zabojniki_opombe_grid_modal_datatable > .dash-tooltip .dash-table-tooltip table td:nth-child(1),
+#zabojniki_opombe_grid_modal_datatable > .dash-tooltip .dash-table-tooltip table th:nth-child(1) {
+    min-width: 7vw !important;
+}
+
+#zabojniki_opombe_grid_modal_datatable > .dash-tooltip .dash-table-tooltip table td:nth-child(2),
+#zabojniki_opombe_grid_modal_datatable > .dash-tooltip .dash-table-tooltip table th:nth-child(2) {
+    min-width: 7vw !important;
+}
+
+#zabojniki_opombe_grid_modal_datatable > .dash-tooltip .dash-table-tooltip table td:nth-child(3),
+#zabojniki_opombe_grid_modal_datatable > .dash-tooltip .dash-table-tooltip table th:nth-child(3) {
+    min-width: 15vw !important;
+}
+
+#zabojniki_opombe_grid_modal_datatable > .dash-tooltip .dash-table-tooltip table td:nth-child(4),
+#zabojniki_opombe_grid_modal_datatable > .dash-tooltip .dash-table-tooltip table th:nth-child(4) {
+    min-width: 10vw !important;
+}
+
+#zabojniki_opombe_grid_modal_datatable > .dash-tooltip .dash-table-tooltip table td:nth-child(7),
+#zabojniki_opombe_grid_modal_datatable > .dash-tooltip .dash-table-tooltip table th:nth-child(7) {
+    min-width: 51vw !important;
+    text-align: left !important;
+}
+/* 
+#zabojniki_opombe_grid_modal_datatable > .dash-tooltip,
+[id*='\"type\":\"plan_dela_logistika_modal_datatable\"'] > .dash-tooltip,
+[id*='\"type\":\"datatable_realizacija\"'] > .dash-tooltip {
+    position: fixed !important;
+    transform: translateY(-50%) !important;
+    max-height: 90vh !important;
+    z-index: 1000 !important;
+    padding: 10px !important;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+} */
+
+/* [id*='\"type\":\"datatable_realizacija\"'] > .dash-tooltip */
+
+.dash-tooltip .dash-table-tooltip {
+    transition: transform 0.35s ease-in-out; /* Smooth transition when translated */
+}
+
+
+/* #zabojniki_opombe_grid_modal_datatable > .dash-tooltip,
+[id*='\"type\":\"plan_dela_logistika_modal_datatable\"'] > .dash-tooltip {
+    position: fixed !important;
+    max-height: 90vh !important;
+    z-index: 1000 !important;
+    padding: 10px !important;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+} */
+
+
+#zabojniki_opombe_grid_modal_datatable > .dash-tooltip,
+[id*='\"type\"\:\"plan_dela_logistika_modal_datatable\"'] > .dash-tooltip .dash-table-tooltip {
+    max-height: 85vh !important;
+}
+
+[id*='\"type\"\:\"plan_dela_logistika_modal_datatable\"'] > .dash-tooltip .dash-table-tooltip table td:nth-child(1),
+[id*='\"type\"\:\"plan_dela_logistika_modal_datatable\"'] > .dash-tooltip .dash-table-tooltip table th:nth-child(1) {
+    min-width: 7vw !important;
+}
+
+[id*='\"type\"\:\"plan_dela_logistika_modal_datatable\"'] > .dash-tooltip .dash-table-tooltip table td:nth-child(2),
+[id*='\"type\"\:\"plan_dela_logistika_modal_datatable\"'] > .dash-tooltip .dash-table-tooltip table th:nth-child(2) {
+    min-width: 7vw !important;
+}
+
+[id*='\"type\"\:\"plan_dela_logistika_modal_datatable\"'] > .dash-tooltip .dash-table-tooltip table td:nth-child(3),
+[id*='\"type\"\:\"plan_dela_logistika_modal_datatable\"'] > .dash-tooltip .dash-table-tooltip table th:nth-child(3) {
+    min-width: 15vw !important;
+}
+
+[id*='\"type\"\:\"plan_dela_logistika_modal_datatable\"'] > .dash-tooltip .dash-table-tooltip table td:nth-child(4),
+[id*='\"type\"\:\"plan_dela_logistika_modal_datatable\"'] > .dash-tooltip .dash-table-tooltip table th:nth-child(4) {
+    min-width: 10vw !important;
+}
+
+[id*='\"type\"\:\"plan_dela_logistika_modal_datatable\"'] > .dash-tooltip .dash-table-tooltip table td:nth-child(7),
+[id*='\"type\"\:\"plan_dela_logistika_modal_datatable\"'] > .dash-tooltip .dash-table-tooltip table th:nth-child(7) {
+    min-width: 51vw !important;
+    text-align: left !important;
+}
+
+
+[id*='\"type\"\:\"plan_dela_logistika_modal_datatable\"'] > .dash-tooltip .dash-table-tooltip {
+    display: inline-block;
+    /* Optional: Prevent container from becoming too wide */
+    max-width: 97vw !important;
+    /* Remove fixed width constraints */
+    /* min-width: 400px !important; */
+    /* max-width: 400px !important; */
+    /* width: 400px !important; */
+}
+
+#zabojniki_opombe_grid_modal_datatable > .dash-tooltip .dash-table-tooltip {
+    display: inline-block;
+    /* Optional: Prevent container from becoming too wide */
+    max-width: 97vw !important;
+    /* Remove fixed width constraints */
+    /* min-width: 400px !important; */
+    /* max-width: 400px !important; */
+    /* width: 400px !important; */
+}
+
+/* Style for the second column */
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > .dash-tooltip .dash-table-tooltip table td:nth-child(5) {
+    color: black;
+    border-left: 2px solid #787878;
+    background-color: #89ff72;
+}
+
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > .dash-tooltip .dash-table-tooltip table td:nth-child(6) {
+    color: black;
+    background-color: #ffbe72;
+}
+
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > .dash-tooltip .dash-table-tooltip table td:nth-child(7) {
+    color: black;
+    background-color: #ff7b7b;
+}
+
+/* Style for the second column */
+.dash-tooltip .dash-table-tooltip table td:nth-child(2) {
+    color: black;
+    font-weight: bold;
+    box-shadow: rgba(55, 148, 255, 0.5) 0px 0px 38px -17px inset;
+    border: 1px solid white;
+}
+
+/* Background color for the first column */
+.dash-tooltip .dash-table-tooltip table td:nth-child(1) {
+    background-color: aliceblue;
+    /* min-width: ; */
+}
+
+/* Container adjusts based on content */
+.dash-tooltip .dash-table-tooltip {
+    top: 0px !important;
+    display: inline-block;
+    /* Optional: Prevent container from becoming too wide */
+    max-width: 800px; /* Adjust as needed */
+    /* Remove fixed width constraints */
+    /* min-width: 400px !important; */
+    /* max-width: 400px !important; */
+    /* width: 400px !important; */
+}
+
+/* Table adjusts based on content */
+.dash-tooltip .dash-table-tooltip table {
+    table-layout: auto;
+    /* width: 100%; */ /* Removed to allow table to size based on content */
+}
+
+/* General cell styles */
+.dash-tooltip .dash-table-tooltip table td,
+.dash-tooltip .dash-table-tooltip table th {
+    white-space: nowrap; /* Prevents text wrapping */
+    overflow: hidden; /* Hides overflow */
+    text-overflow: ellipsis; /* Adds ellipsis for overflowed text */
+    vertical-align: top; /* Adjust as needed */
+    padding: 8px; /* Adjust as needed */
+    border: 1px solid #ccc; /* Optional borders */
+}
+
+/* Adjust column constraints */
+.dash-tooltip .dash-table-tooltip table td:nth-child(2),
+.dash-tooltip .dash-table-tooltip table th:nth-child(2) {
+    /* text-align: left !important; */
+    /* font-weight: normal !important; */
+    min-width: 65px !important;
+}
+
+.dash-tooltip .dash-table-tooltip {
+    max-width: 1000px !important; /* Adjust or remove as needed */
+    text-align: left !important;
+    font-weight: normal;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 800px) {
+    .dash-tooltip .dash-table-tooltip {
+        max-width: 100%;
+    }
+    .dash-tooltip .dash-table-tooltip table td,
+    .dash-tooltip .dash-table-tooltip table th {
+        white-space: normal; /* Allow text to wrap on small screens */
+    }
+}
+
+
+
+/* Font color for the third column */
+.dash-tooltip .dash-table-tooltip table td:nth-child(3) {
+    color: black;
+    background-color: rgb(255, 255, 255);
+}
+
+/* Set the background color of the entire tooltip to white */
+.dash-tooltip .dash-table-tooltip {
+    position: relative;
+    background-color: #ffffff;
+    /* max-width: 300px; */
+    min-width: 325px !important;
+    padding: 15px !important;
+    padding-top: 5px !important;
+    font-family: Trebuchet MS;
+    box-shadow: 0px 0px 2px 2px #a1bcff;
+    border-radius: 12px;
+}
+
+/* Add padding to each cell of the tooltip table */
+.dash-tooltip .dash-table-tooltip table td,
+.dash-tooltip .dash-table-tooltip table th {
+    padding: 4px; /* Adjust the padding value as needed */
+    padding-top: 1px; /* Adjust the padding value as needed */
+    padding-bottom: 1px; /* Adjust the padding value as needed */
+}
+
+
+div.dash-tooltip > div > p:first-child {
+    text-decoration: underline;
+    text-align: left;
+    font-size: 15px !important;
+    margin-bottom: 3px;
+    font-weight: bold;
+    color: rgb(0, 0, 0);
+}
+
+div.dash-tooltip > div > p {
+    font-size: 14px;
+    white-space: pre-wrap;
+}
+/*
+div.dash-tooltip > div > p:last-child {
+    text-align: left;
+    font-size: 12px !important;
+    margin-bottom: 3px;
+    font-weight: normal;
+    color: rgb(21, 73, 185);
+}
+*/
+
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-menu {
+    display: none;  
+}
+
+
+.dash-tooltip .dash-table-tooltip table td {
+    white-space: normal; /* Allow text wrapping */
+    word-break: break-word; /* Break lines at whitespaces */
+    max-width: 500px; /* Set the maximum width of the column */
+    overflow-wrap: break-word; /* Ensure long words are wrapped */
+    padding: 3px; /* Optional: adjust padding */
+    vertical-align: top; /* Ensure the cell adjusts height with content */
+}
+

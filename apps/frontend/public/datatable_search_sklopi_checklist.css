@@ -1,0 +1,4 @@
+#datatable_search_sklopi_checklist > label > input[type=checkbox] {
+    transform: scale(1.5);
+    margin-right: 15px;
+}

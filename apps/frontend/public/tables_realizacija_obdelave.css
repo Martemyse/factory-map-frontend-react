@@ -1,0 +1,884 @@
+@page {
+    size: A4 landscape !important; 
+}
+
+.toc-link {
+    margin-right: 2rem;
+    text-decoration: none;
+    /* font-weight: bold; */
+    /* font-style: italic; */
+    color: #3a99ff;
+    font-family: Bahnschrift;
+}
+.toc-link:hover { text-decoration: underline; }
+
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:last-child  {
+    filter: drop-shadow(0px 0px 2px #6393c0);
+    background-color: #ffffff !important;
+    border: 3px solid #ffffff;
+    box-shadow: 0px 0px 3px 0px #4c6b9d;
+}
+
+[id*='{\"index\":\"table_Obdelava\",\"tagname_tim\":\"stgh_i_ii__hag\",\"type\":\"datatable_realizacija\"}'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-last-child(4),
+[id*='{\"index\":\"table_Preizkus tesnosti\",\"tagname_tim\":\"stgh_i_ii__hag\",\"type\":\"datatable_realizacija\"}'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-last-child(4) {
+    filter: drop-shadow(0px 0px 2px #6ab7ff15);
+    background-color: #ffffff !important;
+    border: 5px solid #ffffff;
+    font-size: 20px !important;
+    box-shadow: 0px 0px 8px -3px #75aaff7a;
+}
+
+[id*='{\"index\":\"table_Obdelava\",\"tagname_tim\":\"stgh_i_ii__hag\",\"type\":\"datatable_realizacija\"}'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-last-child(3),
+[id*='{\"index\":\"table_Preizkus tesnosti\",\"tagname_tim\":\"stgh_i_ii__hag\",\"type\":\"datatable_realizacija\"}'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-last-child(3) {
+    filter: drop-shadow(0px 0px 2px #6ab7ff27);
+    background-color: #ffffff !important;
+    border: 5px solid #ffffff;
+    font-size: 20px !important;
+    box-shadow: 0px 0px 8px -3px #75aaff7a;
+}
+
+[id*='{\"index\":\"table_Obdelava\",\"tagname_tim\":\"stgh_i_ii__hag\",\"type\":\"datatable_realizacija\"}'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-last-child(2),
+[id*='{\"index\":\"table_Preizkus tesnosti\",\"tagname_tim\":\"stgh_i_ii__hag\",\"type\":\"datatable_realizacija\"}'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-last-child(2) {
+    filter: drop-shadow(0px 0px 2px #6ab7ff42);
+    background-color: #ffffff !important;
+    border: 5px solid #ffffff;
+    font-size: 20px !important;
+    box-shadow: 0px 0px 8px -3px #75aaff7a;
+}
+
+
+[id*='\"type\"\:\"datatable_doseganje_modal_datatable\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:last-child  {
+    filter: drop-shadow(0px 0px 2px #6393c0);
+    background-color: #ffffff !important;
+    border: 3px solid #ffffff;
+    box-shadow: 0px 0px 3px 0px #4c6b9d;
+    font-size:20px !important;
+}
+
+[id*='\"type\"\:\"datatable_leanteam_porocila\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(2)  {
+    filter: drop-shadow(0px 0px 2px #6393c0);
+    background-color: #ffffff !important;
+    border: 3px solid #ffffff;
+    box-shadow: 0px 0px 3px 0px #4c6b9d;
+    font-size:20px !important;
+    font-weight: bold !important;
+}
+
+ul#realizacija_teami_tabs {
+    /* left: 265px;
+    position: relative; */
+    border:none;
+}
+
+/* assets/style.css */
+
+.daq-indicator-green {
+    filter: drop-shadow(0 0 3px #0dc70d);
+}
+
+.daq-indicator-yellow {
+    filter: drop-shadow(0 0 3px rgb(255, 179, 39));
+}
+
+.daq-indicator-red {
+    filter: drop-shadow(0 0 3px #bb0000);
+}
+
+.daq-indicator-grey {
+    filter: drop-shadow(0 0 3px #a8a8a8);
+}
+
+/* .hover-scale:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s;
+}
+ */
+
+ /* .Select--single>.Select-control .Select-value, .Select-placeholder {
+    overflow: visible !important;
+} */
+
+.dash-spinner-container {
+    z-index: 1000000 !important;
+    background-color: transparent !important;
+    /* filter: drop-shadow(0px 0px 1px rgb(255, 255, 255)) 
+            drop-shadow(0px 0px 2px rgb(255, 255, 255)) 
+            drop-shadow(0px 0px 4px rgba(142, 142, 142, 0.311)); */
+    position: relative;
+}
+
+.dash-cube-side {
+    z-index: 1000000 !important;
+}
+
+.dash-spinner {
+    z-index: 1000000 !important;
+    /* filter: drop-shadow(0px 0px 2px rgb(255, 255, 255))  drop-shadow(0px 0px 2px rgb(83, 114, 180))  drop-shadow(0px 0px 4px rgb(55, 118, 255)); */
+    transform: scale(1.3);
+    position: relative;
+    filter: hue-rotate(-60deg);
+    opacity: 0.8;
+}
+
+
+[id*='\"type\"\:\"datatable_realizacija_summation_stroj\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:last-child  {
+    filter: drop-shadow(0px 0px 2px #6393c0);
+    background-color: #ffffff !important;
+    border: 3px solid #ffffff;
+    box-shadow: 0px 0px 3px 0px #4c6b9d;
+}
+
+[id*='\"type\"\:\"datatable_realizacija_sifrant_izmeta\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody >  tr:nth-child(3) {
+    filter: drop-shadow(2px 2px 4px #6393c0);
+    background-color: #ffffff !important;
+    border: 6px solid #4682ff1f;
+    box-shadow: 1px 1px 3px 0px #0f2b59
+}
+
+#table_odlagalne_zone > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody >  tr:nth-child(3) {
+    filter: drop-shadow(2px 2px 4px #6393c0);
+    background-color: #ffffff !important;
+    border: 1px solid #4682ff1f;
+    box-shadow: 1px 1px 3px 0px #0f2b59
+}
+
+#usposobljenost-table > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody >  tr:nth-child(3) {
+    filter: drop-shadow(2px 2px 4px #6393c0);
+    background-color: #ffffff !important;
+    border: 1px solid #4682ff1f;
+    box-shadow: 1px 1px 3px 0px #0f2b59
+}
+
+#realizacija_porocila_leanteam_izmet_fig1 > div.js-plotly-plot > div > div > svg > g.infolayer > g.annotation {
+    /* filter: drop-shadow(0px 0px 1px gray); */
+    text-shadow: 1.5px 1.5px 1.5px black;
+}
+
+#realizacija_porocila_leanteam_izmet_fig2 > div.js-plotly-plot > div > div > svg > g.infolayer > g.annotation {
+    /* filter: drop-shadow(0px 0px 1px gray); */
+    text-shadow: 1.5px 1.5px 1.5px black;
+}
+
+#realizacija_porocila_leanteam_izmet_fig3 > div.js-plotly-plot > div > div > svg > g.infolayer > g.annotation {
+    /* filter: drop-shadow(0px 0px 1px gray); */
+    text-shadow: 1.5px 1.5px 1.5px black;
+}
+
+#realizacija_porocila_leanteam_izmet_fig4 > div.js-plotly-plot > div > div > svg > g.infolayer > g.annotation {
+    /* filter: drop-shadow(0px 0px 1px gray); */
+    text-shadow: 1.5px 1.5px 1.5px black;
+}
+
+#realizacija_porocila_leanteam_izmet_fig5 > div.js-plotly-plot > div > div > svg > g.infolayer > g.annotation {
+    /* filter: drop-shadow(0px 0px 1px gray); */
+    text-shadow: 1.5px 1.5px 1.5px black;
+}
+
+#realizacija_porocila_leanteam_izmet_fig6 > div.js-plotly-plot > div > div > svg > g.infolayer > g.annotation {
+    /* filter: drop-shadow(0px 0px 1px gray); */
+    text-shadow: 1.5px 1.5px 1.5px black;
+}
+
+[id*='\"type\"\:\"datatable_realizacija_graph_NOK_mesecni_artikel\"'] > div.js-plotly-plot > div > div > svg > g.infolayer > g.annotation,
+[id*='\"type\"\:\"datatable_realizacija_graph_NOK_dnevni_artikel\"'] > div.js-plotly-plot > div > div > svg > g.infolayer > g.annotation {
+    /* filter: drop-shadow(0px 0px 1px gray); */
+    /* text-shadow: 1.5px 1.5px 1.5px black; */
+}
+
+
+.ag-theme-quartz {
+    --ag-grid-size: 3px;
+    /* --ag-row-height: 13px; */
+    --ag-cell-horizontal-padding: 4px;
+}
+
+#zabojniki_opombe_grid .ag-row-selected {
+    background-color: #ff8c8c !important;
+}
+
+
+
+/* [id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-6 > div > span {
+    position: relative;
+    top: 11px;
+}
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-8 > div > span {
+    position: relative;
+    top: 11px;
+}
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-10 > div > span {
+    position: relative;
+    top: 11px;
+} */
+
+/* [id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-12 > div > span {
+    position: relative;
+    top: 11px;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-14 > div > span {
+    position: relative;
+    top: 11px;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-16 > div > span {
+    position: relative;
+    top: 11px;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-18 > div > span {
+    position: relative;
+    top: 11px;
+} */
+
+
+span.Select-arrow {
+    visibility: hidden;
+}
+
+/* [id*='\"type\"\:\"ag_grid_realizacija_tpm_dnevnik\"'] .ag-theme-quartz.compact-grid {
+    --ag-font-size: 19px;
+    --ag-header-height: 30px;
+    --ag-row-height: 24px;
+} 
+
+
+[id*='\"type\"\:\"strosek_izmeta_tabela\"'] .ag-theme-quartz.compact-grid {
+    --ag-font-size: 20px;
+    --ag-header-height: 30px;
+    --ag-row-height: 15px !important;
+}
+ */
+.ag-tooltip {
+    top: 370.984px;
+    left: 24px;
+    font-size: 21px;
+    filter: drop-shadow(2px 4px 6px black);
+    font-family: -webkit-body;
+ }
+
+.ag-theme-quartz.compact-grid .ag-header-cell-label {
+    padding: 3px 3px;
+}
+
+.ag-theme-quartz.compact-grid .ag-cell {
+    padding: 3px 3px;
+}
+
+.ag-theme-quartz.compact-grid .ag-header-cell {
+    padding: 3px 3px;
+}
+
+.ag-right-aligned-header .ag-header-cell-text {
+    text-align: start !important;
+}
+
+.ag-right-aligned-header .ag-header-cell-label {
+    flex-direction: row !important;
+}
+
+
+div[id*='realizacija_tab_strosek'] > a {
+    font-size: 24px !important;
+    font-weight: bold;
+    padding-left: 50px;
+    padding-right: 50px;
+}
+
+#strosek_izmeta_teami_tabs {
+    position: sticky;
+    top: 50px;
+    background-color: white;
+    z-index: 1;
+}    
+
+@media print {
+
+    #realizacija_teami_tabs, #strosek_izmeta_teami_tabs, #delez_izmeta_teami_tabs {
+        display: none !important;
+    }
+
+    #leanteams_content > div.m-1.ms-2.radio-group {
+        display: none !important;
+    }
+
+    #realizacija_leanteam_signali_strojev_div {
+        display: none !important;
+    }
+    
+    #realizacija_stroji_output_figure_pripni {
+        display: none !important;
+    }
+    
+    #datepicker_range_realizacija_stroji {
+        display: none !important;
+    }
+    
+    #radios_realizacija_mode_stroji {
+        display: none !important;
+    }
+    
+    #dropdown_realizacija_stroji {
+        display: none !important;
+    }
+    
+    #radios_dtm_stroji {
+        display: none !important;
+    }
+
+    [id*='\"type\"\:\"datatable_realizacija_tpm_dnevnik_checklist\"'] {
+        display: none !important;
+    }
+
+    [id*='\"type\"\:\"datatable_realizacija_button_xlsx\"'] {
+        display: none !important;
+    }
+
+    [id*='\"type\"\:\"datatable_realizacija_button_izmene_xlsx\"'] {
+        display: none !important;
+    }
+
+    [id*='\"type\"\:\"strosek_izmeta_tabela_button_xlsx\"'] {
+        display: none !important;
+    }
+
+    [id*='\"type\"\:\"datatable_realizacija_button_oee_xlsx\"'] {
+        display: none !important;
+    }
+
+    [id*='\"type\"\:\"datatable_realizacija_button_xlsx_vse\"'] {
+        display: none !important;
+    }
+
+    [id*='\"type\"\:\"datatable_realizacija_toggle_OEE\"'] {
+        display: none !important;
+    }
+
+    #realizacija_leanteam_izmet_div_dropdown_leto_mesec {
+        display: none !important;
+    }
+
+    #radios_dtm_pozivi {
+        display: none !important;
+    }
+
+    [id*='\"type\"\:\"datatable_realizacija_input_sestevalnik\"'] {
+        display: none !important;
+    }
+    
+    #toast_minimize_sidebar {
+        display: none !important;
+    }
+
+    #navbar_container_outer {
+        display: none !important;
+    }
+
+    #_pages_content > div > div.button-group-manufacturer {
+        display: none !important;
+    }
+
+    #app_layout_div::before {
+        content: none;
+    }
+    
+}
+
+
+@media print {
+
+    /* body {
+        transform: scale(0.8);
+        transform-origin: top left;
+        width: 125%;
+    }
+
+    [id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(1) > div {
+        font-size: 17px !important;
+    }
+
+    [id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(2) > div {
+        font-size: 17px !important;
+    }
+
+    div > div.ag-cell {
+        font-size: 16px;
+    }
+
+    [id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td > div {
+        font-size: 17px !important;
+    }
+
+    
+    ag-theme-quartz.compact-grid {
+        --ag-font-size: 16px !important;
+
+    }
+
+    */
+    
+
+
+    .dash-table-container {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    /* div > div.ag-cell {
+        font-size: 17px !important;
+    } */
+
+    span.column-header-name {
+        font-size: 22px !important;
+    }
+
+
+    [id*='\"type\"\:\"datatable_realizacija\"'] > div > div > div > div.cell > table > tbody > tr > td > div {
+        font-size: 26px;
+    }
+
+    [id*="datatable_realizacija"] .dash-header,
+    [id*="datatable_realizacija"] .dash-header > div {
+        font-size: 24px !important;
+    }
+
+    #reklamacije_dashtable > div > div > div > div.cell > table > tbody > tr > td > div {
+        font-size: 23px;
+    }
+
+    #reklamacije_dashtable .dash-header,
+    #reklamacije_dashtable .dash-header > div {
+        font-size: 21px !important;
+    }
+
+    #realizacija_leanteam_pozivi_table > div > div > div > div.cell > table > tbody > tr > td > div {
+        font-size: 23px;
+    }
+
+    #realizacija_leanteam_pozivi_table .dash-header,
+    #realizacija_leanteam_pozivi_table .dash-header > div {
+        font-size: 21px !important;
+    }
+
+
+    [id*='\"type\"\:\"kriticna_koda_datatable\"'] > div > div > div > div.cell > table > tbody > tr > td > div {
+        font-size: 26px;
+    }
+
+    [id*="kriticna_koda_datatable"] .dash-header,
+    [id*="kriticna_koda_datatable"] .dash-header > div {
+        font-size: 24px !important;
+    }
+
+
+    [id*='\"type\"\:\"onk_tabela\"'] > div > div > div > div.cell > table > tbody > tr > td > div {
+        font-size: 19px;
+    }
+
+    [id*='\"type\"\:\"datatable_realizacija\"'] > div > div > div > div.cell > table > tbody > tr > td:nth-child(2) > div,
+    [id*='\"type\"\:\"datatable_realizacija\"'] > div > div > div > div.cell > table > tbody > tr > td:nth-child(3) > div {
+        font-size: 20px !important;
+        font-weight: bold !important;
+    }
+
+    #strosek_izmet_main_indicator,
+    #strosek_izmet_main_indicator * {
+        font-size: 21px !important;
+    }
+
+    i {
+        font-size: 28px !important;
+    }
+
+    .fs-4 {
+        font-size: 26px !important;
+    }
+
+    text.annotation-text {
+        font-size: 27px !important;
+    }
+
+    /* text {
+        font-size: 23px !important;
+    } */
+
+    g.xtick > text {
+        font-size: 20px !important;
+    }
+
+    text.legendtext {
+        scale: 1.35;
+    }
+
+    .ag-cell-value {
+        font-size: 20px !important;
+
+    }
+
+    
+    /* ag-theme-quartz.compact-grid {
+        --ag-font-size: 24px !important;
+
+    } */
+
+    [id*='\"type\"\:\"strosek_izmeta_tabela\"'] {
+        zoom: 0.85;
+    }
+
+    [class*=ag-theme-] {
+        --ag-font-size: 20px !important;
+    }
+
+    .ag-paging-panel {
+        display: none !important;
+    }
+
+    #contents {
+        display: none !important;
+    }
+
+    #realizacija_leanteam_merilni_zahtevki_indicator_div1 > div > div > div > div > ul > li > span {
+        font-size: 22px !important;
+    }
+
+    #realizacija_leanteam_merilni_zahtevki_indicator_div1 > div > div > div > div > h5 {
+        font-size: 26px !important;
+    }
+
+    /* #datatable_realizacija_print_container {
+        display: flex;
+        flex-direction: column;
+    } */
+      
+    /* .table-container-oee {
+      page-break-after: avoid;
+    }
+
+    .graph-container-oee {
+        page-break-before: always;
+        
+    } */
+
+    /* Hide the normal on-screen graphs and show the print-only graphs */
+    .graph-container-dnevni-oee-aplikacija,
+    .graph-container-mesecni-oee-aplikacija {
+        display: none !important;
+    }
+
+    .graph-container-mesecni-oee-print {
+        /* display: flex !important; */
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .graph-container-dnevni-oee-print {
+        /* display: block !important; */
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    /* [id*='\"type\"\:\"datatable_realizacija_collapse_OEE\"'] {
+        display: none !important;
+    } */
+}
+
+@media screen {
+    .graph-container-dnevni-oee-print,
+    .graph-container-mesecni-oee-print {
+      display: none !important;
+    }
+  }
+
+/* #realizacija_leanteam_izmet_div_dropdown_leto_mesec > div > div.Select-menu-outer {
+    z-index: 1;
+} */
+
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-6 {
+    white-space: nowrap !important;
+}
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-8 {
+    white-space: nowrap !important;
+}
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-10 {
+    white-space: nowrap !important;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-12 {
+    white-space: nowrap !important;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-14 {
+    white-space: nowrap !important;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-16 {
+    white-space: nowrap !important;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-18 {
+    white-space: nowrap !important;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > th.dash-header:nth-last-child(4) {
+    white-space: pre-wrap !important;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > th.dash-header:nth-last-child(4) > div > span {
+    position: relative;
+    top: 0px !important;
+
+}
+
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(5) {
+    border-right: 15px solid transparent !important;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(20) {
+    border-left: 15px solid transparent !important;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(6) {
+    border-left: 1px solid silver;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(7) {
+    border-right: 1px solid silver;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(9) {
+    border-right: 1px solid silver;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(11) {
+    border-right: 1px solid silver;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(13) {
+    border-right: 1px solid silver;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(15) {
+    border-right: 1px solid silver;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(17) {
+    border-right: 1px solid silver;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(19) {
+    border-right: 1px solid silver;
+}
+
+/* [id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-4 > div > span::after {
+    content: ', dnevno';
+} */
+
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(5) {
+    border-right: none !important;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(20) {
+    border-left: none !important;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(6) {
+    border-left: none !important;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(7) {
+    border-right: none !important;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(9) {
+    border-right: none !important;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(11) {
+    border-right: none !important;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(13) {
+    border-right: none !important;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(15) {
+    border-right: none !important;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(17) {
+    border-right: none !important;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(19) {
+    border-right: none !important;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-4 > div > span::after {
+    content: none !important;
+}
+
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(6) {
+    border-right: 15px solid transparent !important;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(21) {
+    border-left: 15px solid transparent !important;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(7) {
+    border-left: 1px solid silver;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(8) {
+    border-right: 1px solid silver;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(10) {
+    border-right: 1px solid silver;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(12) {
+    border-right: 1px solid silver;
+}
+
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(14) {
+    border-right: 1px solid silver;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(16) {
+    border-right: 1px solid silver;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(18) {
+    border-right: 1px solid silver;
+}
+
+[id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(20) {
+    border-right: 1px solid silver;
+}
+
+/* [id*='\"index\"\:\"table_Obdelava\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-4 > div > span::after {
+    content: ', dnevno';
+} */
+
+
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-3 {
+    white-space: normal;
+}
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-4 {
+    white-space: normal;
+}
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-5 {
+    white-space: normal;
+}
+
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-6 {
+    white-space: normal;
+}
+
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-7 {
+    white-space: normal;
+}
+
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-8 {
+    white-space: normal;
+}
+
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr:nth-child(1) > th.dash-header.column-9 {
+    white-space: normal;
+}
+
+
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > th.dash-header:nth-last-child(4) > div > span {
+    position: relative;
+    top: 0px !important;
+
+}
+
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(10) {
+    border-right: 5px solid transparent;
+}
+
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(11) {
+    border-right: 12px solid transparent;
+}
+
+
+
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(3) {
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+}
+
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(4) {
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+}
+
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(6) {
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+}
+
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(8) {
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+}
+
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(9) {
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+}
+
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(12) {
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+}
+
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(14) {
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+}
+
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(16) {
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+}
+
+[id*='\"type\"\:\"datatable_doseganje\"']  > div.dash-spreadsheet-container.dash-spreadsheet.dash-freeze-top.dash-list-view.dash-fill-width {
+    width: 98% !important;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"']  > div.dash-spreadsheet-container.dash-spreadsheet.dash-freeze-top.dash-list-view.dash-fill-width {
+    width: 98% !important;
+}
+
+
+#\{\"index\"\:\"Doseganje\ naročil\"\,\"type\"\:\"datatable_doseganje\"\} > div.dash-spreadsheet-menu {
+    display:none;
+}
+
+
+[id*='\"type\"\:\"strosek_izmeta_tabela\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody >  tr:nth-child(3) {
+    filter: drop-shadow(2px 2px 4px #446686);
+    background-color: #ffffff !important;
+    border: 3px solid #4682ff1f;
+    box-shadow: 1px 1px 3px 0px #0f2b59
+}
+
+#kriticne_kode_datatable_detail > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(9),
+#kriticne_kode_datatable_detail > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > :nth-child(2) {
+    /* filter: drop-shadow(0px 0px 1.5px #446686); */
+    border: 3px solid white;
+    box-shadow: 0px 0px 0px 1px #0f2b59 inset;
+}
+
+[id*='\"type\"\:\"kriticna_koda_datatable\"'] > div.dash-spreadsheet-menu > div.dash-spreadsheet-menu-item > button {
+    display: none;
+}

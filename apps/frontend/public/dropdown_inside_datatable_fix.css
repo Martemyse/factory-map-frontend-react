@@ -1,0 +1,74 @@
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer,
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer,
+#\{\"index\"\:\"table_Pranje\"\,\"type\"\:\"datatable_realizacija\"\} > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer {
+    display : block !important;
+    background-color: white !important;
+    border: 1px solid gainsboro !important;
+    z-index: 1000;
+    }
+
+span.Select-clear-zone {
+    display: none !important;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer > div,
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer > div,
+#\{\"index\"\:\"table_Pranje\"\,\"type\"\:\"datatable_realizacija\"\} > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer > div {
+    border-radius: 0px;
+    background-color: transparent !important;
+    border: 0px solid gainsboro !important;
+    z-index: 1000;
+
+    }
+
+
+/* div:not(#datatable_search_sklopi_dropdown) .Select--single > .Select-control .Select-value,
+div:not(#datatable_search_sklopi_dropdown) .Select--single > .Select-control .Select-placeholder {
+    padding: 0px;
+    max-width: 85px !important;
+    
+} */
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer > div > div,
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer > div > div,
+#\{\"index\"\:\"table_Pranje\"\,\"type\"\:\"datatable_realizacija\"\} > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer > div > div {
+    font-weight: normal !important;
+    text-shadow: none !important;
+    border: 0.5px solid rgb(241, 241, 241) !important;
+}
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer > div > div > div > div > div,
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer > div > div > div > div > div,
+#\{\"index\"\:\"table_Pranje\"\,\"type\"\:\"datatable_realizacija\"\} > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer > div > div > div > div > div {
+    display: inline-block !important;
+    padding: 5px !important;
+    text-align: center;
+    
+}
+
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer > div > div,
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer > div > div,
+#\{\"index\"\:\"table_Pranje\"\,\"type\"\:\"datatable_realizacija\"\} > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer > div > div {
+    color: rgb(0, 0, 0) !important;
+    background-color: #ffffff;
+    box-shadow: none;
+    filter: none;
+    border: 1px solid rgb(241, 241, 241);
+    font-weight: normal;
+    border-radius: 0px;
+    text-align: center !important;
+}
+
+
+[id*='\"type\"\:\"datatable_realizacija\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer > div.Select-menu,
+[id*='\"type\"\:\"datatable_doseganje\"'] > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer > div.Select-menu,
+#\{\"index\"\:\"table_Pranje\"\,\"type\"\:\"datatable_realizacija\"\} > div.dash-spreadsheet-container > div > div.dt-table-container__row > div.cell > table > tbody > tr > td.dash-cell > div > div.Select.has-value.is-open.is-searchable.Select--single > div.Select-menu-outer > div.Select-menu {
+    overflow: visible;
+} 
+
+.dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner :not(.cell--selected) tr:hover, .dash-table-container .dash-spreadsheet-container tr:hover input :not(.cell--selected) {
+    z-index: 1;
+    position: relative;
+    
+}

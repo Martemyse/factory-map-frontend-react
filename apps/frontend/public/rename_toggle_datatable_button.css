@@ -1,0 +1,31 @@
+.show-hide {
+font-size: 0 !important;
+margin: 10px;
+padding: 5px;
+margin-top: 0px;
+border-radius: 12px;
+background-color: aliceblue;
+border: 2px solid white;
+box-shadow: 0px 2px 9px -7px #0070ff;
+font-family: sans-serif;
+font-weight: bold;
+color: #3a65a0;
+transition: 0.2s all;
+}
+
+.show-hide:before { 
+content: "Več stolpcev" !important;
+font-size: 16px !important; 
+ }
+
+.dash-spreadsheet-menu {
+    float: right;
+ }
+
+ button.show-hide:hover {
+    background-color: #134e76 !important;
+}
+
+.show-hide-menu {
+left: -80px !important;
+}

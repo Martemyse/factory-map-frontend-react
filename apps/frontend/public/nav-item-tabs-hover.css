@@ -1,0 +1,14 @@
+.nav-tabs .nav-link:hover {
+    box-shadow: 0px 0px 5px 0px #6fb6fb;
+	border-color: #9bb6ff !important;
+	box-sizing: border-box;
+}
+
+.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+    box-shadow: 0px 0px 4px 1px #0088ff, 0px -7px 27px -7px #2e5da91f inset;
+   /* text-shadow: 1px 1px 4px #ffffff !important;*/
+}
+
+[id*='\"class\"\:\"realizacija_tab\"'] {
+    padding: 7px !important;
+}

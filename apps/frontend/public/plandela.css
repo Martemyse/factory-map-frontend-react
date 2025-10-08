@@ -1,0 +1,364 @@
+.custom-machine-dropdown {
+    background-color: #f0f8ff; /* Light blue */
+    border-radius: 4px;
+}
+
+/* #\{\"index\"\:\"table_Obdelava\"\,\"tagname_tim\"\:\"triglav\"\,\"type\"\:\"datatable_realizacija_modalbody\"\} */
+.custom-products-dropdown {
+    background-color: #fff8dc; /* Light yellow */
+    border-radius: 4px;
+}
+
+#manage-workers-dropdown > div > div > div > div.Select-input > input,
+[id*='\"type\"\:\"worker-dropdown\"'] > div > div > div > div.Select-input > input {
+    color: black !important;
+}
+
+.Select--multi .Select-value {
+    margin: 0 !important;
+}
+
+#global-shift-setter > div > div:has(.Select-placeholder),
+[id*='\"type\"\:\"plandela-shift-leader\"']  > div > div:has(.Select-placeholder),
+[id*='\"type\"\:\"worker-dropdown\"']  > div > div:has(.Select-placeholder),
+[id*='\"type\"\:\"machine-dropdown\"']  > div > div:has(.Select-placeholder),
+[id*='\"type\"\:\"products-dropdown\"']  > div > div:has(.Select-placeholder) {
+    border: 1.5px solid var(--border-danger, red);
+    box-shadow: 0px 0px 5px 1px #ff8f8f;
+}
+
+[id*='\"color\"\:\"green\"'] > .Select--multi .Select-value {
+    background-color: #dcffd8;
+    color: #000000;
+    border: none;
+}
+
+[id*='\"color\"\:\"red\"'] > .Select--multi .Select-value {
+    background-color: #ffd3d3;
+    color: #000000;
+    border: none;
+}
+
+[id*='\"color\"\:\"blue\"'] > .Select--multi .Select-value {
+    background-color: #cee0ff;
+    color: #000000;
+    border: none;
+}
+
+[id*='\"color\"\:\"white\"'] > .Select--multi .Select-value {
+    background-color: #ffffff;
+    color: #000000;
+    /* border: 0px solid #cccccc; */
+}
+
+[id*='\"color\"\:\"green\"'] > div > div {
+    background-color: #dcffd8;
+    color: #000000;
+    border: 0.5px solid #e0e0e0;
+}
+
+[id*='\"color\"\:\"red\"'] > div > div  {
+    background-color: #ffd3d3;
+    color: #000000;
+    border: 0.5px solid #e0e0e0;
+}
+
+[id*='\"color\"\:\"blue\"'] > div > div  {
+    background-color: #cee0ff;
+    color: #000000;
+    border: 0.5px solid #e0e0e0;
+}
+
+[id*='\"color\"\:\"white\"'] > div > div  {
+    background-color: #ffffff;
+    color: #000000;
+    border: 0.5px solid #e0e0e0;
+}
+
+[id*='\"type\"\:\"weekdays-dropdown\"'] > div:not(.has-value) > div {
+    background-color: rgb(255, 255, 162);
+    border: 1px solid #ffa0a0;
+}
+
+[id*='\"izmena\"\:\"Prost\"']  {
+    /* filter: brightness(0.92) grayscale(1);
+    opacity: 0.6; */
+    display: none;
+}
+
+[id*='\"izmena\"\:\"Prost\"'] .worker-label {
+    font-size: 10px;
+}
+
+#global-shift-setter {
+    border: none;
+}
+
+#global-shift-setter .Select-value-label,
+[id*='\"type\"\:\"shift-factor-dropdown\"'] .Select-value-label {
+    padding-left: 5px;
+}
+
+[id*='\"type\"\:\"shift-factor-dropdown\"'] .Select-control,
+#global-shift-setter .Select-control {
+    border: 2px solid #2172ff;
+}
+
+/* Allow the dropdown to grow dynamically with multiple selections */
+[id*='\"type\"\:\"weekdays-dropdown\"'] .Select-multi-value-wrapper,
+[id*='\"type\"\:\"machine-dropdown\"'] .Select-multi-value-wrapper,
+[id*='\"type\"\:\"products-dropdown\"'] .Select-multi-value-wrapper {
+    display: flex; /* Use flexbox for layout */
+    align-items: center; /* Vertically align items */
+    flex-wrap: wrap; /* Allow labels to wrap onto multiple lines */
+    overflow: visible; /* Allow content to grow outside the wrapper */
+    white-space: normal; /* Allow wrapping for multi-line labels */
+}
+
+
+/* Ensure each label is compact and inline-flex */
+[id*='\"type\"\:\"weekdays-dropdown\"'] .Select-value,
+[id*='\"type\"\:\"machine-dropdown\"'] .Select-value,
+[id*='\"type\"\:\"products-dropdown\"'] .Select-value {
+    display: inline-flex; /* Keep label and icon inline */
+    align-items: center; /* Vertically align */
+    border-radius: 2px; /* Optional styling */
+    overflow: hidden; /* Prevent text overflow */
+    white-space: nowrap; /* Prevent wrapping for individual labels */
+    text-overflow: ellipsis; /* Add ellipsis for long text */
+    /* margin: -1px; */
+}
+
+/* Truncate long text within a label */
+[id*='\"type\"\:\"weekdays-dropdown\"'] .Select-value-label,
+[id*='\"type\"\:\"machine-dropdown\"'] .Select-value-label,
+[id*='\"type\"\:\"products-dropdown\"'] .Select-value-label {
+    flex: 1; /* Allow the label to take up remaining space */
+    overflow: hidden; /* Prevent overflow */
+    white-space: nowrap; /* Prevent wrapping for single labels */
+    text-overflow: ellipsis; /* Add ellipsis for truncated text */
+}
+
+/* Ensure the dropdown control grows with its content */
+[id*='\"type\"\:\"weekdays-dropdown\"'] .Select-control,
+[id*='\"type\"\:\"machine-dropdown\"'] .Select-control,
+[id*='\"type\"\:\"products-dropdown\"'] .Select-control {
+    display: flex; /* Use flexbox for layout */
+    align-items: flex-start; /* Align content to the top */
+    flex-wrap: wrap; /* Allow multiple labels to wrap */
+    /* padding: 0px important; Minimal padding */
+    min-height: auto; /* Allow height to grow dynamically */
+    height: auto !important; /* Ensure height adjusts automatically */
+}
+
+/* Remove fixed height and ensure the dropdown expands with content */
+[id*='\"type\"\:\"weekdays-dropdown\"'] .dash-dropdown,
+[id*='\"type\"\:\"machine-dropdown\"'] .dash-dropdown,
+[id*='\"type\"\:\"products-dropdown\"'] .dash-dropdown {
+    height: auto !important; /* Let the dropdown adjust height */
+    min-height: 30px; /* Ensure a minimal height */
+    padding: 1px; /* Minimal padding for aesthetics */
+}
+
+/* Adjust grid behavior to grow with dropdowns */
+[id*='\"type\"\:\"weekdays-dropdown-inner-div\"'],
+[id*='\"type\"\:\"machine-dropdown-inner-div\"'],
+[id*='\"type\"\:\"products-dropdown-inner-div\"'] {
+    display: grid;
+    grid-template-rows: auto; /* Allow rows to grow dynamically */
+    gap: 1px; /* Minimal gap between rows */
+}
+
+
+[id*='\"type\"\:\"weekdays-dropdown\"'] .Select-arrow-zone,
+[id*='\"type\"\:\"machine-dropdown\"'] .Select-arrow-zone,
+[id*='\"type\"\:\"products-dropdown\"'] .Select-arrow-zone {
+    display: none;
+}
+
+[id*='\"type\"\:\"weekdays-dropdown\"'] .Select-input,
+[id*='\"type\"\:\"machine-dropdown\"'] .Select-input,
+[id*='\"type\"\:\"products-dropdown\"'] .Select-input {
+    position: absolute;
+}
+
+[id*='\"type\"\:\"machine-dropdown\"'] > .Select--multi .Select-value {
+    background-color: #f6f9ff;
+    color: #173391;
+    /* font-weight: bold; */
+}
+
+[id*='\"type\"\:\"products-dropdown\"'] > .Select--multi .Select-value {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+/* Style for workers who are absent */
+.absent {
+    color: #830000; /* Dark red text for non-competent workers */
+}
+
+/* Style for non-competent workers */
+.not-competent {
+    text-decoration: underline;
+    font-style: italic;
+}
+
+.worker-label {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.Select, .Select div, .Select input, .Select span {
+    font-family: bahnschrift;
+}
+
+.Select-menu-outer {
+    min-width: 75px !important;
+}
+
+.modal-header {
+    background-color: #2a3f5f;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    font-family: bahnschrift;
+    font-size: 30px;
+    text-decoration: underline;
+}
+.modal-body {
+    background-color: #f8f9fa;
+    padding: 15px;
+    font-family: bahnschrift;
+}
+.modal-footer {
+    background-color: #dee2e6;
+    text-align: center;
+    font-family: bahnschrift;
+}
+.card-header {
+    font-weight: bold;
+    font-size: 16px;
+    text-align: center;
+    background-color: #343a40;
+    color: white;
+    padding: 10px;
+    border-radius: 8px 8px 0 0;
+}
+.color-card {
+    border-radius: 10px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+.header-col {
+    text-align: center;
+    font-weight: bold;
+    background-color: #ffffff;
+    padding: 3px;
+}
+.worker-name {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 5px;
+}
+.styled-checkbox {
+    text-align: center;
+}
+.styled-textarea {
+    background-color: white;
+    border: 1px solid #ced4da;
+    padding: 5px;
+    font-size: 14px;
+    border-radius: 5px;
+    color: black;
+}
+
+[id*='\"type\"\:\"weekdays-dropdown-modal\"'] .form-check-input[type=checkbox] {
+    scale: 2.0;
+    top: 10px;
+    position: relative;
+}
+
+.modal-xl {
+    max-width: 85vw !important;
+}
+
+/* [id*='\"izmena\"\:\"Prost\"'] {
+    display: none !important;
+} */
+
+@media print {
+
+    #plandela_outer_div > div.mb-4.mx-1.card > div > div:nth-child(1),
+    #plandela_outer_div > div.mb-4.mx-1.card > div > div:nth-child(2) {
+        display: none !important;
+    }
+
+    [id*='\"type\"\:\"row_header_plandela_machine_groups\"'] > div:nth-child(1) {
+        display: none !important;
+    }
+
+    [id*='\"type\"\:\"worker-dropdown\"'],
+    [id*='\"type\"\:\"remove-row-button\"'],
+    [id*='\"type\"\:\"btn-add-row\"'],
+    [id*='\"type\"\:\"row_header_plandela_machine_groups\"']  {
+        display: none !important;
+    }
+
+    [id*='\"type\"\:\"machine-dropdown\"'],
+    [id*='\"type\"\:\"row-container-outer\"'] > div:nth-child(1),
+    [id*='\"type\"\:\"machine-dropdown\"'] .Select-control,
+    [id*='\"type\"\:\"machine-dropdown\"'] .Select-multi-value-wrapper {
+        width: 65px !important;
+        /* zoom: 0.95; */
+    }
+
+    [id*='\"type\"\:\"products-dropdown\"'],
+    .custom-products-dropdown,
+    [id*='\"type\"\:\"row-container-outer\"'] > div:nth-child(2),
+    [id*='\"type\"\:\"products-dropdown\"'] .Select-control,
+    [id*='\"type\"\:\"products-dropdown\"'] .Select-multi-value-wrapper {
+        width: 100px !important;
+        /* zoom: 0.95; */
+    }
+
+    span.Select-value-icon {
+        display: none !important;
+    }
+
+    [id*='\"type\"\:\"shift-factor-dropdown-div\"'] {
+        display: none !important;
+    }
+
+    [id*='\"type\"\:\"paste-default-worker-assignments\"'] {
+        display: none !important;
+    }
+
+    .worker-label {
+        color: #000000 !important;
+    }
+
+    .Select-value-label {
+        font-size: 9px !important;
+    }
+
+    .print-hide {
+        display: none !important;
+    }
+
+    [id*='\"type\"\:\"weekdays-dropdown-header-column\"'] {
+        font-size: 10px !important;
+    }
+
+
+    [id*='\"type\"\:\"cardbody_plandela_machine_groups\"'] {
+        margin: 0px !important;
+        padding: 0px !important;
+    }
+
+    hr {
+        display: none !important;
+    }
+
+}

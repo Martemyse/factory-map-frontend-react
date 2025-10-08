@@ -1,0 +1,73 @@
+.modal-xl {
+    max-width: 100vw !important;
+	max-height: 100vh !important;
+    margin:0px;
+}
+
+body > div.fade.modal.show {
+    padding: 0px !important;
+}
+
+.modal-toast-popup {
+    width: 98% !important;
+	height: 90vh !important;
+	left: -9px;
+}
+
+#modal_datatable_card_stroski_nalog > div  {
+    border-radius: 20px !important;
+    filter: drop-shadow(2px 4px 4px rgb(63, 63, 63));
+    position: relative;
+    top: 48px;
+
+}
+
+.modal-toast-rounded {
+    border-radius: 20px !important;
+}
+
+#toast_zaloga_skladisca_kpi_top > div {
+    border-radius: 20px !important;
+}
+
+#modal_barplot_ocene_po_vrsti_strojev_preventivno_vzd_per_mesec > div {
+    border-radius: 20px !important;
+}
+
+#popup_preventivno_vzd_toast > div {
+    border: 0px solid white !important;
+}
+/*
+.modal-content {
+    border: 0px solid white !important;
+}
+*/
+/*
+button.btn-close::after {
+    content: "(Esc)";
+    position: relative;
+    top: -4px !important;
+    left: -40px !important;
+}
+*/
+i.fas.fa-times.text-primary::after {
+    content: " ( Esc )";
+    font-size: 25px;
+    /* text-align: center; */
+    /* text-align: center !important; */
+    /* align-items: center; */
+    /* align-content: center; */
+    position: relative;
+    top: -14px;
+}
+
+button.btn-close {
+    right: 15px !important;
+    position: relative;
+}
+
+#toast_datatable_card_stroski_nalog > div.toast-header > button::after {
+    top: -2px !important;
+    left: -34px !important;
+
+}

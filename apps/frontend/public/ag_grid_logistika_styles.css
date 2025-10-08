@@ -1,0 +1,107 @@
+/* --------------------------------------------------------- */
+/* 1) LIVARNA GROUP – ORANGE OUTER BORDER (Header & Cells)    */
+/* --------------------------------------------------------- */
+
+/* Header group container for Livarna */
+.ag-header-group-cell.common-group-border.liv-group-header-class {
+    border: 2px solid orange !important;
+    padding: 4px;
+}
+
+/* Header cells for Livarna group */
+.ag-header-cell[col-id="Peskamo_10"] {
+    border-left: 7px solid orange !important;
+    /* border-bottom: 2px solid orange !important; */
+}
+/* .ag-header-cell[col-id="Popravilo_LIV_10"],
+.ag-header-cell[col-id="Defekt_LIV_10"] {
+    border-bottom: 2px solid orange !important;
+} */
+.ag-header-cell[col-id="RČ"] {
+    /* border-bottom: 2px solid orange !important; */
+    border-right: 7px solid orange !important;
+}
+
+/* Grid cells for Livarna group */
+.ag-cell[col-id="Peskamo_10"] {
+    border-left: 7px solid orange !important;
+    margin-left: 5px !important;
+    box-shadow: 2px 6px 1px 7px orange;
+    /* border-bottom: 2px solid orange !important; */
+}
+/* .ag-cell[col-id="Popravilo_LIV_10"],
+.ag-cell[col-id="Defekt_LIV_10"] {
+    border-bottom: 2px solid orange !important;
+} */
+.ag-cell[col-id="RČ"] {
+    /* border-bottom: 2px solid orange !important; */
+    border-right: 7px solid orange !important;
+    margin-right: 5px !important;
+    /* box-shadow: -2px 6px 1px 7px orange; */
+}
+
+/* --------------------------------------------------------- */
+/* 2) SECOND GROUP – #5fa4ff OUTER BORDER (Header & Cells)       */
+/* --------------------------------------------------------- */
+
+/* Header group container for second group columns */
+.ag-header-group-cell.outer-group-border.obd-group-header-class {
+    border: none !important; /* Reset default borders */
+    border-top: 2px solid #5fa4ff !important;
+    /* border-bottom: 2px solid #5fa4ff !important; */
+}
+
+/* Header cells for second group */
+.ag-header-cell[col-id="Za Obd_OBD"] {
+    border-left: 7px solid #5fa4ff !important;
+    /* border-bottom: 2px solid #5fa4ff !important; */
+}
+.ag-header-cell[col-id="Prevzeto_OBD"] {
+    border-right: 7px solid #5fa4ff !important;
+    /* border-bottom: 2px solid #5fa4ff !important; */
+}
+/* .ag-header-cell[col-id^="Za Obd_"],
+.ag-header-cell[col-id^="Za popra_"],
+.ag-header-cell[col-id^="Defekt_"],
+.ag-header-cell[col-id^="Prevzeto_"],
+.ag-header-cell[col-id$="_OBD"] {
+    border-bottom: 2px solid #5fa4ff !important;
+} */
+
+/* Grid cells for second group */
+.ag-cell[col-id="Za Obd_OBD"] {
+    border-left: 7px solid #5fa4ff !important;
+    /* border-bottom: 2px solid #5fa4ff !important; */
+}
+.ag-cell[col-id="Prevzeto_OBD"] {
+    border-right: 7px solid #5fa4ff !important;
+    margin-right: 5px !important;
+    /* box-shadow: -2px 6px 1px 7px #5fa4ff; */
+
+    /* border-bottom: 2px solid #5fa4ff !important; */
+}
+/* .ag-cell[col-id^="Za Obd_"],
+.ag-cell[col-id^="Za popra_"],
+.ag-cell[col-id^="Defekt_"],
+.ag-cell[col-id^="Prevzeto_"],
+.ag-cell[col-id$="_OBD"] {
+    border-bottom: 2px solid #5fa4ff !important;
+} */
+
+/* --------------------------------------------------------- */
+/* 3) EXISTING HEADER GROUP STYLES                         */
+/* --------------------------------------------------------- */
+
+.obd-group-header-class {
+    background-color: #5fa4ff;
+    color: white;
+    font-family: "Trebuchet MS", sans-serif;
+    text-shadow: 1px 1px 2px black;
+}
+
+.liv-group-header-class {
+    background-color: #ffbb00;
+    color: white;
+    font-family: "Trebuchet MS", sans-serif;
+    text-shadow: 1px 1px 2px black;
+}

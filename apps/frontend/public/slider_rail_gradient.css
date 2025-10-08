@@ -1,0 +1,126 @@
+.rc-slider-rail {
+    background-image: linear-gradient(90deg, #3efd00, #d6f6ff4d ,#ff0000);
+	height: 5px;
+	box-shadow: 0px 0px 10px -1px;
+}
+
+.rc-slider-rail .inverse-gradient {
+    background-image: linear-gradient(270deg, #3efd00, #d6f6ff4d ,#ff0000);
+}
+
+.rc-slider {
+    box-shadow: -5px 5px 15px -5px;
+}
+
+.rc-slider-track {
+    height: 5px;
+    box-shadow: 0px 2px 5px 0px #38ffff;
+}
+
+.rc-slider-handle {
+    box-shadow: 0px 0px 5px 3px #62ffff;
+	width: 20px;
+    height: 20px;
+}
+
+.rc-slider-dot {
+    position: absolute;
+    bottom: -2px;
+    margin-left: -3px;
+    width: 8px;
+    height: 8px;
+    border: 1px solid #ffffff;
+    background-color: #959595;
+    cursor: pointer;
+    border-radius: 100%;
+    vertical-align: middle;
+}
+
+#\{\"class\"\:\"ocene_strojev_slider\"\,\"id\"\:\"cas\"\} > div > div.rc-slider-rail {
+	background-image: linear-gradient(270deg, #3efd00, #d6f6ff4d ,#ff0000);
+}
+
+#\{\"class\"\:\"ocene_strojev_slider\"\,\"id\"\:\"oee\"\} > div > div.rc-slider-rail {
+	background-image: linear-gradient(270deg, #3efd00, #d6f6ff4d ,#ff0000);
+}
+
+#slider_dtm > div > div.rc-slider-rail {
+	background-image: linear-gradient(90deg, #ffffff, #ffffff ,#3e70ca);
+    /*filter: drop-shadow(0px 1px 3px steelblue);*/
+}
+
+#slider_dtm > div > div.rc-slider-handle {
+    box-shadow: 0px 0px 8px 5px #bee3ff;
+    border: solid 2px #ffffff;
+    background-color: #d1eeff;
+    position: relative;
+    top: -2px;
+}
+
+#slider_dtm > div > div.rc-slider-track {
+    background-color: transparent !important;
+    box-shadow: 0px 0px 0px 0px #ffffff00 !important;
+}
+
+
+#slider_dtm > div > div.rc-slider-mark > .rc-slider-mark-text {
+    rotate: -27deg;
+    font-size: 12px;
+    color: #2b3452;
+    font-family: sans-serif;
+    font-weight: bold;
+    transition: all 0.2s;
+    padding: 4px;
+    border-radius: 15px;
+    white-space: nowrap;
+}
+
+#slider_dtm > div {
+    box-shadow: -5px 5px 15px -5px #ffffff !important;
+}
+
+
+#slider_dtm > div > div.rc-slider-handle::after {
+    content:"|";
+    font-size: 13px;
+    color: #000000;
+    top: 10px;
+    left: 4px;
+    position: relative;
+    transition: all 0.2s;
+    text-shadow: 0px 0px 2px #000000, 1px 1px 4px #68dcff, 1px 1px 4px #68dcff, 1px 1px 4px #68dcff, 1px 1px 4px #68dcff, -1px -1px 4px #68dcff, -1px -1px 4px #68dcff;
+}
+
+
+#slider_dtm > div > div.rc-slider-mark > .rc-slider-mark-text:hover {
+    rotate: -30deg;
+    font-size: 13px;
+    box-shadow: 0px 8px 5px -7px #b7deff, 0px 0px 5px 0px #b7deff;
+    transition: all 0.2s;
+    background-color: white;
+    z-index: 1000;
+}
+
+
+#slider_dtm > div > div.rc-slider-step > span:hover {
+    height: 16px;
+    width: 16px;
+    top: -5px;
+    /* position: relative; */
+    /* right: 2px; */
+    filter: drop-shadow(0px 0px 4px rgb(130, 220, 255));
+    background-color: rgb(177, 222, 255) !important;
+    transition: all 0.2s;
+}
+
+
+#slider_dtm > div > div.rc-slider-step > span {
+    width: 14px;
+    height: 14px;
+    top: -5px;
+    transition: all 0.2s;
+    background-image: linear-gradient(45deg, #758aac, #ffffff);
+    border: 1.5px solid #5996e1;
+    /* left: 1px; */
+}
+

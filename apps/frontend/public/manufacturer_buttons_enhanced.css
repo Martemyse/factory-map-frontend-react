@@ -1,0 +1,452 @@
+.button-group-manufacturer {
+    /* display: flex; */
+    /* justify-content: space-between; */
+    max-width: 103%;
+    position: relative;
+    /* perspective: 1200px; */
+    transform-style: preserve-3d; /* Ensures 3D transformations are preserved */
+    align-items: center;     /* centers vertically */
+    /* height: 12vh;  */
+    /* margin-left: auto;
+    margin-right: auto; */
+    /* top: -13vh; */
+    /* margin: auto; */
+    /* filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.5)); */
+    transition: all 0.9s ease;
+    /* transform: translateY(50px); */
+    /* z-index: 1100; */
+    /* float:left; */
+    /* padding-left: 15px; */
+    /* height: 19vh; */
+    /* padding-left: 3px; */
+    transform: rotateX(180deg);
+    overflow-x: hidden;
+    overflow-y: hidden;
+    padding: 5px;
+}
+
+/* 1) Parent creates the “merged” look: */
+.merged-group {
+  display: inline-flex;             /* lay its two children side by side */
+  border: 0.5px solid silver;       /* shared border */
+  border-radius: 10px;              /* only outer corners rounded */
+  overflow: hidden;                 /* clip inner borders */
+  background-color: transparent;    /* or your gradient here */
+}
+
+/* 2) Reset child buttons so they don’t double-border or re-round: */
+.merged-group .manufacturer-button {
+  margin: 0;                /* kill the normal 1px margin */
+  border: none;             /* parent is drawing the border */
+  border-radius: 0;         /* no rounding on the inside edges */
+  flex: 1;                  /* share the width equally */
+  /* any other per-button positioning can stay, 
+     but remove things like background-image, border... */
+}
+
+/* 3) If you want a dividing line between them, add it on the first child: */
+.merged-group .manufacturer-button:first-child {
+  border-right: 0.5px solid silver;
+}
+
+
+/* #page_content {
+    position: relative;
+    top: -4vh;
+} */
+
+/* [id*='\"id\"\:\"stgh_ii\"']
+#\{\"class\"\:\"button-name-image\"\,\"id\"\:\"stgh_ii\"\} */
+
+#\{\"class\"\:\"button-name-image\"\,\"id\"\:\"triglav\"\} {
+
+    display: block;
+    width: 35px;  /* Adjust the size as needed */
+    height: 40px;
+    background-image: url("stgh_i__hag.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* position: absolute;
+    margin-left: 0px;
+    top: -23px;
+    left: -2px;  */
+}
+
+/* #\{\"class\"\:\"button-name-image\"\,\"id\"\:\"hrastnik\"\} {
+
+    display: block;
+    width: 35px;
+    height: 40px;
+    background-image: url("stgh_ii.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+
+}
+
+
+#\{\"class\"\:\"button-name-image\"\,\"id\"\:\"hrastnik_1\"\} {
+
+    display: block;
+    width: 35px; 
+    height: 40px;
+    background-image: url("stgh_ii.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+*/
+
+#\{\"class\"\:\"button-name-image\"\,\"id\"\:\"hrastnik_2\"\} {
+
+    display: block;
+    position:relative;
+    width: 35px;
+    height: 40px;
+    background-image: url("stgh_ii.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    top: -46px;
+}
+
+#\{\"class\"\:\"button-name-image\"\,\"id\"\:\"soa\"\} {
+
+    display: block;
+    width: 35px;  /* Adjust the size as needed */
+    height: 40px;
+    background-image: url("heat_obdelava.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* position: absolute;
+    margin-left: 0px;
+    top: -23px;
+    left: -2px;  */
+}
+
+#\{\"class\"\:\"button-name-image\"\,\"id\"\:\"nanos\"\} {
+
+    display: block;
+    width: 35px;  /* Adjust the size as needed */
+    height: 40px;
+    background-image: url("heat_soba.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* position: absolute;
+    margin-left: 0px;
+    top: -23px; */
+    /* left: 89px; */
+}
+
+#\{\"class\"\:\"button-name-image\"\,\"id\"\:\"ankaran\"\} {
+
+    display: block;
+    width: 35px;  /* Adjust the size as needed */
+    height: 40px;
+    background-image: url("bmw.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* position: absolute;
+    margin-left: 0px;
+    top: -23px;
+    left: -2px; */
+}
+
+#\{\"class\"\:\"button-name-image\"\,\"id\"\:\"straa\"\} {
+
+    display: block;
+    width: 35px;  /* Adjust the size as needed */
+    height: 40px;
+    background-image: url("straa.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* position: absolute;
+    margin-left: 0px;
+    top: -23px;
+    left: -2px; */
+}
+
+#\{\"class\"\:\"button-name-image\"\,\"id\"\:\"celje\"\} {
+
+    display: block;
+    width: 35px;  /* Adjust the size as needed */
+    height: 40px;
+    background-image: url("bosch.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* position: absolute;
+    margin-left: 0px;
+    top: -23px;
+    left: -2px;  */
+}
+
+#\{\"class\"\:\"button-name-image\"\,\"id\"\:\"trbovlje\"\} {
+
+    display: block;
+    width: 35px;  /* Adjust the size as needed */
+    height: 40px;
+    background-image: url("mopf.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* position: absolute;
+    margin-left: 0px;
+    top: -23px;
+    left: -2px;  */
+}
+
+#\{\"class\"\:\"button-name-image\"\,\"id\"\:\"gorica\"\} {
+
+    display: block;
+    width: 35px;  /* Adjust the size as needed */
+    height: 40px;
+    background-image: url("mercedes.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* position: absolute;
+    margin-left: 0px;
+    top: -23px;
+    left: -2px;  */
+}
+
+.dash-cube-side--front,
+.dash-cube-side--back {
+    display: block;
+    width: 35px;
+    height: 40px;
+    background-image: url("linea.jpg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* position: absolute;
+    margin-left: 0px;
+    top: -23px;
+    left: -2px;  */
+}
+
+.dash-cube-side--left,
+.dash-cube-side--right {
+    display: block;
+    background-image: url("lth.jpg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* position: absolute;
+    margin-left: 0px;
+    top: -23px;
+    left: -2px;  */
+}
+
+
+#\{\"class\"\:\"button-name-image\"\,\"id\"\:\"izola\"\} {
+
+    display: block;
+    width: 35px;  /* Adjust the size as needed */
+    height: 40px;
+    background-image: url("onebox.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* position: absolute;
+    margin-left: 0px;
+    top: -23px;
+    left: -2px;  */
+}
+
+#\{\"class\"\:\"button-name-image\"\,\"id\"\:\"ljubljana\"\} {
+
+    display: block;
+    width: 35px;  /* Adjust the size as needed */
+    height: 40px;
+    background-image: url("stellantis.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* position: absolute;
+    margin-left: 0px;
+    top: -23px;
+    left: -2px;  */
+}
+
+.button-header-manufacturer {
+    transform: none !important;
+    font-size: 17px;
+    font-weight: normal;
+    color: black;
+    /* margin-bottom: 5px; */
+    /* text-shadow: 1px 1px 1px white, 1px 1px 2px white; */
+    /* box-shadow: 0px 0px 3px 36px inset white; */
+    /* position: absolute; */
+    text-align: start;
+    /* top: 15px; */
+    /* background: steelblue; */
+    /* background: white; */
+    border-radius: 1px;
+    /* filter: drop-shadow(1px 2px 5px black); */
+    left: 0; /* Align to the left of the button */
+    right: 0; /* Align to the right of the button */
+    top: -75px;
+    /* width: 99%; */
+    display: flex;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    /* height: 135px; */
+    padding:3px;
+    /* border: 0.5px solid #d4d4d4; */
+    border-radius: 8px; /* Rounded corners for a soft look */
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+}
+
+.button-name-manufacturer {
+    /* transform: none !important; */
+    /* font-size: 17px; */
+    font-weight: normal;
+    color: white;
+    /* margin-bottom: 5px; */
+    display: block;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    /* text-shadow: 0px 0px 2px black, 1px 1px 0px black; */
+    text-shadow: 0.5px 0.5px 2px black !important;
+    position: relative;
+    left: 0; /* Align to the left of the button */
+    right: 0; /* Align to the right of the button */
+    text-align: start; /* Center the text */
+    position: relative; /* Position the name absolutely within the button */
+    /* background: rgb(255, 255, 255); */
+    bottom: 15px;
+    border-radius: 4px;
+    /* box-shadow: 0px 0px 3px 10px white; */
+    /* width: 90%; */
+    transform: none !important;
+    scale: none !important;
+    font-weight: bold;
+    top: 0px;
+    /* background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0)); */
+}
+
+.manufacturer-button {
+    /* opacity: 0.8; */
+    flex: 1;
+    /* height: 200%; */
+    padding: 0; /* Remove padding to ensure image fills button */
+    margin: 0;
+    transition: all 0.8s ease;
+    /* background-size: 75%; */
+    background-size: cover; /* Set the image to be larger than the button */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-clip: border-box;
+    background-position: center;
+    /* border: none; */
+    /* top:-18vh; */
+    cursor: pointer;
+    outline: none;
+    /* overflow: visible; */
+    background-color: rgb(129, 186, 233);
+    /* background-image: repeating-linear-gradient(45deg, rgb(84, 145, 196), white 305px); */
+    position: relative;
+    transform-origin: center center; /* Pivot point for the rotation */
+    margin-right: 3px;
+    /* z-index: 1091; */
+    color: white;
+    font-size: 30px;
+    font-weight: bold;
+    border-radius: 8px; /* Rounded corners for a modern look */
+    /* box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); */
+    /* max-width: 24%; */
+    /* min-width: 8%; */
+    /* padding-bottom: 50px; */
+    /* transition: transform 0.9s ease, width 0.9s ease, height 0.9s ease, background-size 0.9s ease; */
+    /* background: none; */
+    /* filter: drop-shadow(2px 2px 2px black); */
+    border: 0.5px solid white;
+    transform: rotateX(180deg);
+    /* max-width: 300px; */
+    /* max-width: 26%;
+    min-width: 12%; */
+}
+
+/* .manufacturer-button:hover {
+    transform: scale(1.11) translateY(3px) translateX(3px) !important;
+    transition: transform 0.5s ease !important;
+}
+
+.button-group:hover .manufacturer-button:not(:hover) {
+    transform: scale(1) translateY(3px) !important;
+    transition: transform 0.5s ease !important;
+} */
+
+.manufacturer-button:hover {
+    transform: translateY(3px) translateX(3px) rotateX(180deg) !important;
+    /* width: 300px; */
+    transition: transform 0.5s ease !important;
+}
+
+.button-group:hover .manufacturer-button:not(:hover) {
+    transform: translateY(3px) !important;
+    /* width: 200px; */
+    transition: transform 0.5s ease !important;
+}
+
+.manufacturer-button:hover {
+    /* height: 15vh; */
+    /* top: 5vh; */
+    /* width: 35%;  */
+    /* flex: none;  */
+    z-index: 1102;
+    background-size: contain; /* Show the full image on hover */
+    /* background-image: repeating-linear-gradient(45deg, rgb(110, 177, 231), aliceblue 355px); */
+    border: 2px solid white;
+    transition: all 0.9s ease;
+    filter: brightness(1.05) blur(0);
+    opacity: 1;
+    background-color: rgb(112, 170, 218);
+}
+
+/* Adjust the hover effect for the inner-bg-manufacturer */
+.manufacturer-button:hover .inner-bg-manufacturer::before {
+    /* filter: brightness(1) blur(0); */
+    border-radius: 0px 0px 15px 15px;
+    /* transform: translateY(50px); */
+    /* background-size: 75%; */
+}
+
+/* #app_layout_div::before {
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(45deg, #b6d8ff, transparent), repeating-linear-gradient(45deg, #e8f3ff, transparent 400px);
+    background-size: 110%; 
+    background-repeat: no-repeat;
+    background-position: center; 
+    background-position: top center;
+    opacity: 0.5;
+    z-index: -1;
+}
+ */
+
+#\{\"class\"\:\"lean_tim_button\"\,\"id\"\:\"hrastnik_1\"\} > div.button-header-manufacturer {
+    height: unset !important
+}
+
+#\{\"class\"\:\"lean_tim_button\"\,\"id\"\:\"hrastnik_2\"\} > div.button-header-manufacturer {
+    height: unset !important
+}
+
+
+#\{\"class\"\:\"lean_tim_button\"\,\"id\"\:\"hrastnik_2\"\} > div.button-header-manufacturer > span > div:nth-child(1) {
+    height: 25px;
+}

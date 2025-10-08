@@ -1,0 +1,145 @@
+/* Updated Grid Layouts: smaller first two columns, larger .col-delez, .col-strosek columns */
+.grid-container-daily,
+.grid-container-weekly,
+.grid-container-monthly {
+    display: grid;
+    grid-template-columns: 0.5fr 1fr 2fr 2.5fr 2.5fr; /* Adjusted to make the 3rd/4th columns bigger */
+    grid-template-rows: auto auto auto;
+    gap: 8px; /* More compact spacing */
+    position: relative;
+}
+
+/* Common stylings */
+.cell-header {
+    font-weight: bold;
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 5px; /* Reduced padding for compactness */
+    background: #f1f3f5;
+    border-radius: 5px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.label-header {
+    background: none;
+    box-shadow: none;
+}
+
+.col-dobri, .col-izmet {
+    font-size: 0.85rem;
+    color: #6c757d;
+    background: #ffffff;
+    text-align: center;
+    padding: 4px; /* Smaller padding for compactness */
+}
+
+.col-delez, .col-strosek {
+    font-size: 1rem;
+    font-weight: bold;
+    background: #f8f9fa;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    padding: 6px; /* Slightly smaller padding */
+    text-align: center;
+}
+
+.cell-label {
+    font-weight: bold;
+    text-align: left;
+    font-size: 0.85rem;
+    padding: 4px;
+}
+
+.data-cell {
+    background: none;
+    text-align: center;
+    padding: 4px;
+}
+
+/* Merged cell for single Izmet or Strošek across 2 rows */
+.data-merged {
+    text-align: center;
+    vertical-align: middle;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    padding: 4px; /* Slightly smaller for compactness */
+}
+
+/* Odlito row => row 2 */
+.label-odlito {
+    font-size: 0.85rem;
+    grid-row: 2;
+    grid-column: 1;
+}
+#daily_odlito_kol,
+#weekly_odlito_kol,
+#monthly_odlito_kol {
+    grid-row: 2;
+    grid-column: 2;
+}
+#daily_odlito_delez,
+#weekly_odlito_delez,
+#monthly_odlito_delez {
+    text-align: center;
+    grid-row: 2;
+    grid-column: 4;
+}
+
+/* Merged Izmet cell => row 2..3 => column 3 */
+#daily_merged_izmet,
+#weekly_merged_izmet,
+#monthly_merged_izmet {
+    grid-row: 2 / 4;
+    grid-column: 3;
+}
+
+/* Merged Strošek cell => row 2..3 => column 5 */
+#daily_merged_strosek,
+#weekly_merged_strosek,
+#monthly_merged_strosek {
+    grid-row: 2 / 4;
+    grid-column: 5;
+}
+
+/* Embalirano row => row 3 */
+.label-embalirano {
+    font-size: 0.85rem;
+    grid-row: 3;
+    grid-column: 1;
+}
+#daily_embalirano_kol,
+#weekly_embalirano_kol,
+#monthly_embalirano_kol {
+    grid-row: 3;
+    grid-column: 2;
+}
+#daily_embalirano_delez,
+#weekly_embalirano_delez,
+#monthly_embalirano_delez {
+    text-align: center;
+    grid-row: 3;
+    grid-column: 4;
+}
+
+/* Hover effect for .col-delez/.col-strosek columns */
+.col-delez:hover,
+.col-strosek:hover,
+.highlighted-cell:hover {
+    background: #e9ecef;
+    transition: background-color 0.3s ease;
+}
+
+/* Highlighted cell styling */
+.highlighted-cell {
+    background: #f1f3f5;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #000000;
+    text-align: center;
+}

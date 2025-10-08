@@ -1,0 +1,54 @@
+.hover-btn:hover {
+  background-color: #f6faff !important;
+  border:1px solid white !important;
+  box-shadow: 0px 0px 4px -1px #0088ff,0px 0px 4px 2px #ffffff inset !important;
+  color:#0088ff !important;
+  /*opacity: 0.9;*/
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.hover-btn-nobg:hover {
+  border:1px solid white !important;
+  color: initial !important;
+  text-shadow: 0px 0px 2px white, 0px 0px 1px white;
+  box-shadow: 0px 0px 4px 1px #0088ff, rgb(63 112 178) 0px 0px 4px 0px inset, rgb(0 0 0 / 9%) 0px 6px 3px !important;
+  /*opacity: 0.9;*/
+  transition: all 0.2s;
+}
+
+.fa-hover-html:hover {
+  color:#0088ff !important;
+  transition: all 0.2s;
+}
+
+.hover-btn-bg-border {
+  border: 1px solid #e9e9e9db !important;
+  box-shadow: 0px 0px 1px 1px #f1f4f62e inset;
+}
+
+button#korak_desno:hover {
+  transform: scale(1.11);
+  filter: drop-shadow(0px 0px 3px rgb(133 198 255 / 69%));
+}
+
+button#korak_levo:hover {
+  transform: scale(1.11);
+  filter: drop-shadow(0px 0px 3px rgb(133 198 255 / 69%));
+}
+
+button#korak_levo_end:hover {
+  transform: scale(1.11);
+  filter: drop-shadow(0px 0px 3px rgb(133 198 255 / 69%));
+}
+
+button#korak_desno_end:hover {
+  transform: scale(1.11);
+  filter: drop-shadow(0px 0px 3px rgb(133 198 255 / 69%));
+}
+
+/*
+i.fa-solid:hover {
+  color: #4382d4 !important;
+}
+*/

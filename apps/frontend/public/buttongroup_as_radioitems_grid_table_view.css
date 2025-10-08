@@ -1,0 +1,98 @@
+#radios_prev_vzd_view_table_lab:after {
+	content: '\f00a';
+	font-family: 'FontAwesome';
+    position: relative;
+    top: -4px;
+	left: -4px;
+}
+
+#nastavi_x_os_sklopi_stroji_radioitems_stroji_icon:after {
+	content: '\f1b2';
+	font-family: 'FontAwesome';
+    position: relative;
+    top: -4px;
+	left: -4px;
+}
+
+#nastavi_x_os_sklopi_stroji_radioitems_sklop_icon:after {
+	content: '\f1b3';
+	font-family: 'FontAwesome';
+    position: relative;
+    top: -4px;
+	left: -5px;
+}
+
+#nastavi_x_os_sklopi_stroji_radioitems_strm_icon:after {
+	content: '\f041';
+	font-family: 'FontAwesome';
+    position: relative;
+    top: -4px;
+	left: -3px;
+}
+
+#nastavi_x_os_sklopi_stroji_radioitems_vrste_icon:after {
+	content: '\f0e8';
+	font-family: 'FontAwesome';
+    position: relative;
+    top: -4px;
+	left: -5px;
+}
+
+#nastavi_x_os_sklopi_stroji_radioitems_proizvajalci_icon:after {
+	content: '\f02b';
+	font-family: 'FontAwesome';
+    position: relative;
+    top: -3px;
+	left: -3px;
+}
+
+#nastavi_x_os_sklopi_stroji_radioitems_obrati_icon:after {
+	content: '\f64f';
+	font-family: 'FontAwesome';
+    position: relative;
+    top: -3px;
+	left: -5px;
+}
+
+#nastavi_x_os_sklopi_stroji_radioitems_oddelki_icon:after {
+	content: '\f275';
+	font-family: 'FontAwesome';
+    position: relative;
+    top: -3px;
+	left: -5px;
+}
+
+#nastavi_x_os_sklopi_stroji_radioitems_talina_icon:after {
+	content: '\f16c';
+	font-family: 'FontAwesome';
+    position: relative;
+    top: -3px;
+	left: -5px;
+}
+
+.radio-group .btn-group .btn {
+    /*border-radius: 33px 2px 44px 4px !important;*/
+}
+
+label.form-check-label.btn {
+    /*border-radius: 33px 2px 44px 4px !important;*/
+}
+
+#radios_dtm > div {
+    /*border-radius: 33px 2px 44px 4px !important;*/
+    background-color: white;
+}
+
+#tekoce_leto_zadnjih_x_dni > div {
+    /*border-radius: 33px 2px 44px 4px !important;*/
+    background-color: white;
+}
+
+#prevent_vzdrzevanje_mode_radioitems > div {
+    /*border-radius: 33px 2px 44px 4px !important;*/
+    background-color: white;
+}
+
+.radio-group .form-check {
+    background-color: #ffffff;
+}

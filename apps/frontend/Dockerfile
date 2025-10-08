@@ -16,6 +16,10 @@ COPY . .
 # Build the application
 RUN npm run build
 
+# Copy Dash assets (from your local repo) into final /usr/share/nginx/html/assets/
+# 👇 Add this line
+COPY ./apps/frontend/public/assets /usr/share/nginx/html/assets
+
 # Production stage - use Nginx to serve static files and proxy API/tiles
 FROM nginx:alpine
 
