@@ -5,9 +5,8 @@ from app.db import engine
 from app.config import settings
 import pandas as pd
 
-# Create separate engine for zabojniki database
 zabojniki_engine = create_engine(
-    f"postgresql://{settings.pg_user}:{settings.pg_password}@localhost:5432/bpsna_dobri_slabi_lj",
+    settings.source_database_url,
     echo=False
 )
 
@@ -31,26 +30,26 @@ async def get_filtered_annotations(
     and join with features table to get only relevant odlagalne cone
     """
     try:
-        print(f"=== ADVANCED SEARCH BACKEND DEBUG ===")
-        print(f"Received parameters:")
-        print(f"  odlagalne_zone: {odlagalne_zone}")
-        print(f"  od_operacije: {od_operacije}")
-        print(f"  do_operacije: {do_operacije}")
-        print(f"  status: {status}")
-        print(f"  artikel: {artikel}")
-        print(f"  dodatne_oznake: {dodatne_oznake}")
-        print(f"  mode: {mode}")
-        print(f"  indicator_mode: {indicator_mode}")
-        print(f"  nalog: {nalog}")
-        print(f"  onk: {onk}")
+        # print(f"=== ADVANCED SEARCH BACKEND DEBUG ===")
+        # print(f"Received parameters:")
+        # print(f"  odlagalne_zone: {odlagalne_zone}")
+        # print(f"  od_operacije: {od_operacije}")
+        # print(f"  do_operacije: {do_operacije}")
+        # print(f"  status: {status}")
+        # print(f"  artikel: {artikel}")
+        # print(f"  dodatne_oznake: {dodatne_oznake}")
+        # print(f"  mode: {mode}")
+        # print(f"  indicator_mode: {indicator_mode}")
+        # print(f"  nalog: {nalog}")
+        # print(f"  onk: {onk}")
         
         # Parse comma-separated values
         status_list = status.split(',') if status else []
         dodatne_oznake_list = dodatne_oznake.split(',') if dodatne_oznake else []
         
-        print(f"Parsed lists:")
-        print(f"  status_list: {status_list}")
-        print(f"  dodatne_oznake_list: {dodatne_oznake_list}")
+        # print(f"Parsed lists:")
+        # print(f"  status_list: {status_list}")
+        # print(f"  dodatne_oznake_list: {dodatne_oznake_list}")
         
         # Build the query to get zabojniki data with odlagalne cone
         where_clauses = []

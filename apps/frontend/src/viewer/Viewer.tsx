@@ -1036,7 +1036,7 @@ export default function Viewer() {
   // Load factory layout from tileserver
   function loadFactoryLayout(): Promise<any> {
     return new Promise((resolve) => {
-      console.log('Loading factory layout from tileserver...');
+      // console.log('Loading factory layout from tileserver...');
       
       if (map.current && map.current.isStyleLoaded()) {
         addFactoryTiles();
@@ -1081,34 +1081,33 @@ export default function Viewer() {
           }
         });
         
-        console.log('Factory tiles added to map');
-        console.log('Map layers:', map.current.getStyle().layers.map(l => l.id));
-        console.log('Map sources:', Object.keys(map.current.getStyle().sources));
+        // console.log('Factory tiles added to map');
+        // console.log('Map layers:', map.current.getStyle().layers.map(l => l.id));
+        // console.log('Map sources:', Object.keys(map.current.getStyle().sources));
         
         // Add event listener to detect when tiles are loaded
         map.current.on('sourcedata', (e) => {
           if (e.sourceId === 'factory-tiles' && e.isSourceLoaded) {
-            console.log('Factory tiles source loaded successfully');
-            // Check if layer is visible
-            if (map.current) {
-              const layer = map.current.getLayer('factory-tiles-lines');
-              if (layer) {
-                console.log('Factory layer found:', layer);
-                console.log('Layer visibility:', map.current.getLayoutProperty('factory-tiles-lines', 'visibility'));
-              }
-            }
+            // console.log('Factory tiles source loaded successfully');
+            // if (map.current) {
+            //   const layer = map.current.getLayer('factory-tiles-lines');
+            //   if (layer) {
+            //     console.log('Factory layer found:', layer);
+            //     console.log('Layer visibility:', map.current.getLayoutProperty('factory-tiles-lines', 'visibility'));
+            //   }
+            // }
           }
         });
         
         // Also check layer after a short delay
         setTimeout(() => {
           if (map.current) {
-            const layer = map.current.getLayer('factory-tiles-lines');
-            console.log('Factory layer after timeout:', layer);
-            if (layer) {
-              console.log('Layer paint properties:', map.current.getPaintProperty('factory-tiles-lines', 'line-color'));
-              console.log('Layer source:', map.current.getSource('factory-tiles'));
-            }
+            // const layer = map.current.getLayer('factory-tiles-lines');
+            // console.log('Factory layer after timeout:', layer);
+            // if (layer) {
+            //   console.log('Layer paint properties:', map.current.getPaintProperty('factory-tiles-lines', 'line-color'));
+            //   console.log('Layer source:', map.current.getSource('factory-tiles'));
+            // }
           }
         }, 2000);
       } catch (error) {
@@ -1163,7 +1162,7 @@ export default function Viewer() {
             if (annotationId) {
               setSelectedAnnotation(annotationId);
               addVertexMarkers(annotationId);
-              console.log('Selected annotation:', annotationId);
+              // console.log('Selected annotation:', annotationId);
             }
           }
         });
@@ -1462,7 +1461,7 @@ export default function Viewer() {
     // Use the new checkbox-based visibility system
     const visibleAnnotations = computeVisibleAnnotations();
 
-    console.log('Visible annotations:', visibleAnnotations.length);
+    // console.log('Visible annotations:', visibleAnnotations.length);
 
     if (visibleAnnotations.length > 0) {
       // Create GeoJSON for annotations (ensure closed rings)
