@@ -818,34 +818,52 @@ export default function Viewer() {
   // Load filtered annotations from backend using advanced search
   async function loadFilteredAnnotations(filters: SearchFilters): Promise<HierarchyNode[]> {
     try {
+      console.log('=== ADVANCED SEARCH DEBUG ===');
       console.log('Loading filtered annotations with filters:', filters);
+      console.log('API_BASE:', API_BASE);
       
       // Build query parameters
       const params = new URLSearchParams();
       
       if (filters.odlagalne_zone) {
         params.append('odlagalne_zone', filters.odlagalne_zone);
+        console.log('Added odlagalne_zone:', filters.odlagalne_zone);
       }
       if (filters.od_operacije) {
         params.append('od_operacije', filters.od_operacije.toString());
+        console.log('Added od_operacije:', filters.od_operacije);
       }
       if (filters.do_operacije) {
         params.append('do_operacije', filters.do_operacije.toString());
+        console.log('Added do_operacije:', filters.do_operacije);
       }
       if (filters.status && filters.status.length > 0) {
         params.append('status', filters.status.join(','));
+        console.log('Added status:', filters.status);
       }
       if (filters.artikel) {
         params.append('artikel', filters.artikel);
+        console.log('Added artikel:', filters.artikel);
       }
       if (filters.dodatne_oznake && filters.dodatne_oznake.length > 0) {
         params.append('dodatne_oznake', filters.dodatne_oznake.join(','));
+        console.log('Added dodatne_oznake:', filters.dodatne_oznake);
       }
       if (filters.mode) {
         params.append('mode', filters.mode);
+        console.log('Added mode:', filters.mode);
       }
       if (filters.indicator_mode) {
         params.append('indicator_mode', filters.indicator_mode);
+        console.log('Added indicator_mode:', filters.indicator_mode);
+      }
+      if (filters.nalog) {
+        params.append('nalog', filters.nalog);
+        console.log('Added nalog:', filters.nalog);
+      }
+      if (filters.onk) {
+        params.append('onk', filters.onk);
+        console.log('Added onk:', filters.onk);
       }
       
       const queryString = params.toString();
@@ -853,16 +871,25 @@ export default function Viewer() {
         ? `${API_BASE}/advanced-search/annotations?${queryString}`
         : `${API_BASE}/advanced-search/annotations`;
       
-      console.log('Fetching from:', url);
+      console.log('Final URL:', url);
+      console.log('Query string:', queryString);
+      
+      console.log('Making fetch request...');
       const response = await fetch(url);
       console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Error response body:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
       }
       
+      console.log('Parsing JSON response...');
       const data = await response.json();
       console.log('Loaded filtered annotations:', data.total_count);
+      console.log('First annotation:', data.annotations[0]);
+      console.log('=== END ADVANCED SEARCH DEBUG ===');
       
       // Convert the annotations to HierarchyNode format
       const nodes: HierarchyNode[] = [];
@@ -888,14 +915,14 @@ export default function Viewer() {
           id: `backend_${annotation.id}`,
           remoteId: annotation.id,
           name: annotation.name,
-          level: 'polje' as Level, // Default level for filtered annotations
-          color: annotation.color || colorByLevel('polje' as Level),
+          level: (annotation.level as Level) || 'polje', // Use the level from backend
+          color: annotation.color || colorByLevel((annotation.level as Level) || 'polje'),
           polygon: polygon,
           children: [],
           parentLocalId: undefined,
           cona: annotation.cona,
           max_capacity: annotation.max_capacity,
-          taken_capacity: annotation.taken_capacity, // Use the count from zabojniki
+          taken_capacity: annotation.taken_capacity, // Use the aggregated count from zabojniki
           shape_gl: annotation.geom,
           x_coord_gl: annotation.x_coord_gl,
           y_coord_gl: annotation.y_coord_gl,
@@ -2080,6 +2107,51 @@ export default function Viewer() {
         >
           {isAdvancedSearchMode ? 'Exit Advanced Search' : 'Napredno iskanje'}
         </button>
+        
+        {isAdvancedSearchMode && (
+          <button
+            onClick={async () => {
+              console.log('Clearing advanced search');
+              setAdvancedSearchFilters(null);
+              setIsAdvancedSearchMode(false);
+              
+              // Reload all annotations
+              try {
+                const allAnnotations = await loadAnnotations();
+                setAll(allAnnotations);
+                setDoc({ 
+                  origin: [0, 0], 
+                  units: 'm', 
+                  nodes: allAnnotations.filter(n => !n.parentLocalId) 
+                });
+                console.log('Advanced search cleared, reloaded all annotations');
+              } catch (error) {
+                console.error('Failed to reload annotations:', error);
+              }
+            }}
+            style={{
+              ...btn,
+              marginBottom: '10px',
+              width: '100%',
+              padding: '10px 16px',
+              fontSize: '13px',
+              fontWeight: '500',
+              backgroundColor: '#6b7280',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+            }}
+          >
+            Clear Search
+          </button>
+        )}
       </div>
 
       {/* Edit Modal */}
@@ -2091,6 +2163,7 @@ export default function Viewer() {
           onUpdateCapacity={(newCapacity) => {
             updateAnnotationCapacity(editModalAnnotation.id, newCapacity);
           }}
+          searchFilters={advancedSearchFilters || undefined}
         />
       )}
 
@@ -2102,9 +2175,43 @@ export default function Viewer() {
             setIsAdvancedSearchMode(false);
             setAdvancedSearchFilters(null);
           }}
-          onSearch={(filters) => {
+          onSearch={async (filters) => {
+            console.log('=== ADVANCED SEARCH TRIGGERED ===');
+            console.log('Filters received:', filters);
             setAdvancedSearchFilters(filters);
-            // The useEffect will trigger reload with new filters
+            
+            // Trigger the search immediately
+            try {
+              console.log('Calling loadFilteredAnnotations...');
+              const filteredAnnotations = await loadFilteredAnnotations(filters);
+              console.log('loadFilteredAnnotations returned:', filteredAnnotations.length, 'annotations');
+              
+              // Update the annotations in the hierarchy
+              console.log('Updating all annotations...');
+              setAll(filteredAnnotations);
+              
+              // Update the doc for the hierarchy navigator
+              console.log('Updating doc...');
+              setDoc({ 
+                origin: [0, 0], 
+                units: 'm', 
+                nodes: filteredAnnotations.filter(n => !n.parentLocalId) 
+              });
+              
+              // Auto-check all visible annotations
+              console.log('Auto-checking annotations...');
+              const visibleIds = new Set(filteredAnnotations.map(n => n.id));
+              setCheckedNodes(visibleIds);
+              
+              console.log('Advanced search completed successfully!');
+              console.log('=== END ADVANCED SEARCH ===');
+            } catch (error) {
+              console.error('=== ADVANCED SEARCH FAILED ===');
+              console.error('Error details:', error);
+              console.error('Error message:', error instanceof Error ? error.message : String(error));
+              console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+              console.error('=== END ERROR ===');
+            }
           }}
         />
       )}

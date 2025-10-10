@@ -7,6 +7,7 @@ interface AnnotationEditModalProps {
   maxCapacity: number | undefined;
   onClose: () => void;
   onUpdateCapacity: (newCapacity: number) => void;
+  searchFilters?: SearchFilters;
 }
 
 // Extract number from parentheses in annotation name
@@ -21,17 +22,18 @@ export default function AnnotationEditModal({
   annotationName,
   maxCapacity,
   onClose,
-  onUpdateCapacity
+  onUpdateCapacity,
+  searchFilters: initialSearchFilters
 }: AnnotationEditModalProps) {
   const [capacity, setCapacity] = useState<string>(maxCapacity?.toString() || '0');
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
-  const [searchFilters, setSearchFilters] = useState<SearchFilters>({});
+  const [searchFilters, setSearchFilters] = useState<SearchFilters>(initialSearchFilters || {});
   const locationCode = extractNumberFromName(annotationName);
 
   // Determine the iframe URL based on environment
   const baseUrl = config.isDevelopment 
     ? 'http://127.0.0.1:8050' 
-    : 'http://ecotech.utlth-ol.si:8082';
+    : 'http://ecotech.utlth-ol.si:8082/iframe';
   
   // Build iframe URL with search filters
   const buildIframeUrl = () => {
@@ -66,6 +68,12 @@ export default function AnnotationEditModal({
     }
     if (searchFilters.indicator_mode) {
       params.append('radiobutton_indicator_mode', searchFilters.indicator_mode);
+    }
+    if (searchFilters.nalog) {
+      params.append('input_nalog', searchFilters.nalog);
+    }
+    if (searchFilters.onk) {
+      params.append('input_onk', searchFilters.onk);
     }
     
     const queryString = params.toString();

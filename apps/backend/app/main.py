@@ -41,8 +41,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(layers.router)
-app.include_router(features.router)
+app.include_router(layers.router, prefix="/api")
+app.include_router(features.router, prefix="/api")
 app.include_router(advanced_search.router, prefix="/api", tags=["advanced-search"])
 
 

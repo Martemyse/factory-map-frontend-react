@@ -15,7 +15,7 @@ export const config = {
   // In development: use localhost directly
   // In production: use relative paths (Nginx proxies /api -> backend:7998)
   API_BASE: isDevelopment 
-    ? `http://localhost:${backendPort}` 
+    ? `http://localhost:${backendPort}/api` 
     : '/api',
   
   // Tileserver configuration

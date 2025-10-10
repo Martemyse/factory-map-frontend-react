@@ -15,6 +15,8 @@ export interface SearchFilters {
   dodatne_oznake?: string[];
   mode?: string;
   indicator_mode?: string;
+  nalog?: string;
+  onk?: string;
 }
 
 const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
@@ -30,7 +32,9 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
     artikel: '02',
     dodatne_oznake: [],
     mode: 'agg_Artikel_Cona',
-    indicator_mode: 'Artikel'
+    indicator_mode: 'Artikel',
+    nalog: '',
+    onk: ''
   });
 
   const dodatneOznakeOptions = [
@@ -69,7 +73,9 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
       artikel: '02',
       dodatne_oznake: [],
       mode: 'agg_Artikel_Cona',
-      indicator_mode: 'Artikel'
+      indicator_mode: 'Artikel',
+      nalog: '',
+      onk: ''
     });
   };
 
@@ -489,6 +495,78 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
                     Po nalogu
                   </label>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Row 4: Nalog and ONK */}
+          <div style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
+            <div style={{ flex: 1 }}>
+              <div style={{
+                padding: '16px',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                marginBottom: '15px'
+              }}>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '8px', 
+                  fontSize: '16px', 
+                  fontWeight: '500',
+                  color: '#374151'
+                }}>
+                  Nalog
+                </label>
+                <input
+                  type="text"
+                  placeholder="Vnesi nalog"
+                  value={filters.nalog || ''}
+                  onChange={(e) => handleInputChange('nalog', e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '16px',
+                    outline: 'none',
+                    transition: 'border-color 0.2s'
+                  }}
+                />
+              </div>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{
+                padding: '16px',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                marginBottom: '15px'
+              }}>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '8px', 
+                  fontSize: '16px', 
+                  fontWeight: '500',
+                  color: '#374151'
+                }}>
+                  ONK
+                </label>
+                <input
+                  type="text"
+                  placeholder="Vnesi ONK"
+                  value={filters.onk || ''}
+                  onChange={(e) => handleInputChange('onk', e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '16px',
+                    outline: 'none',
+                    transition: 'border-color 0.2s'
+                  }}
+                />
               </div>
             </div>
           </div>
