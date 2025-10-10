@@ -33,7 +33,7 @@ export default function AnnotationEditModal({
   // Determine the iframe URL based on environment
   const baseUrl = config.isDevelopment 
     ? 'http://127.0.0.1:8050' 
-    : 'http://ecotech.utlth-ol.si:8082/iframe';
+    : 'http://ecotech.utlth-ol.si:8082';
   
   // Build iframe URL with search filters
   const buildIframeUrl = () => {
