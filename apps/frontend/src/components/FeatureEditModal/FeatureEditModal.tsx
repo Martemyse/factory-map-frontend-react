@@ -39,7 +39,6 @@ export default function FeatureEditModal({
   const [levelBorder, setLevelBorder] = useState('#d1d5db');
   const [capacityBorder, setCapacityBorder] = useState('#d1d5db');
   const [takenBorder, setTakenBorder] = useState('#d1d5db');
-  const [lockedBorder, setLockedBorder] = useState('#d1d5db');
 
   // Handle field updates with visual feedback
   const handleFieldUpdate = async (
@@ -161,7 +160,7 @@ export default function FeatureEditModal({
                 checked={isLocked}
                 onChange={(e) => {
                   setIsLocked(e.target.checked);
-                  handleFieldUpdate('locked', e.target.checked, setLockedBorder);
+                  handleFieldUpdate('locked', e.target.checked, () => {});
                 }}
                 style={{
                   width: '16px',
