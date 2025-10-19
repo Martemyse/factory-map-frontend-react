@@ -66,21 +66,34 @@ async def get_features(db: AsyncSession = Depends(get_db)):
 
 
 @router.get('/geojson')
-async def get_features_geojson(db: AsyncSession = Depends(get_db)):
+async def get_features_geojson(layer_id: int | None = None, db: AsyncSession = Depends(get_db)):
   """
   Returns features as a proper GeoJSON FeatureCollection for MapLibre GL.
   This is the most efficient format for mapping libraries.
+  Optionally filter by layer_id.
   """
-  query = text("""
-    SELECT 
-        id, layer_id, parent_id, name, opomba, color, level, order_index, depth, properties,
-        ST_AsGeoJSON(geom)::json as geometry,
-        cona, max_capacity, taken_capacity
-    FROM features 
-    ORDER BY order_index
-  """)
+  if layer_id is not None:
+    query = text("""
+      SELECT 
+          id, layer_id, parent_id, name, opomba, color, level, order_index, depth, properties,
+          ST_AsGeoJSON(geom)::json as geometry,
+          cona, max_capacity, taken_capacity
+      FROM features 
+      WHERE layer_id = :layer_id
+      ORDER BY order_index
+    """)
+    result = await db.execute(query, {"layer_id": layer_id})
+  else:
+    query = text("""
+      SELECT 
+          id, layer_id, parent_id, name, opomba, color, level, order_index, depth, properties,
+          ST_AsGeoJSON(geom)::json as geometry,
+          cona, max_capacity, taken_capacity
+      FROM features 
+      ORDER BY order_index
+    """)
+    result = await db.execute(query)
   
-  result = await db.execute(query)
   rows = result.fetchall()
   
   features = []

@@ -9,6 +9,7 @@ export interface HierarchyNode {
   opomba?: string;
   color?: string;
   remoteId?: number;
+  layerId?: number;
   parentLocalId?: string;
   visible?: boolean;
   order?: number;
@@ -18,6 +19,7 @@ export interface HierarchyNode {
   cona?: string;
   max_capacity?: number;
   taken_capacity?: number;
+  locked?: boolean;
   shape_gl?: {
     type: 'Polygon';
     coordinates: number[][][];

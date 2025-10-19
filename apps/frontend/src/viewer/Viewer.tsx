@@ -6,6 +6,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import HierarchyNavigator from '../components/Hierarchy/HierarchyNavigator';
 import AnnotationEditModal from '../components/AnnotationModal/AnnotationEditModal';
+import FeatureEditModal from '../components/FeatureEditModal/FeatureEditModal';
 import AdvancedSearchModal, { type SearchFilters } from '../components/AdvancedSearchModal/AdvancedSearchModal';
 import type { HierarchyNode, Level } from '../model/types';
 import { config } from '../config';
@@ -91,6 +92,7 @@ export default function Viewer() {
   const [selectedAnnotation, setSelectedAnnotation] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [isDraggingVertex, setIsDraggingVertex] = useState<boolean>(false);
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
   
   // Vertex dragging mode: 'free' or 'rectangular'
   const [vertexDragMode, setVertexDragMode] = useState<'free' | 'rectangular'>('rectangular');
@@ -107,11 +109,23 @@ export default function Viewer() {
   const [advancedSearchFilters, setAdvancedSearchFilters] = useState<SearchFilters | null>(null);
   const [isAdvancedSearchMode, setIsAdvancedSearchMode] = useState<boolean>(false);
 
+  // Layer selection state
+  const [layers, setLayers] = useState<Array<{id: number, name: string}>>([]);
+  const [selectedLayerId, setSelectedLayerId] = useState<number | null>(null);
+  const selectedLayerIdRef = useRef<number | null>(null);
+
+  // Create annotation mode
+  const [isCreateMode, setIsCreateMode] = useState<boolean>(false);
+  const isCreateModeRef = useRef<boolean>(false);
+  const [renameModalAnnotation, setRenameModalAnnotation] = useState<HierarchyNode | null>(null);
+
   // Refs to avoid stale values during drag
   const checkedNodesRef = useRef<Set<string>>(new Set());
   const displayLevelRef = useRef<Level>('polje');
   useEffect(() => { checkedNodesRef.current = checkedNodes; }, [checkedNodes]);
   useEffect(() => { displayLevelRef.current = displayLevel; }, [displayLevel]);
+  useEffect(() => { isCreateModeRef.current = isCreateMode; }, [isCreateMode]);
+  useEffect(() => { selectedLayerIdRef.current = selectedLayerId; }, [selectedLayerId]);
   useEffect(() => { vertexDragModeRef.current = vertexDragMode; }, [vertexDragMode]);
 
   // Animation frame for smooth dragging
@@ -126,9 +140,25 @@ export default function Viewer() {
   const draggedVertexIndexRef = useRef<number | null>(null);
   const hasDraggedRef = useRef<boolean>(false);
   const hasVertexDraggedRef = useRef<boolean>(false);
+  const isAuthorizedRef = useRef<boolean>(false);
 
   useEffect(() => { allRef.current = all; }, [all]);
   useEffect(() => { selectedAnnotationRef.current = selectedAnnotation; }, [selectedAnnotation]);
+  useEffect(() => { isAuthorizedRef.current = isAuthorized; }, [isAuthorized]);
+
+  // Hotkey handler for 'C' to toggle create mode
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'c' || e.key === 'C') {
+        if (isAuthorized) {
+          setIsCreateMode(prev => !prev);
+          console.log('Create mode toggled:', !isCreateMode);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [isAuthorized, isCreateMode]);
 
   // Handle checkbox changes with cascading behavior
   const handleNodeCheck = (nodeId: string, checked: boolean) => {
@@ -771,6 +801,74 @@ export default function Viewer() {
     }
   }
 
+  // Create a new annotation at specified point with fixed size
+  async function createAnnotationAtPoint(lng: number, lat: number) {
+    console.log('🚀 createAnnotationAtPoint called with:', { lng, lat });
+    //; // This will always break if DevTools is open
+    if (!map.current || !selectedLayerIdRef.current) {
+      console.log('❌ Early return:', { mapExists: !!map.current, selectedLayerId: selectedLayerIdRef.current });
+      return;
+    }
+    
+    console.log('✅ Map and layer check passed');
+    // Fixed size in pixels (converted to map units)
+    const sizePx = 100; // 100px square
+    const center = map.current.project([lng, lat]);
+    console.log('📍 Center projected:', center);
+    
+    // Create corners in pixel space
+    const halfSize = sizePx / 2;
+    const topLeft = map.current.unproject([center.x - halfSize, center.y - halfSize]);
+    const topRight = map.current.unproject([center.x + halfSize, center.y - halfSize]);
+    const bottomRight = map.current.unproject([center.x + halfSize, center.y + halfSize]);
+    const bottomLeft = map.current.unproject([center.x - halfSize, center.y + halfSize]);
+    
+    // Create closed ring
+    const ring: [number, number][] = [
+      [topLeft.lng, topLeft.lat],
+      [topRight.lng, topRight.lat],
+      [bottomRight.lng, bottomRight.lat],
+      [bottomLeft.lng, bottomLeft.lat],
+      [topLeft.lng, topLeft.lat] // close the ring
+    ];
+    
+    // Create temporary annotation with temp_ prefix
+    const tempId = `temp_${Date.now()}`;
+    const newAnnotation: HierarchyNode = {
+      id: tempId,
+      name: 'New Annotation',
+      level: displayLevel,
+      color: colorByLevel(displayLevel),
+      polygon: ring,
+      children: [],
+      parentLocalId: undefined,
+      cona: undefined,
+      max_capacity: 0,
+      taken_capacity: 0,
+      shape_gl: {
+        type: 'Polygon',
+        coordinates: [ring]
+      },
+      x_coord_gl: lng,
+      y_coord_gl: lat,
+      // Store layer_id for later saving
+      layerId: selectedLayerIdRef.current
+    };
+    
+    // Add to state immediately
+    const updatedAll = [...allRef.current, newAnnotation];
+    allRef.current = updatedAll;
+    setAll(updatedAll);
+    
+    // Select the new annotation and show vertex markers
+    setSelectedAnnotation(tempId);
+    
+    // Exit create mode after creating one annotation
+    setIsCreateMode(false);
+    
+    console.log('Created temporary annotation at:', lng, lat, 'with temp ID:', tempId);
+  }
+
   // Update annotation max_capacity in database
   async function updateAnnotationCapacity(annotationId: string, newCapacity: number) {
     try {
@@ -811,6 +909,162 @@ export default function Viewer() {
       
     } catch (error) {
       console.error('Failed to update max_capacity:', error);
+    }
+  }
+
+  // Update individual feature field in database
+  async function updateFeatureField(annotationId: string, field: string, value: any): Promise<boolean> {
+    try {
+      const annotation = allRef.current.find(node => node.id === annotationId);
+      if (!annotation) {
+        console.error('Annotation not found:', annotationId);
+        return false;
+      }
+
+      const remoteId = annotation.remoteId;
+      if (!remoteId) {
+        console.error('No remote ID found for annotation:', annotationId);
+        return false;
+      }
+
+      // Update local state immediately for responsive UI
+      const updatedAnnotations = allRef.current.map(node => 
+        node.id === annotationId ? { ...node, [field]: value } : node
+      );
+      allRef.current = updatedAnnotations;
+      setAll([...updatedAnnotations]);
+      refreshAnnotationsSource();
+
+      // Send PATCH request to update the feature
+      const response = await fetch(`${API_BASE}/features/${remoteId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ [field]: value })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      console.log(`Successfully updated ${field} to:`, value);
+      return true;
+      
+    } catch (error) {
+      console.error(`Failed to update ${field}:`, error);
+      return false;
+    }
+  }
+
+  // Update annotation name in database
+  async function handleRenameAnnotation(annotationId: string, newName: string) {
+    try {
+      // For temporary annotations, save them to database first
+      if (annotationId.startsWith('temp_')) {
+        const annotation = allRef.current.find(node => node.id === annotationId);
+        if (!annotation) {
+          console.error('Annotation not found:', annotationId);
+          return;
+        }
+
+        const layerId = (annotation as any).layerId || selectedLayerIdRef.current;
+        if (!layerId) {
+          console.error('No layer ID found for temporary annotation');
+          alert('Cannot save annotation: No layer selected');
+          return;
+        }
+
+        // Save to database
+        const response = await fetch(`${API_BASE}/features/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            layer_id: layerId,
+            name: newName,
+            level: annotation.level,
+            color: annotation.color,
+            coordinates: annotation.polygon,
+            x_coord: annotation.x_coord_gl,
+            y_coord: annotation.y_coord_gl,
+            cona: annotation.cona,
+            max_capacity: annotation.max_capacity || 0,
+            taken_capacity: annotation.taken_capacity || 0,
+            properties: {}
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to save annotation: ${response.statusText}`);
+        }
+
+        const savedFeature = await response.json();
+        console.log('Saved temporary annotation to database:', savedFeature);
+
+        // Replace temporary annotation with saved one
+        const updatedAll = allRef.current.map(node =>
+          node.id === annotationId
+            ? {
+                ...node,
+                id: savedFeature.id.toString(),
+                name: newName,
+                remoteId: savedFeature.id
+              }
+            : node
+        );
+        allRef.current = updatedAll;
+        setAll(updatedAll);
+        refreshAnnotationsSource();
+
+        // Update selected annotation if it was the temp one
+        if (selectedAnnotation === annotationId) {
+          setSelectedAnnotation(savedFeature.id.toString());
+        }
+
+        console.log('Replaced temp annotation with saved ID:', savedFeature.id);
+        return;
+      }
+
+      const annotation = allRef.current.find(node => node.id === annotationId);
+      if (!annotation) {
+        console.error('Annotation not found:', annotationId);
+        return;
+      }
+
+      const remoteId = annotation.remoteId;
+      if (!remoteId) {
+        console.error('No remote ID found for annotation:', annotationId);
+        return;
+      }
+
+      // Update local state immediately for responsive UI
+      const updatedAnnotations = allRef.current.map(node => 
+        node.id === annotationId ? { ...node, name: newName } : node
+      );
+      allRef.current = updatedAnnotations;
+      setAll([...updatedAnnotations]);
+      refreshAnnotationsSource();
+
+      // Send PATCH request to update the feature
+      const response = await fetch(`${API_BASE}/features/${remoteId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: newName })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      console.log('Successfully renamed annotation to:', newName);
+      
+    } catch (error) {
+      console.error('Failed to rename annotation:', error);
+      alert('Failed to rename annotation. Please try again.');
     }
   }
 
@@ -938,11 +1192,56 @@ export default function Viewer() {
     }
   }
 
-  // Load annotations from backend using GL coordinates
-  async function loadAnnotations(): Promise<HierarchyNode[]> {
+  // Load layers from backend
+  async function loadLayers(): Promise<void> {
     try {
-      console.log('Loading annotations from:', `${API_BASE}/features/geojson`);
-      const response = await fetch(`${API_BASE}/features/geojson`);
+      console.log('Loading layers from:', `${API_BASE}/layers`);
+      const response = await fetch(`${API_BASE}/layers`);
+      const layersData = await response.json();
+      console.log('Loaded layers:', layersData);
+      setLayers(layersData);
+      
+      // Get layer from URL params or default to "Odlagalne cone"
+      const urlParams = new URLSearchParams(window.location.search);
+      const layerIdParam = urlParams.get('layer_id');
+      
+      if (layerIdParam) {
+        const layerId = parseInt(layerIdParam, 10);
+        if (!isNaN(layerId) && layersData.some((l: any) => l.id === layerId)) {
+          setSelectedLayerId(layerId);
+          return;
+        }
+      }
+      
+      // Default to "Odlagalne cone" layer
+      const defaultLayer = layersData.find((l: any) => l.name === 'Odlagalne cone');
+      if (defaultLayer) {
+        console.log('✅ Setting default layer to:', defaultLayer.name, 'ID:', defaultLayer.id);
+        setSelectedLayerId(defaultLayer.id);
+        // Update URL
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('layer_id', defaultLayer.id.toString());
+        window.history.replaceState({}, '', newUrl.toString());
+      } else if (layersData.length > 0) {
+        // Fallback to first layer if "Odlagalne cone" not found
+        setSelectedLayerId(layersData[0].id);
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('layer_id', layersData[0].id.toString());
+        window.history.replaceState({}, '', newUrl.toString());
+      }
+    } catch (error) {
+      console.error('Failed to load layers:', error);
+    }
+  }
+
+  // Load annotations from backend using GL coordinates
+  async function loadAnnotations(layerId?: number | null): Promise<HierarchyNode[]> {
+    try {
+      const url = layerId 
+        ? `${API_BASE}/features/geojson?layer_id=${layerId}`
+        : `${API_BASE}/features/geojson`;
+      console.log('Loading annotations from:', url);
+      const response = await fetch(url);
       console.log('Response status:', response.status);
       const geojsonData = await response.json();
       
@@ -987,6 +1286,7 @@ export default function Viewer() {
           cona: feature.properties.cona,
           max_capacity: feature.properties.max_capacity,
           taken_capacity: feature.properties.taken_capacity,
+          locked: feature.properties.locked || false,
           // Store the GeoJSON geometry for MapLibre GL
           shape_gl: feature.geometry,
           x_coord_gl: feature.properties.x_coord,
@@ -1177,8 +1477,14 @@ export default function Viewer() {
             if (annotationId) {
               const annotation = allRef.current.find(node => node.id === annotationId);
               if (annotation) {
-                setEditModalAnnotation(annotation);
-                console.log('Opening edit modal for annotation:', annotationId);
+                // If it's a newly created annotation (temp_), open rename modal
+                if (annotationId.startsWith('temp_')) {
+                  setRenameModalAnnotation(annotation);
+                  console.log('Opening rename modal for new annotation:', annotationId);
+                } else {
+                  setEditModalAnnotation(annotation);
+                  console.log('Opening edit modal for annotation:', annotationId);
+                }
               }
             }
           }
@@ -1200,6 +1506,7 @@ export default function Viewer() {
 
         // Handle vertex mouse down for dragging
         map.current!.on('mousedown', 'vertices', (e) => {
+          if (!isAuthorizedRef.current) return;
           // prevent map from panning while dragging a vertex
           try { e.preventDefault?.(); } catch {}
           try { (e.originalEvent as any)?.preventDefault?.(); } catch {}
@@ -1209,6 +1516,13 @@ export default function Viewer() {
             const annotationId = feature.properties?.annotationId;
             const vertexIndex = feature.properties?.vertexIndex;
             if (annotationId !== undefined && vertexIndex !== undefined) {
+              // Check if annotation is locked
+              const ann = allRef.current.find(n => n.id === annotationId);
+              if (ann?.locked) {
+                console.log('Cannot drag vertex of locked annotation:', annotationId);
+                return;
+              }
+              
               setIsDraggingVertex(true);
               draggedVertexIndexRef.current = vertexIndex;
               setSelectedAnnotation(annotationId);
@@ -1218,7 +1532,6 @@ export default function Viewer() {
               const startLngLat = map.current!.unproject([e.point.x, e.point.y]);
               (vertexDragStartRef.current as any).lngLat = [startLngLat.lng, startLngLat.lat];
               // Capture starting ring for selected annotation
-              const ann = allRef.current.find(n => n.id === annotationId);
               if (ann) {
                 (vertexDragStartRef.current as any).startRing = ann.polygon ? [...ann.polygon] : [];
                 const sg: any = (ann as any).shape_gl;
@@ -1233,8 +1546,24 @@ export default function Viewer() {
         });
 
 
-        // Deselect when clicking on empty space
-        map.current!.on('click', (_e) => {
+        // Deselect when clicking on empty space OR create annotation in create mode
+        map.current!.on('click', async (e) => {
+          // Check if we're in create mode and authorized
+          if (isCreateModeRef.current && isAuthorizedRef.current) {
+            // Check if a layer is selected
+            if (!selectedLayerIdRef.current) {
+              console.log('❌ Cannot create annotation: No layer selected', { selectedLayerIdRef: selectedLayerIdRef.current });
+              alert('Please select a layer first before creating annotations.');
+              return;
+            }
+            // Create a new annotation at click location
+            const clickLngLat = e.lngLat;
+            console.log('Creating annotation at:', clickLngLat.lng, clickLngLat.lat, 'Layer:', selectedLayerIdRef.current);
+            await createAnnotationAtPoint(clickLngLat.lng, clickLngLat.lat);
+            return;
+          }
+          
+          // Otherwise, deselect annotation
           if (selectedAnnotation) {
             setSelectedAnnotation(null);
             removeVertexMarkers();
@@ -1244,6 +1573,7 @@ export default function Viewer() {
 
         // Handle mouse down for dragging on annotation body
         map.current!.on('mousedown', 'annotations-fill', (e) => {
+          if (!isAuthorizedRef.current) return;
           // prevent map from panning while dragging an annotation body
           try { e.preventDefault?.(); } catch {}
           try { (e.originalEvent as any)?.preventDefault?.(); } catch {}
@@ -1252,6 +1582,13 @@ export default function Viewer() {
             const feature = e.features[0];
             const annotationId = feature.properties?.id;
             if (annotationId) {
+              // Check if annotation is locked
+              const ann = allRef.current.find(n => n.id === annotationId);
+              if (ann?.locked) {
+                console.log('Cannot drag locked annotation:', annotationId);
+                return;
+              }
+              
               setSelectedAnnotation(annotationId);
               selectedAnnotationRef.current = annotationId;
               setIsDragging(true);
@@ -1260,7 +1597,6 @@ export default function Viewer() {
               const startLngLat = map.current!.unproject([e.point.x, e.point.y]);
               (dragStartRef.current as any).lngLat = [startLngLat.lng, startLngLat.lat];
               // Capture starting ring for selected annotation
-              const ann = allRef.current.find(n => n.id === annotationId);
               if (ann) {
                 (dragStartRef.current as any).startRing = ann.polygon ? [...ann.polygon] : [];
                 const sg: any = (ann as any).shape_gl;
@@ -1278,6 +1614,7 @@ export default function Viewer() {
 
         // Handle mouse move for dragging
         map.current!.on('mousemove', (e) => {
+          if (!isAuthorizedRef.current) return;
           if (dragStartRef.current && selectedAnnotationRef.current) {
             // Mark that dragging has occurred
             hasDraggedRef.current = true;
@@ -1307,6 +1644,7 @@ export default function Viewer() {
 
         // Handle mouse up to stop dragging
         map.current!.on('mouseup', async () => {
+          if (!isAuthorizedRef.current) return;
           // Cancel any pending animation frames
           if (animationFrameRef.current !== null) {
             cancelAnimationFrame(animationFrameRef.current);
@@ -1404,13 +1742,19 @@ export default function Viewer() {
     };
   }, []);
 
+  // Load layers on mount
+  useEffect(() => {
+    console.log('🔄 Loading layers on mount...');
+    loadLayers();
+  }, []);
+
   // Load data and setup map
   useEffect(() => {
     const setupMap = async () => {
       const [annotations] = await Promise.all([
         isAdvancedSearchMode && advancedSearchFilters 
           ? loadFilteredAnnotations(advancedSearchFilters)
-          : loadAnnotations(),
+          : loadAnnotations(selectedLayerId),
         loadFactoryLayout()
       ]);
 
@@ -1435,8 +1779,10 @@ export default function Viewer() {
       }
     };
 
-    setupMap();
-  }, [isAdvancedSearchMode, advancedSearchFilters]);
+    if (selectedLayerId !== null) {
+      setupMap();
+    }
+  }, [isAdvancedSearchMode, advancedSearchFilters, selectedLayerId]);
 
   // Removed automatic post-load fit to avoid camera jumps
 
@@ -1607,7 +1953,7 @@ export default function Viewer() {
         }
       });
     }
-  }, [checkedNodes, displayLevel, factoryLoaded]);
+  }, [checkedNodes, displayLevel, factoryLoaded, all]);
 
   // Update map layers when selection changes
   useEffect(() => {
@@ -1665,13 +2011,17 @@ export default function Viewer() {
     
     console.log('Current view bounds:', viewBounds);
     
-    // Get all checked annotations filtered by current display level
+    // Get all checked annotations filtered by current display level and exclude locked ones
     const targetLevel = displayLevelRef.current;
-    const checkedAnnotationsAll = allRef.current.filter(node => checkedNodes.has(node.id));
+    const checkedAnnotationsAll = allRef.current.filter(node => checkedNodes.has(node.id) && !node.locked);
     const checkedAnnotations = checkedAnnotationsAll.filter(node => node.level === targetLevel);
     
     if (checkedAnnotations.length === 0) {
-      alert(`No annotations at level "${targetLevel}" are checked. Please check some annotations first.`);
+      const lockedCount = allRef.current.filter(node => checkedNodes.has(node.id) && node.locked).length;
+      const message = lockedCount > 0 
+        ? `No unlocked annotations at level "${targetLevel}" are checked. (${lockedCount} locked annotations were skipped)`
+        : `No annotations at level "${targetLevel}" are checked. Please check some annotations first.`;
+      alert(message);
       return;
     }
     
@@ -1701,9 +2051,18 @@ export default function Viewer() {
     
     // Reposition and rescale each checked annotation to fill their allocated space completely
     const updatedAnnotations = allRef.current.map(node => {
-      if (!checkedNodes.has(node.id)) return node;
+      // Skip if not checked OR if locked - return the ORIGINAL node unchanged
+      if (!checkedNodes.has(node.id) || node.locked) {
+        return node;
+      }
       
       const index = checkedAnnotations.findIndex(a => a.id === node.id);
+      
+      // If this annotation is locked or not in the checked list at the target level, skip it
+      if (index === -1) {
+        return node;
+      }
+      
       const row = Math.floor(index / perRow);
       const col = index % perRow;
       // Determine how many items are in this row (last row can be shorter)
@@ -1976,6 +2335,36 @@ export default function Viewer() {
         flexWrap: 'wrap',
         maxWidth: 'calc(100vw - 340px)'
       }}>
+        {/* Layer Dropdown */}
+        <select
+          value={selectedLayerId || ''}
+          onChange={(e) => {
+            const layerId = parseInt(e.target.value, 10);
+            console.log('🔄 Layer changed to:', layerId);
+            setSelectedLayerId(layerId);
+            // Update URL
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('layer_id', layerId.toString());
+            window.history.pushState({}, '', newUrl.toString());
+          }}
+          style={{
+            padding: '10px 12px',
+            border: selectedLayerId ? '1px solid #d1d5db' : '2px solid #ef4444',
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: 'pointer',
+            backgroundColor: selectedLayerId ? 'black' : 'black'
+          }}
+        >
+          <option value="">{selectedLayerId ? 'Select Layer' : '⚠️ No Layer Selected'}</option>
+          {layers.map(layer => (
+            <option key={layer.id} value={layer.id}>
+              {layer.name}
+            </option>
+          ))}
+        </select>
+
         <button
           style={{
             ...btn,
@@ -2024,6 +2413,7 @@ export default function Viewer() {
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
             transition: 'all 0.2s ease'
           }}
+          disabled={!isAuthorized}
           onClick={bringCheckedIntoView}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = '#059669';
@@ -2049,6 +2439,7 @@ export default function Viewer() {
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
             transition: 'all 0.2s ease'
           }}
+          disabled={!isAuthorized}
           onClick={() => {
             const newMode = vertexDragMode === 'free' ? 'rectangular' : 'free';
             setVertexDragMode(newMode);
@@ -2068,6 +2459,55 @@ export default function Viewer() {
           }}
         >
           {vertexDragMode === 'free' ? 'Free Vertex Drag' : 'Rectangular Drag'}
+        </button>
+        {/* Password input for enabling drag */}
+        <input
+          type="password"
+          placeholder="Password for drag"
+          onChange={(e) => {
+            const val = e.target.value;
+            setIsAuthorized(val === 'martin');
+          }}
+          style={{
+            padding: '10px 12px',
+            border: '1px solid #d1d5db',
+            borderRadius: '6px',
+            fontSize: '14px'
+          }}
+        />
+
+        {/* Create annotation button */}
+        <button
+          style={{ 
+            ...btn, 
+            backgroundColor: isCreateMode ? '#ef4444' : '#8b5cf6',
+            padding: '12px 20px',
+            fontSize: '14px',
+            fontWeight: '600',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            transition: 'all 0.2s ease'
+          }}
+          disabled={!isAuthorized}
+          onClick={() => {
+            if (!isAuthorized) return;
+            setIsCreateMode(prev => !prev);
+          }}
+          onMouseEnter={(e) => {
+            if (isAuthorized) {
+              const hoverColor = isCreateMode ? '#dc2626' : '#7c3aed';
+              e.currentTarget.style.backgroundColor = hoverColor;
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            const normalColor = isCreateMode ? '#ef4444' : '#8b5cf6';
+            e.currentTarget.style.backgroundColor = normalColor;
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+          }}
+        >
+          {isCreateMode ? 'Creating... (C)' : 'Create Annotation (C)'}
         </button>
         
         <button
@@ -2153,8 +2593,8 @@ export default function Viewer() {
         )}
       </div>
 
-      {/* Edit Modal */}
-      {editModalAnnotation && (
+      {/* Edit Modal - Conditional based on layer_id */}
+      {editModalAnnotation && selectedLayerId === 8 && (
         <AnnotationEditModal
           annotationName={editModalAnnotation.name}
           maxCapacity={editModalAnnotation.max_capacity}
@@ -2164,6 +2604,113 @@ export default function Viewer() {
           }}
           searchFilters={advancedSearchFilters || undefined}
         />
+      )}
+
+      {/* Feature Edit Modal - For non-layer 8 */}
+      {editModalAnnotation && selectedLayerId !== 8 && (
+        <FeatureEditModal
+          featureId={editModalAnnotation.id}
+          featureName={editModalAnnotation.name}
+          opomba={editModalAnnotation.opomba}
+          color={editModalAnnotation.color}
+          level={editModalAnnotation.level}
+          maxCapacity={editModalAnnotation.max_capacity}
+          takenCapacity={editModalAnnotation.taken_capacity}
+          locked={editModalAnnotation.locked}
+          onClose={() => setEditModalAnnotation(null)}
+          onUpdateField={(field, value) => updateFeatureField(editModalAnnotation.id, field, value)}
+        />
+      )}
+
+      {/* Rename Modal */}
+      {renameModalAnnotation && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000
+          }}
+          onClick={() => setRenameModalAnnotation(null)}
+        >
+          <div 
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '24px',
+              minWidth: '400px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '600' }}>
+              Rename Annotation
+            </h3>
+            <input
+              type="text"
+              defaultValue={renameModalAnnotation.name}
+              autoFocus
+              onKeyDown={async (e) => {
+                if (e.key === 'Enter') {
+                  const newName = e.currentTarget.value;
+                  await handleRenameAnnotation(renameModalAnnotation.id, newName);
+                  setRenameModalAnnotation(null);
+                } else if (e.key === 'Escape') {
+                  setRenameModalAnnotation(null);
+                }
+              }}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                fontSize: '14px',
+                marginBottom: '16px'
+              }}
+            />
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setRenameModalAnnotation(null)}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#6b7280',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async (e) => {
+                  const input = e.currentTarget.parentElement?.parentElement?.querySelector('input');
+                  if (input) {
+                    const newName = input.value;
+                    await handleRenameAnnotation(renameModalAnnotation.id, newName);
+                    setRenameModalAnnotation(null);
+                  }
+                }}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                Rename
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Advanced Search Modal */}

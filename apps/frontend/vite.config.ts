@@ -19,6 +19,14 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: isWindows, // Only generate sourcemaps in development
+    sourcemap: true, // Always generate sourcemaps for debugging
   },
+  // Ensure source maps work in development
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+  },
+  // Enhanced source map configuration
+  esbuild: {
+    sourcemap: 'inline'
+  }
 })
