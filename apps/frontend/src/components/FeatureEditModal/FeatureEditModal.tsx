@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { config } from '../../config';
 
 interface FeatureEditModalProps {
   featureId: string;
@@ -15,7 +14,6 @@ interface FeatureEditModalProps {
 }
 
 export default function FeatureEditModal({
-  featureId,
   featureName,
   opomba,
   color,
